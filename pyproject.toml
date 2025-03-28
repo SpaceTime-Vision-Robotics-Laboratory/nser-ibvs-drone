@@ -1,0 +1,23 @@
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+exclude = []
+strict = true
+
+[tool.ruff]
+target-version = "py310"
+exclude = ["src/tests"]
+
+[tool.ruff.lint]
+# https://docs.astral.sh/ruff/rules/
+select = ["I", "E", "UP", "F", "W", "N", "PL", "NPY", "DOC", "RUF"]
+ignore = [
+    "E501",
+    "I001", # PyCharm uses something else to sort imports
+    "PLR0913",
+    "UP015",
+    "PLR0912",
+    "PLR2004", # Magic values
+    "N806",
+]

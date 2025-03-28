@@ -1,0 +1,10 @@
+python>=3.10
+opencv-python
+opencv-contrib-python
+mediapipe
+parrot-olympe
+pynput
+pygad
+parameterized
+ruff
+pytest
