@@ -1,0 +1,4 @@
+[submodule "drone-base"]
+	path = drone-base
+	url = git@github.com:SpaceTime-Vision-Robotics-Laboratory/drone-base.git
+	branch = main
