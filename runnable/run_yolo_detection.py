@@ -62,7 +62,7 @@ class BasicController(BaseStreamingController):
             reference_type=GimbalType.REF_ABSOLUTE
         )
         time.sleep(2)  # Wait for gimbal to stabilize
-
+        self.frame_processor.frame_queue.empty()
         print("Initialization complete. Ready for tracking.")
 
 if __name__ == "__main__":
@@ -79,9 +79,8 @@ if __name__ == "__main__":
     )
 
     # Initialize drone position before starting tracking
-    # Moves up 1m, back 3m, and tilts gimbal down 45 degrees
     if args.simulated:
-        controller.initialize_position(takeoff_height=1.75, gimbal_angle=-45, back_distance=2.5, left_distance=0.5)
+        controller.initialize_position(takeoff_height=3.25, gimbal_angle=-35, back_distance=2.5, left_distance=0.0)
 
     # Start tracking
     controller.run()
