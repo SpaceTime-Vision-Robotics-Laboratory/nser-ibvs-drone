@@ -17,8 +17,7 @@ parrot-ue4-carla -level=town_10 -ams-path="DefaultPath,Pickup:*" -quality=low
 Command to spawn the Anafi in the car:
 
 ```
-sphinx "/opt/parrot-sphinx/usr/share/sphinx/drones/anafi.drone"::firmware="https://firmware.parrot.com/Versions/anafi/pc/%23latest/images/anafi-pc.ext2.zip"
-::pose="Pickup"
+sphinx "/opt/parrot-sphinx/usr/share/sphinx/drones/anafi.drone"::firmware="https://firmware.parrot.com/Versions/anafi/pc/%23latest/images/anafi-pc.ext2.zip"::pose="Pickup"
 ```
 
 Start the car: 
