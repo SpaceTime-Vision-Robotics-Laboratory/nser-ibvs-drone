@@ -7,17 +7,15 @@ strict = true
 
 [tool.ruff]
 target-version = "py310"
-exclude = ["src/tests"]
+exclude = ["test", "venv", "env", ".venv", ".env"]
+line-length = 120
 
 [tool.ruff.lint]
 # https://docs.astral.sh/ruff/rules/
-select = ["I", "E", "UP", "F", "W", "N", "PL", "NPY", "DOC", "RUF"]
+select = ["A", "E", "F", "G", "I", "N", "T10", "UP", "W", "PL", "NPY", "DOC", "RUF", "PGH004"]
 ignore = [
-    "E501",
     "I001", # PyCharm uses something else to sort imports
-    "PLR0913",
-    "UP015",
-    "PLR0912",
-    "PLR2004", # Magic values
-    "N806",
+    "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
+    "UP015", # For open() default "r" parameter
+    "N818", # Exception name should be named with an Error suffix
 ]
