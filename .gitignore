@@ -5,3 +5,4 @@ __pycache__
 .vscode
 .vs
 tracking_data
+yolo_camera_log.csv

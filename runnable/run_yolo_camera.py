@@ -21,9 +21,6 @@ class RealController(BaseStreamingController):
         super().__init__(**kwargs)
 
     def initialize_position(self):
-        # self.drone_commander.take_off()
-        # time.sleep(5)
-        # self.drone_commander.move_by(forward=0, right=0, down=-2.0, rotation=0)
         if not self.drone.connection_state():
             print("Connecting to drone...")
             self.drone_commander.connect()
@@ -33,21 +30,18 @@ class RealController(BaseStreamingController):
         time.sleep(2)
         self.frame_processor.frame_queue.empty()
         print("Initialization complete. Ready for tracking.")
-
+        
 
 class CarYoloProcessor(BaseVideoProcessor):
-    def __init__(self, model_path: str | None = "models/car_segmentation.pt", **kwargs):
+    def __init__(self, model_path: str | None = "models/yolon_car_detector.pt", **kwargs):
         super().__init__(**kwargs)
         self.detector = ultralytics.YOLO(model_path)
+        self.moved_up = False
 
         # --- Control Gains ---
-        # self.kp_rot = 75 # Proportional gain for rotation (yaw) based on x_offset
-        # self.kd_rot = 15  # Derivative gain for rotation (damping)
-        # self.kp_alt = 0   # Proportional gain for altitude (z) based on y_offset (DISABLED)
-        # self.kp_fwd = -95 # Proportional gain for forward (y) based on y_offset
 
-        self.kp_rot = 35 # Proportional gain for rotation (yaw) based on x_offset
-        self.kd_rot = 25  # Derivative gain for rotation (damping)
+        self.kp_rot = 20 # Proportional gain for rotation (yaw) based on x_offset
+        self.kd_rot = 5  # Derivative gain for rotation (damping)
         self.kp_alt = 0   # Proportional gain for altitude (z) based on y_offset (DISABLED)
         self.kp_fwd = -25 # Proportional gain for forward (y) based on y_offset
 
@@ -59,6 +53,7 @@ class CarYoloProcessor(BaseVideoProcessor):
         self.last_command_time = time.time() # Initialize last time for dt calc
 
     def _process_frame(self, frame: np.ndarray) -> np.ndarray:
+        # frame = cv2.resize(frame, (640, 640))
         results = self.detector.predict(frame, stream=False, verbose=False)
         return [frame, results[0]]
 
@@ -81,7 +76,7 @@ class CarYoloProcessor(BaseVideoProcessor):
         derivative_rot_term = 0 # Initialize derivative term
         proportional_rot_term = 0
         # Calculate state and commands ONLY if target is NOT lost
-
+        
         if not target_lost and object_center is not None and box_size is not None:
             object_center_x, object_center_y = object_center
             x_offset = (object_center_x - frame_center_x) / (frame_width / 2) if frame_width > 0 else 0
@@ -112,13 +107,19 @@ class CarYoloProcessor(BaseVideoProcessor):
 
         else:
             # Target Lost or Not Detected: Reset previous offset
-            self.previous_x_offset = 0.0
+            if not self.moved_up:
+                # self.drone_commander.move_by(forward=0, right=0, down=-0.5, rotation=0)
+                self.moved_up = True
 
         # Clamp commands
-        x_movement = max(-100, min(100, x_movement)) # Note: x_movement is not calculated here, usually 0
-        y_movement = max(-100, min(100, y_movement))
-        z_movement = max(-100, min(100, z_movement))
-        z_rot = max(-100, min(100, z_rot))
+        # Reduce the maximum command values to limit speed
+        max_speed_command = 30 # Example: limit to 50% of max, adjust as needed
+        max_rot_command = 50   # Example: limit rotation rate
+
+        x_movement = max(-max_speed_command, min(max_speed_command, x_movement)) # Note: x_movement is not calculated here, usually 0
+        y_movement = max(-max_speed_command, min(max_speed_command, y_movement))
+        z_movement = max(-max_speed_command, min(max_speed_command, z_movement))
+        z_rot = max(-max_rot_command, min(max_rot_command, z_rot))
 
         # Print the calculated commands instead of sending them
         status = "Tracking" if not target_lost else "Lost/Hover"
@@ -127,7 +128,7 @@ class CarYoloProcessor(BaseVideoProcessor):
         new_data = pd.DataFrame([{
             'timestamp': current_time,
             'x_cmd': x_movement,
-            'y_cmd': y_movement,
+            'y_cmd': y_movement, 
             'z_cmd': z_movement,
             'rot_cmd': z_rot,
             'x_offset': x_offset,
@@ -140,6 +141,9 @@ class CarYoloProcessor(BaseVideoProcessor):
 
         print(f"[{current_time:.2f}] Calculated Cmds ({status}): X={x_movement}, Y={y_movement}, Z={z_movement}, Rot={z_rot}")
         print(f"[{current_time:.2f}] Offsets: x={x_offset:.2f}, y={y_offset:.2f}, P_rot={proportional_rot_term:.1f}, D_rot={derivative_rot_term:.1f}")
+
+        if not target_lost:
+            self.drone_commander.piloting(x=x_movement, y=y_movement, z=z_movement, z_rot=z_rot, dt=0.15)
 
     def _display_frame(self, frame_data: list) -> None:
         original_frame = frame_data[0].copy()
@@ -192,7 +196,7 @@ class CarYoloProcessor(BaseVideoProcessor):
         # Display the frame with drawings
         cv2.imshow("Drone View", plotted_frame)
         cv2.waitKey(1)
-
+                    
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
     args.add_argument("--ip", type=str, default="wireless", help="IP address of the drone. Use 'wireless' for physical drone or 'simulated' for simulator", choices=["wireless", "simulated", "cable"])
@@ -214,10 +218,11 @@ if __name__ == "__main__":
     controller = RealController(
         ip=ip_selected,
         processor_class=CarYoloProcessor,
-        speed=args.speed
+        speed=args.speed,
     )
 
     if args.init:
         controller.initialize_position()
 
     controller.run()
+    
