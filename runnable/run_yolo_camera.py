@@ -26,7 +26,7 @@ class RealController(BaseStreamingController):
             self.drone_commander.connect()
         self.drone_commander.take_off()
         time.sleep(3)
-        self.drone_commander.tilt_camera(pitch_deg=-45, control_mode=GimbalType.MODE_POSITION, reference_type=GimbalType.REF_ABSOLUTE)
+        self.drone_commander.tilt_camera(pitch_deg=-75, control_mode=GimbalType.MODE_POSITION, reference_type=GimbalType.REF_ABSOLUTE)
         time.sleep(2)
         self.frame_processor.frame_queue.empty()
         print("Initialization complete. Ready for tracking.")
@@ -109,7 +109,13 @@ class CarYoloProcessor(BaseVideoProcessor):
             # Target Lost or Not Detected: Reset previous offset
             if not self.moved_up:
                 # self.drone_commander.move_by(forward=0, right=0, down=-0.5, rotation=0)
+                print("Moved up")
                 self.moved_up = True
+                return
+            else:
+                # self.drone_commander.move_by(forward=0, right=0, down=0, rotation=0)
+                print("Moved nothing")
+                return
 
         # Clamp commands
         # Reduce the maximum command values to limit speed
@@ -144,11 +150,18 @@ class CarYoloProcessor(BaseVideoProcessor):
 
         if not target_lost:
             self.drone_commander.piloting(x=x_movement, y=y_movement, z=z_movement, z_rot=z_rot, dt=0.15)
+            if self.moved_up == True:
+                # self.drone_commander.move_by(forward=0, right=0, down=0.5, rotation=0)
+                print("Moved down")
+                self.moved_up = False
+                return
+            
 
     def _display_frame(self, frame_data: list) -> None:
         original_frame = frame_data[0].copy()
         results = frame_data[1]
         plotted_frame = original_frame.copy() # Work on a copy for drawing
+        overlay = plotted_frame.copy() # Create an overlay for semi-transparent drawing
 
         frame_height, frame_width = plotted_frame.shape[:2]
         frame_center_x, frame_center_y = frame_width // 2, frame_height // 2
@@ -156,44 +169,116 @@ class CarYoloProcessor(BaseVideoProcessor):
         frame_dimensions = (frame_width, frame_height)
 
         best_target = {'conf': -1, 'center': None, 'size': None, 'box': None}
+        target_lost_this_frame = True # Assume lost initially
+        status_text = "LOST - HOVERING" # Default status text
+        text_color = (0, 0, 255) # Red
 
-        # Extract bounding boxes and find the best target (highest confidence)
-        if results.boxes:
-            for i, box_tensor in enumerate(results.boxes.xyxy):
-                conf = results.boxes.conf[i].cpu().numpy() if hasattr(results.boxes, 'conf') else 0.5 # Get confidence
-                if conf > best_target['conf']:
-                    coords = box_tensor.cpu().numpy()
-                    x1, y1, x2, y2 = map(int, coords)
-                    best_target = {
-                        'conf': conf,
-                        'center': ((x1 + x2) // 2, (y1 + y2) // 2),
-                        'size': (x2 - x1, y2 - y1),
-                        'box': (x1, y1, x2, y2) # Store box coords
-                    }
+        # Extract bounding boxes and find the best target
+        if results.boxes and results.boxes.conf is not None and len(results.boxes.conf) > 0:
+            best_conf_idx = results.boxes.conf.argmax()
+            best_conf = results.boxes.conf[best_conf_idx].item() # Get as float
+            # You might want a confidence threshold here too
+            # if best_conf > SOME_THRESHOLD:
+            target_lost_this_frame = False
+            coords = results.boxes.xyxy[best_conf_idx].cpu().numpy()
+            x1, y1, x2, y2 = map(int, coords)
+            best_target = {
+                'conf': best_conf,
+                'center': ((x1 + x2) // 2, (y1 + y2) // 2),
+                'size': (x2 - x1, y2 - y1),
+                'box': (x1, y1, x2, y2)
+            }
 
-        target_lost_this_frame = (best_target['center'] is None)
-
-        # Generate commands based on the best target found (or target lost state)
+        # --- Command Generation ---
+        # Note: Ensure _generate_follow_command handles the target_lost state correctly based on your logic
+        # The previous state 'self.moved_up' affects command generation
         self._generate_follow_command(frame_center, best_target['center'], frame_dimensions,
                                       best_target['size'], target_lost=target_lost_this_frame)
 
-        # Draw bounding box and center line if target exists
+        # --- Drawing Logic ---
+        # Draw frame center marker regardless of target status
+        cv2.circle(plotted_frame, frame_center, 7, (0, 0, 255), -1) # Slightly larger red dot
+        cv2.circle(plotted_frame, frame_center, 9, (255, 255, 255), 1) # White outline
+
         if not target_lost_this_frame:
+            # --- Target Found Drawing ---
             x1, y1, x2, y2 = best_target['box']
             best_center = best_target['center']
-            # Draw the rectangle directly onto the plotted frame
-            cv2.rectangle(plotted_frame, (x1, y1), (x2, y2), (0, 255, 0), 2) # Green box, thickness 2
+            confidence = best_target['conf']
+
+            # Bounding Box Style
+            box_color = (0, 255, 0) # Green
+            box_thickness = 3
+            fill_alpha = 0.15 # Transparency level for fill
+
+            # Draw semi-transparent fill
+            cv2.rectangle(overlay, (x1, y1), (x2, y2), box_color, -1)
+            cv2.addWeighted(overlay, fill_alpha, plotted_frame, 1 - fill_alpha, 0, plotted_frame)
+
+            # Draw bounding box outline
+            cv2.rectangle(plotted_frame, (x1, y1), (x2, y2), box_color, box_thickness)
+
             # Draw line from frame center to target center
-            cv2.line(plotted_frame, frame_center, best_center, (0, 255, 0), 2)
-            # Draw frame center
-            cv2.circle(plotted_frame, frame_center, 5, (0, 0, 255), -1) # Red dot for frame center
+            cv2.line(plotted_frame, frame_center, best_center, box_color, 2)
+
+            # Draw target center marker
+            cv2.circle(plotted_frame, best_center, 5, box_color, -1) # Solid dot
+            cv2.circle(plotted_frame, best_center, 7, (255, 255, 255), 1) # White outline
+
+
+            # Confidence Text
+            conf_text = f"Conf: {confidence:.2f}"
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = 0.6
+            font_thickness = 1
+            text_size, _ = cv2.getTextSize(conf_text, font, font_scale, font_thickness)
+            text_x = x1
+            text_y = y1 - 10 if y1 > 20 else y1 + text_size[1] + 5 # Position above or below box
+
+            # Optional: Add background rect for confidence text
+            # cv2.rectangle(plotted_frame, (text_x, text_y - text_size[1] - 2), (text_x + text_size[0], text_y + 2), (0,0,0), -1)
+            cv2.putText(plotted_frame, conf_text, (text_x, text_y), font, font_scale, box_color, font_thickness, cv2.LINE_AA)
+
+            # Update status text for display
+            status_text = "TRACKING"
+            text_color = (0, 255, 0) # Green
+
+            # Add logic for "Moved Down" status if applicable from _generate_follow_command
+            if self.moved_up: # Check if the drone *was* moved up (implying it should move down now)
+                 # This might need adjustment based on exactly when self.moved_up is False'd
+                 status_text = "MOVING DOWN"
+                 text_color = (255, 165, 0) # Blue/Cyan
+
         else:
-            # Optionally indicate no target found on screen
-            status_text = "NO TARGET DETECTED"
-            cv2.putText(plotted_frame, status_text, (int(frame_width * 0.1), int(frame_height * 0.5)), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 2)
+            # --- Target Lost Drawing ---
+            # Determine status based on whether the drone *has* moved up
+            if self.moved_up:
+                status_text = "LOST - SEARCHING UP"
+                text_color = (0, 165, 255) # Orange
+            else:
+                # This case might mean lost before the first move up, or just generic lost
+                status_text = "NO TARGET DETECTED"
+                text_color = (0, 0, 255) # Red
 
 
-        # Display the frame with drawings
+        # --- Display Status Text ---
+        status_font_scale = 0.8
+        status_font_thickness = 2
+        status_font = cv2.FONT_HERSHEY_TRIPLEX # A slightly fancier font
+        (w, h), _ = cv2.getTextSize(status_text, status_font, status_font_scale, status_font_thickness)
+        padding = 5
+        # Position at top-left
+        rect_x1, rect_y1 = padding, padding
+        rect_x2, rect_y2 = padding + w + padding*2, padding + h + padding*2
+        text_x, text_y = padding*2, padding + h + padding
+
+        # Draw background rectangle for status text
+        cv2.rectangle(plotted_frame, (rect_x1, rect_y1), (rect_x2, rect_y2), (0, 0, 0), -1) # Black background
+        # Draw the status text
+        cv2.putText(plotted_frame, status_text, (text_x, text_y), status_font, status_font_scale, text_color, status_font_thickness, cv2.LINE_AA)
+
+
+        # Display the final frame
         cv2.imshow("Drone View", plotted_frame)
         cv2.waitKey(1)
                     
