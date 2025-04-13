@@ -6,3 +6,5 @@ __pycache__
 .vs
 tracking_data
 yolo_camera_log.csv
+ibvs_jacobian_log.csv
+ibvs_log.csv
