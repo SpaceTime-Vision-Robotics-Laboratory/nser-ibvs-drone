@@ -1,6 +1,6 @@
 import time
 
-from auto_follow.pid.config import PIDConfig
+from auto_follow.pid.config import PIDConfig, FilterConfig
 from auto_follow.pid.filters import LowPassFilter
 
 
@@ -15,14 +15,14 @@ class PIDController:
         - Dead zone to prevent oscillation near the target error
     """
 
-    def __init__(self, config: PIDConfig):
+    def __init__(self, config: PIDConfig, filter_config: FilterConfig):
         self.config = config
 
         self.dead_zone_adaptive_threshold = self.config.dead_zone * 2 + (self.config.dead_zone * 0.2)
 
         self.last_error = 0.0
         self.integral = 0.0
-        self.low_pass_filter = LowPassFilter(alpha=self.config.filter_alpha)
+        self.low_pass_filter = LowPassFilter(config=filter_config)
         self.prev_time = time.perf_counter()
 
     def compute(self, process_error: float) -> float:
@@ -40,7 +40,7 @@ class PIDController:
         dt = current_time - self.prev_time
         self.prev_time = current_time
 
-        filtered_error = self.low_pass_filter.filter(self.config.target_error - process_error)
+        filtered_error = self.low_pass_filter(raw_value=self.config.target_error - process_error)
 
         if self.config.thresholds is None or self.config.thresholds[0] < filtered_error < self.config.thresholds[1]:
             self.integral += filtered_error * dt
@@ -107,18 +107,35 @@ if __name__ == '__main__':
     # Usage:
     import random
     from auto_follow.utils.path_manager import Paths
+    import matplotlib.pyplot as plt
 
-    pid_controller_x = PIDController(config=PIDConfig.from_yaml(path=Paths.PID_X_PATH))
+    pid_controller_x = PIDController(
+        config=PIDConfig.from_yaml(path=Paths.PID_X_PATH),
+        filter_config=FilterConfig.from_yaml(path=Paths.LOW_PASS_FILTER_PATH)
+    )
     print(f"{pid_controller_x.config=}")
     current_value = 100.0
     target_value = 0
     pid_controller_x.update_config(target_error=target_value)
 
+    values = []
+    outputs = []
+
     for i in range(100):
-        output = pid_controller_x.compute(current_value)
-        current_value += output * 0.1
+        _output = pid_controller_x.compute(current_value)
+        current_value += _output * 0.1
+        current_value += random.uniform(-0.5, 0.5)
 
-        current_value += random.uniform(-0.5, 0.5)  # Noise
+        values.append(current_value)
+        outputs.append(_output)
 
-        print(f"Step {i}: Value -> {output:.2f} | Output -> {output:.2f}")
+        print(f"Step {i}: Current Value -> {current_value:.2f}, PID Output -> {_output:.2f}")
         time.sleep(0.1)
+
+    plt.plot(values, label='Current Value')
+    plt.plot(outputs, label='PID Output')
+    plt.legend()
+    plt.title("PID Convergence Over Time")
+    plt.xlabel("Step")
+    plt.ylabel("Value")
+    plt.show()

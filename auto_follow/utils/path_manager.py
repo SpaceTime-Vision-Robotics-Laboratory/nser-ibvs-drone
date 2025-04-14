@@ -13,6 +13,7 @@ class Paths:
     PID_CONFIG_DIR: Final[Path] = BASE_DIR / "config" / "pid"
     PID_FWD_PATH: Final[Path] = PID_CONFIG_DIR / "pid_forward.yaml"
     PID_X_PATH: Final[Path] = PID_CONFIG_DIR / "pid_x.yaml"
+    LOW_PASS_FILTER_PATH: Final[Path] = PID_CONFIG_DIR / "low_pass_filter.yaml"
 
     OUTPUT_DIR: Final[Path] = BASE_DIR / "output"
     DETECTOR_LOG_DIR: Final[Path] = OUTPUT_DIR / "detector-logs"

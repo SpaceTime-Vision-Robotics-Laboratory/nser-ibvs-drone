@@ -20,7 +20,6 @@ class PIDConfig:
         - dead_zone (float): If the error reaches this value, it will output 0 (no movement).
         - target_error (float): The value we want to optimize towards.
         - thresholds (tuple[float, float]): Clips the PID output to the given speed limits.
-        - filter_alpha (float): Smoothing factor for filtering the result. 0 means no filtering.
         - max_integral (float): Anti-windup integral limit.
     """
     kp: float
@@ -29,13 +28,9 @@ class PIDConfig:
     dead_zone: float
     target_error: float = 0
     thresholds: tuple[float, float] | None = None
-    filter_alpha: float = 0.2
     max_integral: float = 100
 
     def __post_init__(self):
-        if not (0 <= self.filter_alpha <= 1):
-            raise ValueError(f"Value for \"filter_alpha\" must be between 0 and 1, got {self.filter_alpha}")
-
         if self.thresholds is not None:
             max_length = 2
             if len(self.thresholds) != max_length:
@@ -68,6 +63,59 @@ class PIDConfig:
         data = asdict(self)
         if self.thresholds is not None:
             data["thresholds"] = list(self.thresholds)
+
+        with open(path, "w") as file:
+            yaml.safe_dump(data, file, default_flow_style=False, sort_keys=False)
+
+
+@dataclass
+class FilterConfig:
+    """
+    Configuration parameters for a Low Pass Filter.
+
+    Attributes:
+        - alpha: Smoothing factor, between 0 (no smoothing) and 1 (tons of smoothing).
+        - wp: Pass-band edge frequency, normalized from 0 to 1 (where 1 is π rad/sample).
+        - ws: Stop-band edge frequency, normalized from 0 to 1 (where 1 is π rad/sample).
+        - filter_order: Order of the FIR filter (length of the window).
+        - mode: The type of filtering, can be either "fir" or "exp"
+    """
+    alpha: float = 0.2
+    wp: float = 0.2
+    ws: float = 0.3
+    filter_order: int = 30
+    mode: str = "fir"
+
+    def __post_init__(self):
+        if self.alpha < 0 or self.alpha > 1:
+            raise ValueError(f"Filter alpha must \"{self.alpha}\" be between 0 and 1.")
+
+        if self.wp < 0 or self.wp > 1:
+            raise ValueError(f"Pass-band edge frequency (wp) \"{self.wp}\" must be between 0 and 1. ")
+
+        if self.ws < 0 or self.ws > 1:
+            raise ValueError(f"Stop-band edge frequency (ws) \"{self.ws}\" must be between 0 and 1. ")
+
+        if self.filter_order < 0:
+            raise ValueError(f"Filter order \"{self.filter_order}\" must be non-negative.")
+
+        if self.mode not in ("fir", "exp"):
+            raise ValueError(f"Filter mode \"{self.mode}\" must be \"fir\" or \"exp\".")
+
+    @classmethod
+    def from_yaml(cls, path: str | Path) -> "FilterConfig":
+        """Load Filter configuration from a YAML file and returns a FilterConfig instance."""
+        if not os.path.isfile(path):
+            raise FileNotFoundError(f"YAML file not found at: {path}")
+
+        with open(path, "r") as file:
+            data = yaml.safe_load(file)
+
+        return cls(**data)
+
+    def to_yaml(self, path: str | Path) -> None:
+        """Save current Filter configuration to a YAML file."""
+        data = asdict(self)
 
         with open(path, "w") as file:
             yaml.safe_dump(data, file, default_flow_style=False, sort_keys=False)
