@@ -40,9 +40,7 @@ class SimpleYoloProcessor(BaseVideoProcessor):
         )
         self.perform_movement(command_info)
 
-        self.visualizer.display_frame(frame=frame, target_data=target_data, moved_up=False)
-
-        return frame
+        return self.visualizer.draw_frame(frame=frame, target_data=target_data, moved_up=False)[0]
 
     def perform_movement(self, command_info: CommandInfo) -> None:
         self.drone_commander.execute_command(
