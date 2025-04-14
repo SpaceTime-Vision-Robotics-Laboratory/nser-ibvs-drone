@@ -1,3 +1,48 @@
+[project]
+name = "auto_follow"
+dynamic = ["version"]
+description = "Following objects with Drones."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "AFL-3.0"}
+authors = [
+    { name = "Sebastian Mocanu", email = "sebastian.mocanu31@gmail.com" },
+    { name = "Sebastian Ion Nae", email = "naesebi2000@gmail.com" },
+    { name = "Mihai Barbu", email = "mihai.barbilian@gmail.com" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Academic Free License (AFL)",
+    "Operating System :: POSIX :: Linux"
+]
+keywords = ["drone", "uav", "control", "tracking", "follow", "car", "parrot", "anafi", "olympe"]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow"
+"Source" = "https://github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow"
+"Tracker" = "https://github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow/issues"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "flake8>=6.0"
+]
+
+[tool.setuptools]
+packages = ["auto_follow"]
+include-package-data = true # For non-Python files
+
+[tool.setuptools.dynamic]
+version = { attr = "auto_follow._version.__version__" }
+
 [tool.mypy]
 python_version = "3.10"
 warn_return_any = true
@@ -7,17 +52,24 @@ strict = true
 
 [tool.ruff]
 target-version = "py310"
-exclude = ["src/tests"]
+exclude = ["test", "venv", "env", ".venv", ".env"]
+line-length = 120
 
 [tool.ruff.lint]
 # https://docs.astral.sh/ruff/rules/
-select = ["I", "E", "UP", "F", "W", "N", "PL", "NPY", "DOC", "RUF"]
+select = ["A", "E", "F", "G", "I", "N", "T10", "UP", "W", "PL", "NPY", "DOC", "RUF", "PGH004"]
 ignore = [
-    "E501",
     "I001", # PyCharm uses something else to sort imports
-    "PLR0913",
-    "UP015",
-    "PLR0912",
-    "PLR2004", # Magic values
-    "N806",
+    "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
+    "UP015", # For open() default "r" parameter
+    "N818", # Exception name should be named with an Error suffix
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+
+[tool.coverage.run]
+source = ["auto_follow"]
+omit = ["tests/*", "runnable/*", "external/*"]
