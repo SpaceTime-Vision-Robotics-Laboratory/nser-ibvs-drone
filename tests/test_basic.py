@@ -21,7 +21,7 @@ class TestBasicImport(unittest.TestCase):
     def test_module_existence(self):
         """Verify the module exists in sys.modules after import."""
         try:
-            import drone_base
+            import drone_base # noqa: F401
             self.assertIn('drone_base', sys.modules, "Module should be in sys.modules")
             self.assertIn('drone_base._version', sys.modules, "Version submodule should be in sys.modules")
         except ImportError as e:

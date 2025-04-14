@@ -1,14 +1,13 @@
-#!/usr/bin/env python3
-# tracking_visualizer.py
+import argparse
+import os
 
-import pandas as pd
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
-import os
-import argparse
-import matplotlib.dates as mdates
+import pandas as pd
 from matplotlib.gridspec import GridSpec
 from scipy.ndimage import gaussian_filter
+
 
 def visualize_tracking_data(csv_file, output_dir=None):
     """
@@ -53,6 +52,7 @@ def visualize_tracking_data(csv_file, output_dir=None):
 
     print("Visualization complete!")
 
+
 # --- Helper functions for create_overview_plot ---
 
 def _plot_offsets(ax, df):
@@ -65,6 +65,7 @@ def _plot_offsets(ax, df):
     ax.legend()
     ax.grid(alpha=0.3)
 
+
 def _plot_size_ratio_overview(ax, df):
     """Plots size ratio."""
     ax.plot(df['datetime'], df['size_ratio'], 'b-', label='Current Ratio')
@@ -73,6 +74,7 @@ def _plot_size_ratio_overview(ax, df):
     ax.set_title('Object Size Ratio vs Target')
     ax.legend()
     ax.grid(alpha=0.3)
+
 
 def _plot_commands_overview(ax, df):
     """Plots drone commands."""
@@ -91,6 +93,7 @@ def _plot_commands_overview(ax, df):
     ax.set_title('Drone Commands')
     ax.legend()
     ax.grid(alpha=0.3)
+
 
 def _plot_position_scatter(ax, df):
     """Plots object position scatter."""
@@ -113,6 +116,7 @@ def _plot_position_scatter(ax, df):
     ax.legend()
     ax.grid(alpha=0.3)
 
+
 def _plot_box_dimensions(ax, df):
     """Plots bounding box dimensions."""
     ax.plot(df['datetime'], df['box_width'], 'orange', label='Width')
@@ -122,6 +126,7 @@ def _plot_box_dimensions(ax, df):
     ax.legend()
     ax.grid(alpha=0.3)
 
+
 # --- Main plotting functions ---
 
 def create_overview_plot(df, output_dir):
@@ -130,11 +135,11 @@ def create_overview_plot(df, output_dir):
     gs = GridSpec(3, 3, figure=fig)
 
     # Create axes
-    ax1 = fig.add_subplot(gs[0, :2]) # Offsets
-    ax2 = fig.add_subplot(gs[1, :2]) # Size Ratio
-    ax3 = fig.add_subplot(gs[2, :2]) # Commands
-    ax4 = fig.add_subplot(gs[:2, 2]) # Position Scatter
-    ax5 = fig.add_subplot(gs[2, 2]) # Box Dimensions
+    ax1 = fig.add_subplot(gs[0, :2])  # Offsets
+    ax2 = fig.add_subplot(gs[1, :2])  # Size Ratio
+    ax3 = fig.add_subplot(gs[2, :2])  # Commands
+    ax4 = fig.add_subplot(gs[:2, 2])  # Position Scatter
+    ax5 = fig.add_subplot(gs[2, 2])  # Box Dimensions
 
     # Call helper functions to plot on respective axes
     _plot_offsets(ax1, df)
@@ -153,6 +158,7 @@ def create_overview_plot(df, output_dir):
     if output_dir:
         plt.savefig(f"{output_dir}/tracking_overview.png", dpi=200)
         plt.close()
+
 
 def create_position_plot(df, output_dir):
     """Create a plot showing object position over time"""
@@ -184,8 +190,8 @@ def create_position_plot(df, output_dir):
             ax.arrow(
                 df['object_center_x'].iloc[i],
                 df['object_center_y'].iloc[i],
-                df['object_center_x'].iloc[i+1] - df['object_center_x'].iloc[i],
-                df['object_center_y'].iloc[i+1] - df['object_center_y'].iloc[i],
+                df['object_center_x'].iloc[i + 1] - df['object_center_x'].iloc[i],
+                df['object_center_y'].iloc[i + 1] - df['object_center_y'].iloc[i],
                 head_width=10, head_length=10, fc='white', ec='white', alpha=0.5
             )
 
@@ -212,18 +218,20 @@ def create_position_plot(df, output_dir):
         plt.savefig(f"{output_dir}/position_trajectory.png", dpi=200)
         plt.close()
 
+
 def create_size_plot(df, output_dir):
     """Create a plot showing size ratio and error over time"""
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
 
     # Size ratio plot
     ax1.plot(df['datetime'], df['size_ratio'], 'b-', label='Size Ratio')
-    ax1.axhline(y=df['target_ratio'].iloc[0], color='cyan', linestyle='--', label=f'Target ({df["target_ratio"].iloc[0]:.2f})')
+    ax1.axhline(y=df['target_ratio'].iloc[0], color='cyan', linestyle='--',
+                label=f'Target ({df["target_ratio"].iloc[0]:.2f})')
 
     # Add tolerance band
     # Calculate tolerance safely, handling potential NaN or zero target_ratio
     target_ratio_val = df['target_ratio'].iloc[0] if pd.notna(df['target_ratio'].iloc[0]) else 0
-    tolerance = 0.15 * target_ratio_val if target_ratio_val != 0 else 0.01 # Avoid zero tolerance
+    tolerance = 0.15 * target_ratio_val if target_ratio_val != 0 else 0.01  # Avoid zero tolerance
 
     ax1.fill_between(
         df['datetime'],
@@ -265,6 +273,7 @@ def create_size_plot(df, output_dir):
         plt.savefig(f"{output_dir}/size_analysis.png", dpi=200)
         plt.close()
 
+
 def create_commands_plot(df, output_dir):
     """Create a plot showing commands over time"""
     fig, ax = plt.subplots(figsize=(12, 6))
@@ -303,25 +312,29 @@ def create_commands_plot(df, output_dir):
         plt.savefig(f"{output_dir}/commands.png", dpi=200)
         plt.close()
 
+
 def create_position_heatmap(df, output_dir):
     """Create a heatmap showing where the object spent most time"""
     fig, ax = plt.subplots(figsize=(10, 8))
 
     # Create a 2D histogram (heatmap)
     # Handle potential missing frame center data
-    frame_center_x = df['frame_center_x'].iloc[0] if 'frame_center_x' in df.columns and pd.notna(df['frame_center_x'].iloc[0]) else 640 # Default fallback
-    frame_center_y = df['frame_center_y'].iloc[0] if 'frame_center_y' in df.columns and pd.notna(df['frame_center_y'].iloc[0]) else 360 # Default fallback
+    frame_center_x = df['frame_center_x'].iloc[0] if 'frame_center_x' in df.columns and pd.notna(
+        df['frame_center_x'].iloc[0]) else 640  # Default fallback
+    frame_center_y = df['frame_center_y'].iloc[0] if 'frame_center_y' in df.columns and pd.notna(
+        df['frame_center_y'].iloc[0]) else 360  # Default fallback
     frame_width = frame_center_x * 2
     frame_height = frame_center_y * 2
 
-    bins = [max(1, int(frame_width / 20)), max(1, int(frame_height / 20))] # Ensure bins >= 1
+    bins = [max(1, int(frame_width / 20)), max(1, int(frame_height / 20))]  # Ensure bins >= 1
 
     # Filter out NaN positions before histogramming
     valid_pos_df = df.dropna(subset=['object_center_x', 'object_center_y'])
 
     if valid_pos_df.empty:
         print("Warning: No valid object positions found for heatmap.")
-        ax.text(0.5, 0.5, "No Position Data", horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
+        ax.text(0.5, 0.5, "No Position Data", horizontalalignment='center', verticalalignment='center',
+                transform=ax.transAxes)
         ax.set_title('Object Position Heatmap (No Data)')
     else:
         heatmap, xedges, yedges = np.histogram2d(
@@ -348,7 +361,6 @@ def create_position_heatmap(df, output_dir):
         cbar.set_label('Time Density')
         ax.set_title('Object Position Heatmap')
 
-
     # Plot the frame center
     ax.scatter(
         [frame_center_x],
@@ -369,6 +381,7 @@ def create_position_heatmap(df, output_dir):
     if output_dir:
         plt.savefig(f"{output_dir}/position_heatmap.png", dpi=200)
         plt.close()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Visualize drone tracking data')

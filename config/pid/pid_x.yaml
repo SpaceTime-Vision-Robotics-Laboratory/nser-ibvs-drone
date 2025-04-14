@@ -1,0 +1,10 @@
+kp: 0.1
+ki: 0.1
+kd: 0.05
+dead_zone: 40
+target_error: 0
+thresholds:
+  - -30.0
+  - 30.0
+filter_alpha: 0.2
+max_integral: 100

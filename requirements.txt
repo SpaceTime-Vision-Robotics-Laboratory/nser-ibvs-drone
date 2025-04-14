@@ -1,6 +1,8 @@
+-e external/drone_base
 ultralytics
 opencv-python
 parrot-olympe
 pynput
 ruff
 scipy
+pyyaml
