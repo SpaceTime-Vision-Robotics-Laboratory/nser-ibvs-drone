@@ -43,10 +43,10 @@ class PIDConfig:
             if self.thresholds[0] > self.thresholds[1]:
                 raise ValueError(f"{self.thresholds[0]=} cannot be greater than {self.thresholds[1]=}")
 
-        if self.max_integral <= 0:
+        if self.max_integral < 0:
             raise ValueError("Value for \"max_integral\" must be non-negative.")
 
-        if self.dead_zone <= 0:
+        if self.dead_zone < 0:
             raise ValueError("Value for \"dead_zone\" must be non-negative.")
 
     @classmethod
