@@ -10,7 +10,7 @@ def main():
         processor_class=SimpleYoloProcessor,
         speed=35,
         log_path=Paths.OUTPUT_DIR / "logs",
-        result_path=Paths.OUTPUT_DIR / "results",
+        results_path=Paths.OUTPUT_DIR / "results",
     )
 
     controller.run()

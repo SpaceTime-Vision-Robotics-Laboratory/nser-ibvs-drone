@@ -5,4 +5,5 @@ parrot-olympe
 pynput
 ruff
 scipy
+pandas
 pyyaml

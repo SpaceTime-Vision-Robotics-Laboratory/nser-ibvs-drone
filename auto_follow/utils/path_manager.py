@@ -15,6 +15,7 @@ class Paths:
     PID_X_PATH: Final[Path] = PID_CONFIG_DIR / "pid_x.yaml"
 
     OUTPUT_DIR: Final[Path] = BASE_DIR / "output"
+    DETECTOR_LOG_DIR: Final[Path] = OUTPUT_DIR / "detector-logs"
 
 
 if __name__ == '__main__':
