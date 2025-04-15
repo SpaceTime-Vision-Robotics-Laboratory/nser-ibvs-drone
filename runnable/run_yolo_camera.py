@@ -404,20 +404,6 @@ class CarYoloProcessor(BaseVideoProcessor):
             shape_end_y = int(best_center[1] + shape_line_length * math.sin(angle_rad_shape))
             cv2.line(plotted_frame, best_center, (shape_end_x, shape_end_y), (255, 0, 255), 2) # Magenta line
 
-            # --- Draw Orientation Line ---
-            # if self.smoothed_orientation_vector is not None:
-            #     orientation_line_length = 40 # Length of the orientation line in pixels
-            #     current_angle_deg = None # Initialize for display scope
-            #     # Calculate the angle from the smoothed vector
-            #     angle_rad = np.arctan2(self.smoothed_orientation_vector[1], self.smoothed_orientation_vector[0])
-            #     current_angle_deg = np.degrees(angle_rad) # For potential display or logging
-            #     # Calculate the endpoint of the orientation line
-            #     end_x = int(best_center[0] + orientation_line_length * self.smoothed_orientation_vector[0])
-            #     end_y = int(best_center[1] + orientation_line_length * self.smoothed_orientation_vector[1])
-            #     # Draw the orientation line (e.g., Blue color)
-            #     cv2.line(plotted_frame, best_center, (end_x, end_y), (255, 0, 0), 2)
-
-
             # Confidence Text
             conf_text = f"Conf: {confidence:.2f}"
             font = cv2.FONT_HERSHEY_SIMPLEX
