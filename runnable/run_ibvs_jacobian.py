@@ -20,13 +20,18 @@ camera_fy = 348
 camera_cx = 320.0
 camera_cy = 180.0
 
-lambda_gain = 0.1
+lambda_gain = 0.05
 
 # Target Parameters
-X1Y1 = (220, 50)
-X2Y2 = (400, 310)
-X1Y2 = (220, 310)
-X2Y1 = (400, 50)
+# X1Y1 = (220, 50)
+# X2Y2 = (400, 310)
+# X1Y2 = (220, 310)
+# X2Y1 = (400, 50)
+
+X1Y1 = (270, 65)
+X2Y2 = (370, 305)
+X1Y2 = (270, 305)
+X2Y1 = (370, 65)
 
 class IBVSController(BaseStreamingController):
     def __init__(self, lambda_gain:float = lambda_gain, **kwargs):
@@ -38,7 +43,7 @@ class IBVSController(BaseStreamingController):
         self.cy = camera_cy
         
         
-    def initialize_position(self, takeoff_height=2.0, gimbal_angle=-45, back_distance=-2.0, left_distance=0.0):
+    def initialize_position(self, takeoff_height=5.0, gimbal_angle=-90, back_distance=-0.0, left_distance=0.0):
         if not self.drone.connection_state():
             print("Connecting to drone...")
             self.drone_commander.connect()
@@ -117,7 +122,7 @@ class IBVSProcessor(BaseVideoProcessor):
         
         for i in range(len(current_features)):
             x, y = current_features[i]
-            L = self.calculate_interaction_matrix(x, y, Z=2.0)
+            L = self.calculate_interaction_matrix(x, y, Z=6.5)
             L_full[i*2:i*2+2, :] = L
             
         # print(f"L_full: {L_full}")
@@ -152,7 +157,7 @@ class IBVSProcessor(BaseVideoProcessor):
         
         # print(f"Command: SIDE: {vx}, FWD: {vy}, UP: {vz}, ROT: {wx}")
         print(f'Command: ROLL: {roll}, PITCH: {pitch}, GAZ: {gaz}, YAW_RATE: {yaw_rate}')
-        self.drone_commander.piloting(x=0, y=-pitch, z=0, z_rot=yaw_rate, dt=0.1)
+        self.drone_commander.piloting(x=roll, y=-pitch, z=0, z_rot=yaw_rate, dt=0.1)
         
         # print(f"Command: SIDE: {vx}, FWD: {vy}, UP: {vz}, ROT: {wz}")
         
