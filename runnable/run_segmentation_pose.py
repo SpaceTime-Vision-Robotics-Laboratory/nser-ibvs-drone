@@ -9,9 +9,9 @@ sys.path.append(str(Path(__file__).parent.parent / "drone_base"))
 from drone_base.main.config.drone import DroneIp, GimbalType
 from drone_base.main.stream.base_streaming_controller import BaseStreamingController
 
-from main.processors.yolo_processor import YOLOProcessor
+from main.processors.segmentation_pose_processor import SegmentationPoseProcessor
 
-class BasicController(BaseStreamingController):
+class PoseFollowingController(BaseStreamingController):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -72,9 +72,9 @@ if __name__ == "__main__":
     args.add_argument("--simulated", action="store_true")
     args = args.parse_args()
 
-    controller = BasicController(
+    controller = PoseFollowingController(
         ip=args.ip,
-        processor_class=YOLOProcessor,
+        processor_class=SegmentationPoseProcessor,
         speed=args.speed
     )
 
