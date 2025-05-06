@@ -55,28 +55,88 @@ class SimpleYoloProcessor(BaseVideoProcessor):
             target_data=target_data
         )
 
-        final_command_info = base_command_info
-        # If target is detected and outside the 85% box, prioritize centering
-        if not target_data.is_lost and target_data.center is not None:
+        # --- Determine Final Command based on Target Position ---
+        if target_data.is_lost or target_data.center is None:
+            # Target lost or center not available, use base tracker behavior (hover/search)
+            # Create a *new* CommandInfo instance with the updated status, as CommandInfo is immutable (frozen dataclass)
+            final_command_info = CommandInfo(
+                timestamp=base_command_info.timestamp,
+                x_cmd=base_command_info.x_cmd,
+                y_cmd=base_command_info.y_cmd,
+                z_cmd=base_command_info.z_cmd,
+                rot_cmd=base_command_info.rot_cmd,
+                x_offset=base_command_info.x_offset,
+                y_offset=base_command_info.y_offset,
+                p_rot=base_command_info.p_rot,
+                d_rot=base_command_info.d_rot,
+                angle_error=base_command_info.angle_error,
+                status=base_command_info.status if base_command_info.status else "Target Lost/Searching"
+            )
+        else:
             target_x, target_y = target_data.center
-            is_outside_box = not (x1_85 <= target_x <= x2_85 and y1_85 <= target_y <= y2_85)
-            
-            if is_outside_box:
+            is_inside_box = (x1_85 <= target_x <= x2_85 and y1_85 <= target_y <= y2_85)
+
+            if is_inside_box:
+                # --- IBVS Logic (Target Inside Box) ---
+                x_error = target_x - self.config.frame_center_x
+                y_error = target_y - self.config.frame_center_y
+                error_vec = np.array([[x_error], [y_error]])
+
+                # --- IBVS Parameters ---
+                # TODO: Tune these parameters
+                lambda_gain = 0.8  # Convergence gain
+                k_x = -10.0  # How x_cmd affects x_error (e.g., positive x_cmd moves target left -> negative k_x)
+                k_y = 10.0   # How y_cmd affects y_error (e.g., positive y_cmd moves target down -> positive k_y)
+
+                # Effective Interaction Matrix (Diagonal Approximation)
+                # L_eff = np.array([[k_x, 0], [0, k_y]])
+                # Pseudo-inverse of L_eff
+                L_eff_inv = np.array([[1.0/k_x, 0], [0, 1.0/k_y]])
+                # --- End IBVS Parameters ---
+
+                # IBVS Control Law: cmd = -lambda * L_inv * error
+                command_vec = -lambda_gain * L_eff_inv @ error_vec
+
+                # Extract and clamp commands
+                ibvs_x_cmd = int(np.clip(command_vec[0, 0], -100, 100)) # Sideways
+                # Note: Drone y_cmd often controls forward/backward. Need to map correctly.
+                # Assuming positive y_cmd = forward, and target below center (positive y_error) requires moving forward.
+                # If k_y is positive (positive y_cmd moves target pixel y down), then -lambda * (1/k_y) * y_error works.
+                ibvs_y_cmd = int(np.clip(command_vec[1, 0], -100, 100)) # Forward/Backward
+
+                final_command_info = CommandInfo(
+                    timestamp=base_command_info.timestamp,
+                    x_cmd=ibvs_x_cmd,             # IBVS sideways command
+                    y_cmd=ibvs_y_cmd,             # IBVS forward/backward command
+                    z_cmd=base_command_info.z_cmd, # Keep altitude adjustment from tracker
+                    rot_cmd=base_command_info.rot_cmd, # Keep rotation command from tracker
+                    x_offset=base_command_info.x_offset,
+                    y_offset=base_command_info.y_offset,
+                    p_rot=base_command_info.p_rot,
+                    d_rot=base_command_info.d_rot,
+                    angle_error=base_command_info.angle_error,
+                    status="IBVS Tracking"
+                )
+                # --- End IBVS Logic ---
+            else:
+                # --- Centering Logic (Target Outside Box) ---
                 # Override forward/backward and sideways movement to prioritize rotation/altitude for centering
                 final_command_info = CommandInfo(
                     timestamp=base_command_info.timestamp,
-                    x_cmd=0,  # Disable sideways strafing
-                    y_cmd=0,  # Disable forward/backward movement
-                    z_cmd=base_command_info.z_cmd, # Keep altitude adjustment (if enabled in tracker)
+                    x_cmd=0,                        # Disable sideways strafing
+                    y_cmd=0,                        # Disable forward/backward movement
+                    z_cmd=base_command_info.z_cmd,  # Keep altitude adjustment
                     rot_cmd=base_command_info.rot_cmd, # Keep rotation command
                     x_offset=base_command_info.x_offset,
                     y_offset=base_command_info.y_offset,
                     p_rot=base_command_info.p_rot,
                     d_rot=base_command_info.d_rot,
-                    status="Centering" # Update status
+                    angle_error=base_command_info.angle_error,
+                    status="Centering"              # Update status
                 )
+                # --- End Centering Logic ---
         # --- End Movement Calculation ---
-        
+
         self.perform_movement(final_command_info)
 
         # self.visualizer.display_frame(frame=frame, target_data=target_data, moved_up=False)
