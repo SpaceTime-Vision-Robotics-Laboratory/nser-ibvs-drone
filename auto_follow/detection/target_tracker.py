@@ -30,12 +30,15 @@ class TargetTracker:
         self.kp_rot = 15  # Reduced from 20
         self.kd_rot = 4   # Reduced from 5
         self.kp_alt = 0  # Proportional gain for altitude (z) based on y_offset (DISABLED)
-        self.kp_fwd = -25  # Proportional gain for forward (y) based on y_offset
+
+        self.kp_fwd_x = -150  # Proportional gain for forward (y) based on y_offset
+        self.kp_fwd_y = -40  # Proportional gain for forward (y) based on y_offset
+
         self.offset_threshold = 0.1  # Deadband for x/y offset corrections for P control
         self.centering_threshold = 0.08
 
         # --- Angle Control Gains & Thresholds ---
-        self.kp_angle = 0.1
+        self.kp_angle = 0.2
         self.angle_threshold = 15 # Degrees
         self.target_angle = 180.0
 
@@ -99,18 +102,19 @@ class TargetTracker:
 
             # --- P Control for Forward/Backward ---
             if abs(y_offset) > self.offset_threshold:
-                y_movement = int(self.kp_fwd * y_offset)
+                y_movement = int(self.kp_fwd_y * y_offset)
             
             # --- P Control for Sideways (Strafe) ---
             # Consider if this is desired alongside rotation. Maybe only if rotation is small?
             # Temporarily disable sideways strafing based on x_offset, let rotation handle it.
             if abs(x_offset) > self.offset_threshold:
-                x_movement = int(-self.kp_fwd * x_offset) # Using kp_fwd might be too aggressive?
+                x_movement = int(-self.kp_fwd_x * x_offset) # Using kp_fwd might be too aggressive?
 
             # --- Angle-based Rotation Override --- 
             if target_data.ellipse_angle is not None and target_data.ellipse_axes is not None:
                 # Calculate angle error (-180 to 180)
                 angle_error = (self.target_angle - target_data.ellipse_angle + 180) % 360 - 180
+                print(f"angle_error: {angle_error}")
 
                 # Check if target is centered and angle error is significant (Removed elongation check)
                 if abs(x_offset) < self.centering_threshold and abs(angle_error) > self.angle_threshold:
@@ -127,7 +131,7 @@ class TargetTracker:
 
         # Clamp commands
         max_speed_command = 30
-        max_rot_command = 50
+        max_rot_command = 70
 
         x_movement = max(-max_speed_command, min(max_speed_command, x_movement))
         y_movement = max(-max_speed_command, min(max_speed_command, y_movement))

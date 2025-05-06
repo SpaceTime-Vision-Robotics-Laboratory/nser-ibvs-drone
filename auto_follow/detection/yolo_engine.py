@@ -30,11 +30,14 @@ class YoloEngine:
         self.model = ultralytics.YOLO(model_path)
         self._default_target = Target(confidence=-1.0)
 
+        self.frame = None
+
     def detect(self, image: np.ndarray) -> Results:
         return self.model.predict(image, stream=False, verbose=False)[0]
     
     def detect_stream(self, image: np.ndarray) -> Results:
         # Consume the first result from the generator
+        self.frame = image.copy()
         results_generator = self.model.predict(image, stream=True, verbose=False)
         return next(results_generator) # Get the first item
 
@@ -70,8 +73,19 @@ class YoloEngine:
             try:
                 # Reshape for fitEllipse if needed, assuming (N, 2) already
                 # fitEllipse requires at least 5 points
-                ellipse = cv2.fitEllipse(mask_coords)
+                frame_plot = self.frame.copy()
+
+                car_frame = np.zeros(self.frame.shape[:2], dtype=np.uint8)
+                poly = cv2.fillPoly(car_frame, pts=[mask_coords], color=255)
+
+                contours, hierarchy = cv2.findContours(car_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+                cont = contours[0]
+
+                ellipse = cv2.fitEllipse(cont)
+                
                 ellipse_center, ellipse_axes, ellipse_angle = ellipse
+                ellipse_axes = (int(ellipse_axes[0]/2), int(ellipse_axes[1]/2))
+
                 # Note: ellipse_axes are (minorAxisLength, majorAxisLength)
                 
                 # Calculate keypoints for visualization

@@ -179,12 +179,19 @@ class FrameVisualizer:
                 ellipse_angle = target_data.ellipse_angle
 
                 # Draw the fitted ellipse (e.g., blue)
-                cv2.ellipse(plotted_frame, ellipse_center_int, ellipse_axes_int, ellipse_angle, 0, 360, (255, 0, 0), 1) 
+                cv2.ellipse(img=plotted_frame,
+                            center=ellipse_center_int,
+                            axes=ellipse_axes_int,
+                            angle=ellipse_angle, 
+                            startAngle=0, 
+                            endAngle=360, 
+                            color=(255, 0, 0),
+                            thickness=1)
 
                 # Draw major axis (e.g., red)
-                cv2.line(plotted_frame, tuple(major1), tuple(major2), (0, 0, 255), 1)
+                # cv2.line(plotted_frame, tuple(major1), tuple(major2), (0, 0, 255), 1)
                 # Draw minor axis (e.g., cyan)
-                cv2.line(plotted_frame, tuple(minor1), tuple(minor2), (255, 255, 0), 1)
+                # cv2.line(plotted_frame, tuple(minor1), tuple(minor2), (255, 255, 0), 1)
             # --- End Ellipse Drawing ---
 
             # Confidence text
