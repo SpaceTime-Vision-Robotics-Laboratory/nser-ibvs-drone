@@ -64,16 +64,16 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         super().__init__(**kwargs)
         self.detector = ultralytics.YOLO(model_path)
 
-        self.offset_threshold = 6 # Deadband for x/y offset corrections
+        self.offset_threshold = 8 # Deadband for x/y offset corrections
 
         self.kp_rot = 100 # Proportional gain for rotation (yaw) based on x_offset
         self.kp_alt = 0   # Proportional gain for altitude (z) based on y_offset (DISABLED)
         
-        self.kp_fwd_x = -0.01 # Proportional gain for roll (x) based on x_offset
-        self.kd_fwd_x = -0.01  # Derivative gain for roll (x)
+        self.kp_fwd_x = -0.05 # Proportional gain for roll (x) based on x_offset
+        self.kd_fwd_x = -0.001  # Derivative gain for roll (x)
         
-        self.kp_fwd_y = -0.01 # Proportional gain for forward (y) based on y_offset
-        self.kd_fwd_y = -0.01  # Derivative gain for pitch (y)
+        self.kp_fwd_y = -0.05 # Proportional gain for forward (y) based on y_offset
+        self.kd_fwd_y = -0.001  # Derivative gain for pitch (y)
 
         self.previous_x_offset = 0.0
         self.previous_y_offset = 0.0
@@ -111,6 +111,9 @@ class IBVSYoloProcessor(BaseVideoProcessor):
 
         ## -------------------------------------
 
+        self.frame_mod = 8
+        self.frame_count = 0
+
         ## IBVS
 
         self.lambda_factor = 0.5
@@ -123,6 +126,9 @@ class IBVSYoloProcessor(BaseVideoProcessor):
 
         with open("xy.txt", "w") as f:
             f.write("xy\n")
+        
+        with open("cmd.txt", "w") as f:
+            f.write("commands\n")
 
     def find_distance(self, p1, p2):
         p1_arr = np.array(p1)
@@ -170,6 +176,16 @@ class IBVSYoloProcessor(BaseVideoProcessor):
                kp_m1, \
                kp_m2
     
+    def plot_bbox_keypoints(self, plotted_frame, keypoints):
+        kp_M1, kp_M2, kp_m1, kp_m2 = keypoints
+        # kp_M1, kp_M2, kp_m1 = keypoints
+
+        cv2.circle(plotted_frame, kp_m1, 5, (255, 0, 0), -1)
+        cv2.circle(plotted_frame, kp_m2, 5, (0,255,0), -1)
+
+        cv2.circle(plotted_frame, kp_M1, 5, (0,0,255), -1)
+        cv2.circle(plotted_frame, kp_M2, 5, (255, 255, 255), -1)
+
     def plot_ellipse_keypoints(self, plotted_frame, keypoints):
         kp_M1, kp_M2, kp_m1, kp_m2 = keypoints
 
@@ -232,11 +248,10 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         current_time = time.time()
         # Calculate dt, handle potential first run or zero dt
         dt = current_time - self.last_command_time
+        self.last_command_time = current_time
         if dt <= 0.001: # Avoid division by zero or excessively large derivatives
             dt = 0.15 # Assume a nominal dt if issue occurs
         print(f"dt: {dt}")
-
-        self.last_command_time = current_time
 
         x_movement, y_movement, z_movement, z_rot = 0, 0, 0, 0
 
@@ -270,6 +285,7 @@ class IBVSYoloProcessor(BaseVideoProcessor):
             proportional_x_term = self.kp_fwd_x * velocities[0]
 
             x_movement = int(proportional_x_term + derivative_x_term)
+            # x_movement = int(proportional_x_term)
             x_movement = max(-max_speed_command, min(max_speed_command, x_movement)) ## TODO check - no roll normally
             print(f"x_movement: {proportional_x_term} + {derivative_x_term} | {x_movement}")
 
@@ -291,6 +307,7 @@ class IBVSYoloProcessor(BaseVideoProcessor):
 
             # --- P Control for Forward/Backward ---
             y_movement = int(proportional_y_term + derivative_y_term)
+            # y_movement = int(proportional_y_term)
             y_movement = max(-max_speed_command, min(max_speed_command, y_movement)) ## pitch - front/back
             print(f"y_movement: {proportional_y_term} + {derivative_y_term} | {y_movement}")
 
@@ -302,6 +319,14 @@ class IBVSYoloProcessor(BaseVideoProcessor):
 
         z_movement = max(-max_speed_command, min(max_speed_command, z_movement)) ## up/down for drone (gaz) - _no_
 
+        with open("cmd.txt", "a") as f:
+            f.write(f"velocities: {velocities}\n")
+            f.write(f"z_rot: {z_rot}\n")
+            f.write(f"delta_x: {delta_x} / dt: {dt}\n")
+            f.write(f"x_movement: {proportional_x_term} + {derivative_x_term} | {x_movement}\n")
+            f.write(f"delta_y: {delta_y} / dt: {dt}\n")
+            f.write(f"y_movement: {proportional_y_term} + {derivative_y_term} | {y_movement}\n\n")
+
         if not target_lost:
             self.drone_commander.piloting(x=x_movement, y=y_movement, z=z_movement, z_rot=z_rot, dt=0.15)
     
@@ -309,7 +334,7 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         original_frame = frame_data[0].copy()
 
         plotted_frame = original_frame.copy()
-        cv2.rectangle(plotted_frame, self.goal_points_bbox[0], self.goal_points_bbox[3], (255, 0, 0), 1)
+        # cv2.rectangle(plotted_frame, self.goal_points_bbox[0], self.goal_points_bbox[3], (255, 0, 0), 1)
         # for point in self.goal_points_ellipse:
         #     # print(point)
         #     cv2.circle(plotted_frame, tuple(point), 10, (51,87,255), -1)
@@ -364,6 +389,10 @@ class IBVSYoloProcessor(BaseVideoProcessor):
                 cv2.rectangle(plotted_frame, (xl, yl), (xr, yr), box_color, box_thickness)
 
                 points_bbox = [(xl, yl), (xl, yr), (xr, yl), (xr, yr)]
+                # points_bbox = points_bbox[:3]
+                self.plot_bbox_keypoints(plotted_frame, tuple(points_bbox))
+
+                self.plot_bbox_keypoints(plotted_frame, tuple(self.goal_points_bbox))
                 ## ------------------------------------------------
                 
                 xc = (xl + xr) // 2
@@ -404,7 +433,7 @@ class IBVSYoloProcessor(BaseVideoProcessor):
                 )
 
                 kp_M1, kp_M2, kp_m1, kp_m2 = self.compute_ellipse_axis_keypoints(ellipse)
-                self.plot_ellipse_keypoints(plotted_frame, (kp_M1, kp_M2, kp_m1, kp_m2))
+                # self.plot_ellipse_keypoints(plotted_frame, (kp_M1, kp_M2, kp_m1, kp_m2))
                 points_ellipse = [tuple(kp_m1), tuple(kp_m2), tuple(kp_M1), tuple(kp_M2)]
 
                 ## ------------------
@@ -427,10 +456,10 @@ class IBVSYoloProcessor(BaseVideoProcessor):
                 if (distance_from_goal <= self.offset_threshold):
                     vel = np.zeros(6)
                 
-                if (abs(vel[0]) > 100 or abs(vel[1]) > 100):
-                    cv2.imwrite("check_frame.png", plotted_frame)
-                    with open("check_vel.txt", "w") as f:
-                        f.write(f"{vel}\n")
+                # if (abs(vel[0]) > 100 or abs(vel[1]) > 100):
+                #     cv2.imwrite("check_frame.png", plotted_frame)
+                #     with open("check_vel.txt", "w") as f:
+                #         f.write(f"{vel}\n")
 
                 with open("rpy.txt", "a") as f:
                     f.write(f"{vel[0]} {vel[1]} {vel[5]}\n")
@@ -447,7 +476,11 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         cv2.imshow("Drone View", plotted_frame)
         cv2.waitKey(1)
 
-        # self._generate_ibvs_command(vel, object_center, target_lost)
+        # self.frame_count += 1
+        # if (self.frame_count % self.frame_mod == 0):
+        #     self._generate_ibvs_command(vel, object_center, target_lost)
+        #     self.frame_count = 0
+        self._generate_ibvs_command(vel, object_center, target_lost)
 
 
 if __name__ == "__main__":
