@@ -33,7 +33,7 @@ parrot-ue4-carla -RenderOffScreen
 Full command to setup the scene:
 
 ```
-parrot-ue4-carla -level=town_10 -ams-path="DefaultPath,Pickup:*"
+parrot-ue4-carla -level=town_10 -ams-path="DefaultPath,Pickup:*" -quality=low
 ```
 
 Command to spawn the Anafi AI in the car:

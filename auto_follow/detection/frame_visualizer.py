@@ -41,9 +41,44 @@ class FrameVisualizer:
         cv2.rectangle(plotted_frame, (x1_85, y1_85), (x2_85, y2_85), (0, 255, 255), 2) # Yellow, thickness 2
         
         # Draw Frame Axes Lines (Horizontal and Vertical through center)
-        cv2.line(plotted_frame, (0, frame_center_y), (frame_width, frame_center_y), (128, 128, 128), 1) # Gray horizontal line
+        cv2.line(plotted_frame, (0, frame_center_y), (frame_width, frame_center_y), (128, 128, 128), 1)
         cv2.line(plotted_frame, (frame_center_x, 0), (frame_center_x, frame_height), (128, 128, 128), 1) # Gray vertical line
         # --- End Frame Center/Box Drawing ---
+
+        # --- Draw Desired Points ---
+        desired_center = np.array([frame_center_x, frame_center_y])
+        desired_major_length = 100  # Desired length of major axis in pixels
+        desired_minor_length = 50   # Desired length of minor axis in pixels
+        desired_vertical_distance = 50  # Distance for vertical points
+        
+        # Calculate desired points (3 points + ellipse)
+        desired_points = np.array([
+            desired_center,  # Center point
+            desired_center + np.array([0, -desired_vertical_distance]),  # Point above
+            desired_center + np.array([0, desired_vertical_distance]),   # Point below
+        ]).astype(np.int32)
+        
+        # Draw desired points and lines
+        for i, point in enumerate(desired_points):
+            # Draw points
+            cv2.circle(plotted_frame, tuple(point), 3, (0, 0, 255), -1)  # Red points
+            
+            # Draw lines between points
+            if i == 0:  # Center point
+                # Draw lines from center to vertical points
+                cv2.line(plotted_frame, tuple(desired_points[0]), tuple(desired_points[1]), (0, 255, 0), 1)  # Green line
+                cv2.line(plotted_frame, tuple(desired_points[0]), tuple(desired_points[2]), (0, 255, 0), 1)  # Green line
+        
+        # Draw desired ellipse
+        cv2.ellipse(plotted_frame, 
+                    center=tuple(desired_center),
+                    axes=(int(desired_major_length/2), int(desired_minor_length/2)),
+                    angle=0,
+                    startAngle=0,
+                    endAngle=360,
+                    color=(0, 255, 255),  # Yellow
+                    thickness=1)
+        # --- End Draw Desired Points ---
 
         if not target_data.is_lost and target_data.center is not None:
             # --- Target Found Drawing ---
@@ -97,10 +132,6 @@ class FrameVisualizer:
                 # Position below confidence text
                 angle_x = conf_x
                 angle_y = conf_y + angle_h + 5 
-                # Adjust if it goes off screen (simple check)
-                # if angle_y > plotted_frame.shape[0] - 10: 
-                #     angle_y = conf_y - angle_h - 5 # Try placing above confidence if below is bad
-
                 cv2.putText(plotted_frame, angle_text, (angle_x, angle_y), font, font_scale, (255, 0, 0), font_thickness, cv2.LINE_AA) # Blue text
 
             # Status text

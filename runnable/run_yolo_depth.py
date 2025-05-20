@@ -1,7 +1,7 @@
 import argparse
 import time
 
-from auto_follow.processors.simple_yolo_processor import SimpleYoloProcessor
+from auto_follow.processors.yolo_depth_processor import YoloDepthProcessor
 from drone_base.config.drone import DroneIp, GimbalType
 from drone_base.stream.base_streaming_controller import BaseStreamingController
 
@@ -70,15 +70,14 @@ if __name__ == "__main__":
 
     controller = BasicController(
         ip=args.ip,
-        processor_class=SimpleYoloProcessor,
+        processor_class=YoloDepthProcessor,
         speed=args.speed,
-        log_path="./logs",
-        results_path="./results"
+        
     )
 
     # Initialize drone position before starting tracking
     if args.simulated:
-        controller.initialize_position(takeoff_height=2.25, gimbal_angle=-45, back_distance=1.5, left_distance=1.0)
+        controller.initialize_position(takeoff_height=3.25, gimbal_angle=-35, back_distance=2.5, left_distance=0.0)
 
     # Start tracking
     controller.run()
