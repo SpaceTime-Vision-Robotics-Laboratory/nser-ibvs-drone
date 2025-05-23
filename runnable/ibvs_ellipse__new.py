@@ -8,8 +8,14 @@ import cv2
 import pandas as pd
 import os
 
+import pickle
+
 from pathlib import Path
 import json
+
+import math
+
+import matplotlib.pyplot as plt
 
 # Modify this line to also make drone_base/main visible as a top-level module
 sys.path.append(str(Path(__file__).parent.parent))
@@ -24,20 +30,275 @@ from drone_base.main.stream.base_video_processor import BaseVideoProcessor
 ## --------------------------------
 
 # in mm
-PIXEL_WIDTH = 0.001078
-PIXEL_HEIGHT = 0.001069
+# PIXEL_WIDTH = 0.001078
+# PIXEL_HEIGHT = 0.001069
 
 FOCAL_LENGTH = 465.60298
+
+PIXEL_WIDTH = 1 / FOCAL_LENGTH
+PIXEL_HEIGHT = 1 / FOCAL_LENGTH
 
 Px = FOCAL_LENGTH / PIXEL_WIDTH
 Py = FOCAL_LENGTH / PIXEL_HEIGHT
 
+
 U0 = 320
 V0 = 180
 
-Z = 10
-
 ## --------------------------------
+
+def e2h(v):
+    """
+    Convert from Euclidean to homogeneous form
+
+    :param v: Euclidean vector or matrix
+    :type v: array_like(n), ndarray(n,m)
+    :return: homogeneous vector
+    :rtype: ndarray(n+1,m)
+
+    - If ``v`` is an N-vector, return an (N+1)-column vector where a value of 1 has
+      been appended as the last element.
+    - If ``v`` is a matrix (NxM), return a matrix (N+1xM), where each column has
+      been appended with a value of 1, ie. a row of ones has been appended to the matrix.
+
+    .. runblock:: pycon
+
+        >>> from spatialmath.base import *
+        >>> e2h([2, 4, 6])
+        >>> e = np.c_[[1,2], [3,4], [5,6]]
+        >>> e
+        >>> e2h(e)
+
+    .. note:: The result is always a 2D array, a 1D input results in a column vector.
+
+    :seealso: e2h
+    """
+    if isinstance(v, np.ndarray) and len(v.shape) == 2:
+        # dealing with matrix
+        return np.vstack([v, np.ones((1, v.shape[1]))])
+
+    elif isvector(v):
+        # dealing with shape (N,) array
+        v = getvector(v, out="col")
+        return np.vstack((v, 1))
+
+    else:
+        raise ValueError("bad type")
+
+def isvector(v, dim) -> bool:
+    """
+    Test if argument is a real vector
+
+    :param v: value to test
+    :param dim: required dimension
+    :type dim: int or None
+    :return: whether value is a valid vector
+    :rtype: bool
+
+    - ``isvector(vec)`` is ``True`` if ``vec`` is a vector, ie. any of:
+
+        - a Python native int or float, a 1-vector
+        - Python native list or tuple
+        - numPy real 1D array, ie. shape=(N,)
+        - numPy real 2D array with a singleton dimension, ie. shape=(1,N)
+          or (N,1)
+
+    - ``isvector(vec, N)`` as above but must also be an ``N``-element vector.
+
+    .. runblock:: pycon
+
+        >>> from spatialmath.base import isvector
+        >>> import numpy as np
+        >>> isvector([1,2])  # list
+        >>> isvector((1,2))  # tuple
+        >>> isvector(np.r_[1,2,3])  # numpy array
+        >>> isvector(1)  # scalar
+        >>> isvector([1,2], 3)  # list
+
+    :seealso: :func:`getvector`, :func:`assertvector`
+    """
+    if (
+        isinstance(v, (list, tuple))
+        and (dim is None or len(v) == dim)
+        and all(map(lambda x: isinstance(x, _scalartypes), v))
+    ):
+        return True  # list or tuple
+
+    if isinstance(v, np.ndarray):
+        s = v.shape
+        if dim is None:
+            return (
+                (len(s) == 1 and s[0] > 0)
+                or (s[0] == 1 and s[1] > 0)
+                or (s[0] > 0 and s[1] == 1)
+            )
+        else:
+            return s == (dim,) or s == (1, dim) or s == (dim, 1)
+
+    if (dim is None or dim == 1) and isinstance(v, _scalartypes):
+        return True
+
+    return False
+
+def getvector(
+    v,
+    dim,
+    out,
+    dtype,
+):
+    """
+    Return a vector value
+
+    :param v: passed vector
+    :param dim: required dimension, or None if any length is ok
+    :type dim: int or None
+    :param out: output format, default is 'array'
+    :type out: str
+    :param dtype: datatype for numPy array return (default np.float64)
+    :type dtype: numPy type
+    :return: vector value in specified format
+    :raises TypeError: value is not a list or NumPy array
+    :raises ValueError: incorrect number of elements
+
+    - ``getvector(vec)`` is ``vec`` converted to the output format ``out``
+      where ``vec`` is any of:
+
+        - a Python native int or float, a 1-vector
+        - Python native list or tuple
+        - numPy real 1D array, ie. shape=(N,)
+        - numPy real 2D array with a singleton dimension, ie. shape=(1,N)
+          or (N,1)
+
+    - ``getvector(vec, N)`` as above but must be an ``N``-element vector.
+
+    The returned vector will be in the format specified by ``out``:
+
+    ==========  ===============================================
+    format      return type
+    ==========  ===============================================
+    'sequence'  Python list, or tuple if a tuple was passed in
+    'list'      Python list
+    'array'     1D numPy array, shape=(N,)  [default]
+    'row'       row vector, a 2D numPy array, shape=(1,N)
+    'col'       column vector, 2D numPy array, shape=(N,1)
+    ==========  ===============================================
+
+    .. runblock:: pycon
+
+        >>> from spatialmath.base import getvector
+        >>> import numpy as np
+        >>> getvector([1,2])  # list
+        >>> getvector([1,2], out='row')  # list
+        >>> getvector([1,2], out='col')  # list
+        >>> getvector((1,2))  # tuple
+        >>> getvector(np.r_[1,2,3], out='sequence')  # numpy array
+        >>> getvector(1)  # scalar
+        >>> getvector([1])
+        >>> getvector([[1]])
+        >>> getvector([1,2], 2)
+        >>> # getvector([1,2], 3)  --> ValueError
+
+    .. note::
+        - For 'array', 'row' or 'col' output the NumPy dtype defaults to the
+          ``dtype`` of ``v`` if it is a NumPy array, otherwise it is
+          set to the value specified by the ``dtype`` keyword which defaults
+          to ``np.float64``.
+        - If ``v`` is symbolic the ``dtype`` is retained as ``'O'``
+
+    :seealso: :func:`isvector`
+    """
+    dt = dtype
+
+    if isinstance(v, _scalartypes):  # handle scalar case
+        v = [v]  # type: ignore
+    if isinstance(v, (list, tuple)):
+        # list or tuple was passed in
+
+        # if issymbol(v):
+        #     dt = None
+
+        if dim is not None and v and len(v) != dim:
+            raise ValueError(
+                "incorrect vector length: expected {}, got {}".format(dim, len(v))
+            )
+        if out == "sequence":
+            return v
+        elif out == "list":
+            return list(v)
+        elif out == "array":
+            return np.array(v, dtype=dt)
+        elif out == "row":
+            return np.array(v, dtype=dt).reshape(1, -1)
+        elif out == "col":
+            return np.array(v, dtype=dt).reshape(-1, 1)
+        else:
+            raise ValueError("invalid output specifier")
+
+    elif isinstance(v, np.ndarray):
+        s = v.shape
+        if dim is not None:
+            if not (s == (dim,) or s == (1, dim) or s == (dim, 1)):
+                raise ValueError(
+                    "incorrect vector length: expected {}, got {}".format(dim, s)
+                )
+
+        v = v.flatten()
+
+        if v.dtype.kind == "O":
+            dt = "O"
+
+        if out in ("sequence", "list"):
+            return list(v.flatten())
+        elif out == "array":
+            return v.astype(dt)
+        elif out == "row":
+            return v.astype(dt).reshape(1, -1)
+        elif out == "col":
+            return v.astype(dt).reshape(-1, 1)
+        else:
+            raise ValueError("invalid output specifier")
+    else:
+        raise TypeError("invalid input type")
+
+# def get_rectangle_sides(corners) -> tuple[int, int]:
+#     """
+#     :param corners: list of 4 (x, y) tuples representing rectangle corners
+#     Returns: Tuple of (short_side_length, long_side_length)
+#     """
+#     distances = []
+#     for i in range(4):
+#         x1, y1 = corners[i]
+#         x2, y2 = corners[(i + 1) % 4] 
+#         distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+#         distances.append(distance)
+    
+#     unique_distances = list(set(round(d, 6) for d in distances))
+#     print(f"{unique_distances=}")
+    
+#     if len(unique_distances) != 2:
+#         raise ValueError("Invalid rectangle: should have exactly 2 unique side lengths")
+    
+#     short_side = min(unique_distances)
+#     long_side = max(unique_distances)
+    
+#     return short_side, long_side
+
+def get_rectangle_sides(corners) -> tuple[float, float]:
+    """
+    :param corners: list of 4 (x, y) tuples representing rectangle corners
+    :returns: Tuple of (short_side_length, long_side_length)
+    """
+    # Calculate only two adjacent sides
+    x1, y1 = corners[0]
+    x2, y2 = corners[1] 
+    x3, y3 = corners[2]
+    
+    side1 = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    side2 = math.sqrt((x3 - x2)**2 + (y3 - y2)**2)
+    
+    if side1 < side2:
+        return side1, side2
+    return side2, side1
 
 class IBVSController(BaseStreamingController):
     def __init__(self, **kwargs):
@@ -53,7 +314,7 @@ class IBVSController(BaseStreamingController):
         self.drone_commander.tilt_camera(pitch_deg=-90, control_mode=GimbalType.MODE_POSITION, reference_type=GimbalType.REF_ABSOLUTE)
         time.sleep(2)
 
-        self.drone_commander.move_by(forward=0, right=5, down=-10, rotation=0)
+        self.drone_commander.move_by(forward=0, right=2, down=-10, rotation=0)
 
         self.frame_processor.frame_queue.empty()
         
@@ -93,18 +354,62 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         ## ---------------------------------
         self.goal_points_bbox = goal_points["bbox_points"]
         self.goal_points_bbox = self.goal_points_bbox[:4]
+
+        xc = (self.goal_points_bbox[0][0] + self.goal_points_bbox[3][0]) / 2
+        yc = (self.goal_points_bbox[0][1] + self.goal_points_bbox[3][1]) / 2
+        self.goal_points_bbox.append((xc, yc))
         
         goal_points_bbox_xy = np.array([self.convert_pixel_to_image_plane_coordinates(point[0], point[1]) for point in self.goal_points_bbox])
-        self.goal_points_bbox_xy = np.hstack(goal_points_bbox_xy)
+        # self.goal_points_bbox_xy = np.hstack(goal_points_bbox_xy)
+        
+        path_to_file = "/home/mihaib08/Desktop/_research_2025/drone_lab/auto-follow/camera-parameters/sim-anafi-4k/intrinsic_matrix_half_size.pkl"
+        with open(path_to_file, 'rb') as f:
+            self.K = pickle.load(f)
+        
+        print(f"{self.K=}")
+        self.Kinv = np.linalg.inv(self.K)
+
+        goal_new = []
+        for p in self.goal_points_bbox:
+            p_array = np.array([[p[0]], [p[1]]])
+
+            # print(p_array, p_array.shape)
+
+            xy = self.Kinv @ e2h(p_array)
+            x = xy[0,0]
+            y = xy[1,0]
+            goal_new.append((x, y))
+        
+        goal_new = np.array(goal_new)
+        goal_new = np.hstack(goal_new)
+
+        # print(f"old={self.goal_points_bbox_xy}")
+        # print(f"new={goal_new}")
+
+        self.goal_points_bbox_xy = goal_new
+
         ## ---------------------------------
 
         ## ellipse
         ## ---------------------------------
-        self.goal_points_ellipse = goal_points["ellipse_points"]
+        self.goal_points_ellipse = [np.array(p) for p in goal_points["ellipse_points"]]
         self.goal_points_ellipse = self.goal_points_ellipse[:4]
         
         goal_points_ellipse_xy = np.array([self.convert_pixel_to_image_plane_coordinates(point[0], point[1]) for point in self.goal_points_ellipse])
-        self.goal_points_ellipse_xy = np.hstack(goal_points_ellipse_xy)
+
+        goal_new_ellipse = []
+        for p in self.goal_points_ellipse:
+            p_array = np.array([[p[0]], [p[1]]])
+
+            xy = self.Kinv @ e2h(p_array)
+            x = xy[0,0]
+            y = xy[1,0]
+            goal_new_ellipse.append((x, y))
+        
+        goal_new_ellipse = np.array(goal_new_ellipse)
+        goal_new_ellipse = np.hstack(goal_new_ellipse)
+
+        self.goal_points_ellipse_xy = goal_new_ellipse
         ## ---------------------------------
 
         self.goal_colors = [(255,0,0), (0,255,0), (0,0,255), (255, 255, 255), (51,87,255)]
@@ -116,19 +421,37 @@ class IBVSYoloProcessor(BaseVideoProcessor):
 
         ## IBVS
 
-        self.lambda_factor = 0.5
+        ## TODO integrate the entire IBVS logic into this class
+        # self.ibvs = ImageBasedVisualServo()
 
-        # with open("missed.txt", "w") as f:
-        #     f.write("Missed objects frames\n")
+        self.lambda_factor = 0.1
 
-        with open("rpy.txt", "w") as f:
-            f.write("roll-pitch-yaw\n")
+        diagonal = [self.lambda_factor, self.lambda_factor, self.lambda_factor, self.lambda_factor, self.lambda_factor, self.lambda_factor * 2]
+        self.lambda_factor = np.diag(diagonal)
 
-        with open("xy.txt", "w") as f:
-            f.write("xy\n")
-        
-        with open("cmd.txt", "w") as f:
-            f.write("commands\n")
+        self.max_linear_speed = 2 # m/s
+        self.max_height_linear_speed = 1 # m/s
+        self.max_angular_speed = np.deg2rad(60) # rad/s
+
+        ## -----------------------------
+
+        self.jconds = []
+        self.errs = []
+    
+    def velocity_to_command(self, velocities):
+        roll = 100 * velocities[0] / self.max_linear_speed
+        pitch = -100 * velocities[1] / self.max_linear_speed
+        gaz = 100 * velocities[2] / self.max_height_linear_speed
+        yaw = 100 * velocities[5] / self.max_angular_speed
+
+        roll *= 1000
+        pitch *= 1000
+        yaw *= 1000
+
+        print(f"{roll=} | {pitch=} | {gaz=} | {yaw=}")
+
+        # self.drone_commander.piloting(x=int(roll), y=int(pitch), z=0, z_rot=0, dt=0.15)
+        self.drone_commander.piloting(x=int(roll), y=int(pitch), z=0, z_rot=int(yaw), dt=0.15)
 
     def find_distance(self, p1, p2):
         p1_arr = np.array(p1)
@@ -149,6 +472,7 @@ class IBVSYoloProcessor(BaseVideoProcessor):
 
         rect = cv2.minAreaRect(cont)
         box = np.int0(cv2.boxPoints(rect))
+        # print(f"{box=}")
 
         ellipse = cv2.fitEllipse(cont)
         return ellipse, box
@@ -187,13 +511,13 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         cv2.circle(plotted_frame, kp_M2, 5, (255, 255, 255), -1)
 
     def plot_ellipse_keypoints(self, plotted_frame, keypoints):
-        kp_M1, kp_M2, kp_m1, kp_m2 = keypoints
+        kp_m1, kp_m2, kp_M1, kp_M2 = keypoints
 
-        cv2.line(plotted_frame, tuple(kp_m1.astype(np.int32)), tuple(kp_m2.astype(np.int32)), (255, 255, 0), 1)
+        # cv2.line(plotted_frame, tuple(kp_m1.astype(np.int32)), tuple(kp_m2.astype(np.int32)), (255, 255, 0), 1)
         cv2.circle(plotted_frame, tuple(kp_m1.astype(np.int32)), 5, (255, 0, 0), -1)
         cv2.circle(plotted_frame, tuple(kp_m2.astype(np.int32)), 5, (0,255,0), -1)
 
-        cv2.line(plotted_frame, tuple(kp_M1.astype(np.int32)), tuple(kp_M2.astype(np.int32)), (255, 255, 0), 1)
+        # cv2.line(plotted_frame, tuple(kp_M1.astype(np.int32)), tuple(kp_M2.astype(np.int32)), (255, 255, 0), 1)
         cv2.circle(plotted_frame, tuple(kp_M1.astype(np.int32)), 5, (0,0,255), -1)
         cv2.circle(plotted_frame, tuple(kp_M2.astype(np.int32)), 5, (255, 255, 255), -1)
         
@@ -206,12 +530,20 @@ class IBVSYoloProcessor(BaseVideoProcessor):
     
     def compute_interaction_matrix(self, points):
         ## TODO set a proper value for Z
-        Z = 10
+        Z = 12
 
         J_list = []
-        for u, v in points:
-            x, y = self.convert_pixel_to_image_plane_coordinates(u, v)
-            J_point = np.array([
+        for p in points:
+            p_array = np.array([[p[0]], [p[1]]])
+            # print(p_array)
+
+            xy = self.Kinv @ e2h(p_array)
+            x = xy[0,0]
+            y = xy[1,0]
+
+            # x, y = self.convert_pixel_to_image_plane_coordinates(u, v)
+
+            J_point = self.K[:2,:2] @ np.array([
                 [-1/Z,     0,    x/Z,  x*y,     -(1+x*x),  y],
                 [    0, -1/Z,    y/Z,  1+y*y,   -x*y,     -x]
             ])
@@ -225,19 +557,52 @@ class IBVSYoloProcessor(BaseVideoProcessor):
 
         return J
     
-    def compute_velocities_ibvs(self, points, goal_points_xy):
+    def compute_velocities_ibvs(self, points, goal_points_xy, bbox=False):
         J = self.compute_interaction_matrix(points)
+        
+        jcond = np.linalg.cond(J)
+
+        if (bbox):
+            self.jconds.append(jcond)
+            print(f"J_cond: {jcond}")
+
         J_pinv = np.linalg.pinv(J)
 
-        points_xy = np.array([self.convert_pixel_to_image_plane_coordinates(point[0], point[1]) for point in points])
-        points_xy = np.hstack(points_xy)
+        # points_xy = np.array([self.convert_pixel_to_image_plane_coordinates(point[0], point[1]) for point in points])
+        # points_xy = np.hstack(points_xy)
+
+        ## TODO here
+        goal_new = []
+        for p in points:
+            p_array = np.array([[p[0]], [p[1]]])
+            # print(p_array)
+
+            xy = self.Kinv @ e2h(p_array)
+            x = xy[0,0]
+            y = xy[1,0]
+            goal_new.append((x, y))
+        
+        goal_new = np.array(goal_new)
+        goal_new = np.hstack(goal_new)
+
+        # print(f"old={points_xy}")
+        # print(f"new={goal_new}")
+
+        points_xy = goal_new
 
         e = goal_points_xy - points_xy
+        if (bbox):
+            self.errs.append(np.linalg.norm(e))
+
         print(f"err: {e}")
         print(f"Current: {points_xy} \n Goal: {goal_points_xy}")
         print("--------------------------------------------")
 
-        vel = self.lambda_factor * J_pinv.dot(e)
+        if (isinstance(self.lambda_factor, np.ndarray)):
+            vel = self.lambda_factor @ J_pinv @ e
+        else:
+            vel = self.lambda_factor * J_pinv @ e
+
         return vel
     
     def _process_frame(self, frame: np.ndarray) -> np.ndarray:
@@ -335,6 +700,10 @@ class IBVSYoloProcessor(BaseVideoProcessor):
     def _display_frame(self, frame_data: list) -> None:
         original_frame = frame_data[0].copy()
 
+        # if (self._frame_count % 3 != 0):
+        #     return
+
+
         plotted_frame = original_frame.copy()
         # cv2.rectangle(plotted_frame, self.goal_points_bbox[0], self.goal_points_bbox[3], (255, 0, 0), 1)
         # for point in self.goal_points_ellipse:
@@ -386,20 +755,31 @@ class IBVSYoloProcessor(BaseVideoProcessor):
                 xyxy = predictions.boxes.xyxy[best_idx].cpu().numpy()
                 xl, yl, xr, yr = map(int, xyxy)
 
-                box_color = (0, 255, 0)
-                box_thickness = 3
-                cv2.rectangle(plotted_frame, (xl, yl), (xr, yr), box_color, box_thickness)
+                ## works on NOT ORIENTED BBOX
+                ## ---------------------------
+                # dx = xr - xl
+                # dy = yr - yl
+                # r = (1. * dy) / dx
+                # if (abs(r - 2.275) >= 0.207):
+                #     cv2.imshow("Drone View", plotted_frame)
+                #     cv2.waitKey(1)
 
-                points_bbox = [(xl, yl), (xl, yr), (xr, yl), (xr, yr)]
-                # points_bbox = points_bbox[:3]
-                self.plot_bbox_keypoints(plotted_frame, tuple(points_bbox))
+                #     return
 
-                self.plot_bbox_keypoints(plotted_frame, tuple(self.goal_points_bbox))
-                ## ------------------------------------------------
-                
                 xc = (xl + xr) // 2
                 yc = (yl + yr) // 2
                 object_center = (xc, yc)
+
+                box_color = (0, 255, 0)
+                box_thickness = 3
+                # cv2.rectangle(plotted_frame, (xl, yl), (xr, yr), box_color, box_thickness)
+
+                points_bbox = [(xl, yl), (xl, yr), (xr, yl), (xr, yr), object_center]
+                # points_bbox = points_bbox[:3]
+                # self.plot_bbox_keypoints(plotted_frame, tuple(points_bbox[:4]))
+                # self.plot_bbox_keypoints(plotted_frame, tuple(self.goal_points_bbox[:4]))
+                ## ------------------------------------------------
+                
                 cv2.circle(plotted_frame, object_center, 5, (255, 0, 0), -1)
                 cv2.line(plotted_frame, frame_center, object_center, (0, 165, 255), 2)
 
@@ -422,7 +802,22 @@ class IBVSYoloProcessor(BaseVideoProcessor):
                 ## ------------------
 
                 ellipse, box = self.compute_oriented_ellipse(original_frame, xy_seg)
-                # cv2.drawContours(plotted_frame, [box], 0, (36,255,12), 3)e
+
+                cv2.drawContours(plotted_frame, [box], 0, (36,255,12), 3)
+                ## they are ordered _clockwise_
+                # self.plot_bbox_keypoints(plotted_frame, tuple(box))
+
+                sides = get_rectangle_sides(box)
+                # print(f"{sides=}")
+
+                ## works on ORIENTED BBOX
+                ## ---------------------------
+                r = (1. * sides[1]) / sides[0]
+                if (abs(r - 2.401) >= 0.198):
+                    cv2.imshow("Drone View", plotted_frame)
+                    cv2.waitKey(1)
+
+                    return
 
                 (xc_ellipse,yc_ellipse), (MA,ma), angle = ellipse
                 cv2.ellipse(
@@ -436,7 +831,11 @@ class IBVSYoloProcessor(BaseVideoProcessor):
                 )
 
                 kp_M1, kp_M2, kp_m1, kp_m2 = self.compute_ellipse_axis_keypoints(ellipse)
-                # self.plot_ellipse_keypoints(plotted_frame, (kp_M1, kp_M2, kp_m1, kp_m2))
+                
+                self.plot_ellipse_keypoints(plotted_frame, (kp_m1, kp_m2, kp_M1, kp_M2))
+                # print(f"ellipse - {tuple(self.goal_points_ellipse)}")
+                self.plot_ellipse_keypoints(plotted_frame, tuple(self.goal_points_ellipse))
+                
                 points_ellipse = [tuple(kp_m1), tuple(kp_m2), tuple(kp_M1), tuple(kp_M2)]
 
                 ## ------------------
@@ -447,16 +846,49 @@ class IBVSYoloProcessor(BaseVideoProcessor):
                 distance_from_goal = self.find_distance(frame_center, object_center)
                 print(f"Object center {object_center} | Frame center {frame_center} | distance from goal: {distance_from_goal}")
 
-                vel = self.compute_velocities_ibvs(points_bbox, self.goal_points_bbox_xy)
-                print(f"Velocities bbox: {vel}")
+                # vel = self.compute_velocities_ibvs(points_bbox, self.goal_points_bbox_xy, bbox=True)
+                # print(f"Velocities bbox: {vel}")
 
-                vel_ellipse = self.compute_velocities_ibvs(points_ellipse, self.goal_points_ellipse_xy)
+                ## set bbox to True only if you want to plot jcond and the errors
+                vel_ellipse = self.compute_velocities_ibvs(points_ellipse, self.goal_points_ellipse_xy, bbox=True)
                 print(f"Velocities ellipse: {vel_ellipse}")
-                vel[2] = vel_ellipse[2]
-                vel[5] = vel_ellipse[5]
+                vel = vel_ellipse
+                # vel[2] = vel_ellipse[2]
+                # vel[5] = vel_ellipse[5]
 
-                if (distance_from_goal <= self.offset_threshold):
-                    vel = np.zeros(6)
+                self.velocity_to_command(vel)
+
+                ## plot
+                ## -----------------
+
+                if (self._frame_count % 120 == 0):
+                    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+                    
+                    # Plot X values
+                    ax1.plot(range(len(self.jconds)), self.jconds, 'b-o')
+                    ax1.set_title('J_cond')
+                    ax1.set_ylabel('value')
+                    ax1.grid(True)
+                    
+                    # Plot Y values
+                    ax2.plot(range(len(self.errs)), self.errs, 'r-o')
+                    ax2.set_title('error')
+                    ax2.set_xlabel('idx')
+                    ax2.set_ylabel('err norm')
+                    ax2.grid(True)
+
+                    plt.savefig("_check_errs.jpg", bbox_inches='tight')
+
+
+                ## -----------------
+
+                # vel_ellipse = self.compute_velocities_ibvs(points_ellipse, self.goal_points_ellipse_xy)
+                # print(f"Velocities ellipse: {vel_ellipse}")
+                # vel[2] = vel_ellipse[2]
+                # vel[5] = vel_ellipse[5]
+
+                # if (distance_from_goal <= self.offset_threshold):
+                #     vel = np.zeros(6)
                 
                 # if (abs(vel[1]) > 200):
                 #     cv2.imwrite("check_frame.png", plotted_frame)
@@ -482,7 +914,7 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         # if (self.frame_count % self.frame_mod == 0):
         #     self._generate_ibvs_command(vel, object_center, target_lost)
         #     self.frame_count = 0
-        self._generate_ibvs_command(vel, object_center, target_lost)
+        # self._generate_ibvs_command(vel, object_center, target_lost)
 
 
 if __name__ == "__main__":

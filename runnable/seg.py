@@ -216,7 +216,7 @@ if __name__ == "__main__":
     # check()
 
     model_path = Path("/home/mihaib08/Desktop/_research_2025/drone_lab/auto-follow/models/yolo11n-seg_car_sim_simple.pt")
-    frame_path = Path("/home/mihaib08/Desktop/_research_2025/drone_lab/auto-follow/assets/reference/images/frame_drone_sim_10m_center.png")
+    frame_path = Path("/home/mihaib08/Desktop/_research_2025/drone_lab/auto-follow/assets/reference/images/frame_sim_45_5m_center.png")
 
     bbox_points, ellipse_points = retrieve_keypoints(model_path, frame_path)
     data = {
