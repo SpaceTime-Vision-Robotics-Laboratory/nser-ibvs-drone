@@ -124,7 +124,7 @@ def retrieve_keypoints(model_path: Path, frame_path: Path):
 
         coords = results.boxes.xyxy[best_conf_idx].cpu().numpy()
         xl, yl, xr, yr = map(int, coords)
-        bbox_points = [(xl, yl), (xl, yr), (xr, yl), (xr, yr)]
+        bbox_points = [(xl, yl), (xr, yl), (xr, yr), (xl, yr)]
         
         xy_seg = results.masks.xy[best_conf_idx]
         xy_seg = [list(xy) for xy in xy_seg]
@@ -149,6 +149,27 @@ def retrieve_keypoints(model_path: Path, frame_path: Path):
 
         contours, hierarchy = cv2.findContours(car_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         cont = contours[0]
+
+        ## oriented bbox
+        ## ------------------------------------------
+        rect = cv2.minAreaRect(cont)
+        bbox_oriented = np.int0(cv2.boxPoints(rect))
+        print(f"{bbox_oriented=}")
+
+        bbox_oriented_points = [tuple(map(int, p)) for p in bbox_oriented]
+
+        frame_bbox_oriented = frame.copy()
+        cv2.rectangle(frame_bbox_oriented, bbox_oriented_points[0], bbox_oriented_points[2], (0, 255, 0), 2)
+
+        cv2.circle(frame_bbox_oriented, bbox_oriented_points[0], 5, (255, 0, 0), -1)
+        cv2.circle(frame_bbox_oriented, bbox_oriented_points[1], 5, (0,255,0), -1)
+
+        cv2.circle(frame_bbox_oriented, bbox_oriented_points[2], 5, (0,0,255), -1)
+        cv2.circle(frame_bbox_oriented, bbox_oriented_points[3], 5, (255, 255, 255), -1)
+
+        cv2.imwrite("check_bbox_oriented.png", frame_bbox_oriented)
+
+        ## ------------------------------------------
 
         ellipse = cv2.fitEllipse(cont)
         (x,y), (MA,ma), angle = ellipse
@@ -206,9 +227,10 @@ def retrieve_keypoints(model_path: Path, frame_path: Path):
         ellipse_points.append(object_center)
 
         cv2.imwrite("check_ellipse.png", plotted_frame)
-
-    print(ellipse_points)
-    return bbox_points, ellipse_points
+    
+    print(f"{bbox_points=}")
+    print(f"{ellipse_points=}")
+    return bbox_points, ellipse_points, bbox_oriented_points
 
 
 
@@ -216,12 +238,13 @@ if __name__ == "__main__":
     # check()
 
     model_path = Path("/home/mihaib08/Desktop/_research_2025/drone_lab/auto-follow/models/yolo11n-seg_car_sim_simple.pt")
-    frame_path = Path("/home/mihaib08/Desktop/_research_2025/drone_lab/auto-follow/assets/reference/images/frame_sim_45_5m_center.png")
+    frame_path = Path("/home/mihaib08/Desktop/_research_2025/drone_lab/auto-follow/assets/reference/images/frame_drone_sim_10m_center.png")
 
-    bbox_points, ellipse_points = retrieve_keypoints(model_path, frame_path)
+    bbox_points, ellipse_points, bbox_oriented_points = retrieve_keypoints(model_path, frame_path)
     data = {
         "ellipse_points": ellipse_points,
-        "bbox_points": bbox_points
+        "bbox_points": bbox_points,
+        "bbox_oriented_points": bbox_oriented_points
     }
 
     with open(f"{frame_path.stem}.json", "w") as f:
