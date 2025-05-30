@@ -99,7 +99,7 @@ def check_stability_bbox_oriented(points_bbox):
     sides = get_rectangle_sides(points_bbox)
 
     r = (1. * sides[1]) / sides[0]
-    if (abs(r - 2.401) >= 0.198):
+    if (abs(r - 2.401) >= 0.18):
         return False
     
     return True

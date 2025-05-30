@@ -315,6 +315,7 @@ class IBVSController(BaseStreamingController):
         time.sleep(2)
 
         self.drone_commander.move_by(forward=0, right=2, down=-10, rotation=0)
+        # self.drone_commander.move_by(forward=0, right=1, down=0, rotation=0) # for the bunker env
 
         self.frame_processor.frame_queue.empty()
         
@@ -470,6 +471,8 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         contours, hierarchy = cv2.findContours(object_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         cont = contours[0]
 
+        ## check https://theailearner.com/tag/cv2-minarearect/
+        ## ^ The 4 corner points are ordered clockwise starting from the point with the highest y.
         rect = cv2.minAreaRect(cont)
         box = np.int0(cv2.boxPoints(rect))
         # print(f"{box=}")

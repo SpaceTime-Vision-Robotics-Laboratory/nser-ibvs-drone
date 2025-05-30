@@ -13,6 +13,8 @@ import pickle
 from pathlib import Path
 import json
 
+import matplotlib.pyplot as plt
+
 from utils import e2h, plot_bbox_keypoints, compute_distance
 from utils import check_stability_bbox_oriented
 
@@ -99,14 +101,15 @@ class ImageBasedVisualServo():
         
         jcond = np.linalg.cond(J)
         self.jcond_values.append(jcond)
+        print("--------------------------------------------")
         print(f"J cond: {jcond}")
 
         J_pinv = np.linalg.pinv(J)
 
         err = self.goal_points_normalized - self.current_points_normalized
-        self.err_values.append(err)
+        self.err_values.append(np.linalg.norm(err))
 
-        print("--------------------------------------------")
+        # print("--------------------------------------------")
         print(f"err: {err}")
         print(f"Current: {self.current_points_normalized} \n Goal: {self.goal_points_normalized}")
         print("--------------------------------------------")
@@ -117,6 +120,24 @@ class ImageBasedVisualServo():
             vel = self.lambda_factor * J_pinv @ err
 
         return vel
+    
+    def plot_values(self):
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+                    
+        # Plot X values
+        ax1.plot(range(len(self.jcond_values)), self.jcond_values, 'b-o')
+        ax1.set_title('J_cond')
+        ax1.set_ylabel('value')
+        ax1.grid(True)
+        
+        # Plot Y values
+        ax2.plot(range(len(self.err_values)), self.err_values, 'r-o')
+        ax2.set_title('error')
+        ax2.set_xlabel('idx')
+        ax2.set_ylabel('err norm')
+        ax2.grid(True)
+
+        plt.savefig("_check_errs.jpg", bbox_inches='tight')
 
 
 class IBVSController(BaseStreamingController):
@@ -182,7 +203,9 @@ class IBVSYoloProcessor(BaseVideoProcessor):
 
         return box
     
+    ## TODO - temporary assumption that the points at the front are the ones with the lowest y
     def reorder_points_bbox_oriented(self, points_bbox_oriented):
+        ## better (?): sorted(data,key=itemgetter(1))
         pts = sorted(points_bbox_oriented, key=lambda x: x[1])
 
         p0 = pts[0]
@@ -225,6 +248,8 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         return [frame, results[0]]
     
     def _display_frame(self, frame_data: list) -> None:
+        ## TODO add the take-off detection conditions from Sebi // check the code from sebnae/pid_with_rot
+
         plotted_frame = frame_data[0].copy()
 
         frame_h, frame_w = plotted_frame.shape[:2]
@@ -239,7 +264,7 @@ class IBVSYoloProcessor(BaseVideoProcessor):
             # print(f"Best idx {best_idx} / {len(predictions.boxes.conf)}")
             
             best_conf = predictions.boxes.conf[best_idx]
-            if (best_conf >= 0.8):
+            if (best_conf >= 0.6):
                 ## Segmentation
                 ## ------------------------------------------------
                 xy_seg = predictions.masks.xy[best_idx]
@@ -309,8 +334,11 @@ class IBVSYoloProcessor(BaseVideoProcessor):
 
                 distance_from_goal = compute_distance(frame_center, (xc, yc))
                 print(f"Object center {(xc, yc)} | Frame center {frame_center} | {distance_from_goal=}")
-                if (distance_from_goal <= 8):
-                    vel = np.zeros(6)
+                # if (distance_from_goal <= 8):
+                #     vel = np.zeros(6)
+                
+                # if (self._frame_count % 120 == 0):
+                #     self.ibvs.plot_values()
 
                 ## ------------------------------------------------
                 ## Drone
