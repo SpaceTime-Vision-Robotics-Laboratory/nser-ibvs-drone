@@ -29,7 +29,7 @@ from drone_base.main.stream.base_video_processor import BaseVideoProcessor
 
 ## -------------------------------------------------------------
 
-MODEL_PATH = "/home/mihaib08/Desktop/_research_2025/drone_lab/auto-follow/models/yolo11n-seg_car_sim_simple.pt"
+MODEL_PATH = "/home/mihaib08/Desktop/_research_2025/drone_lab/auto-follow/runnable/models/yolo11n-seg_car_sim_simple.pt"
 
 ## -------------------------------------------------------------
 
@@ -40,18 +40,27 @@ class ImageBasedVisualServo():
         self.Kinv = np.linalg.inv(self.K)
         # print(f"{self.Kinv=}")
 
-        self.lambda_factor = 0.1
-        diagonal = [self.lambda_factor, self.lambda_factor, self.lambda_factor, self.lambda_factor, self.lambda_factor, self.lambda_factor * 2]
+        self.lambda_factor = 0.2
+        
+        # diagonal = [self.lambda_factor, self.lambda_factor, self.lambda_factor, self.lambda_factor, self.lambda_factor, self.lambda_factor]
+        diagonal = [self.lambda_factor, self.lambda_factor, self.lambda_factor]
+        
         self.lambda_factor = np.diag(diagonal)
 
         self.goal_points = goal_points
-        self.goal_points_normalized = self.compute_normalized_image_plane_coordinates(self.goal_points)
+        self.goal_points_flat = np.hstack(self.goal_points)
+        # self.goal_points_normalized = self.compute_normalized_image_plane_coordinates(self.goal_points)
 
         self.current_points = None
         self.current_points_normalized = None
 
         self.jcond_values = []
         self.err_values = []
+        self.err_uv_values = []
+
+        ## TODO Z should not be fixed at 45deg
+        ## if depth is scalar is a problem to other angles than 90 degrees
+        self.Z = 11.5
     
     def compute_normalized_image_plane_coordinates(self, points):
         points_normalized = []
@@ -71,30 +80,85 @@ class ImageBasedVisualServo():
     
     def set_current_points(self, current_points):
         self.current_points = current_points
-        self.current_points_normalized = self.compute_normalized_image_plane_coordinates(self.current_points)
+        self.current_points_flat = np.hstack(self.current_points)
+        # self.current_points_normalized = self.compute_normalized_image_plane_coordinates(self.current_points)
     
-    def compute_interaction_matrix(self):
-        ## TODO set a proper value for Z
-        Z = 12
+    ## TODO this needs to be rewritten for other than 90deg tilt
+    def compute_depths(self, pixels):
+        """
+        Estimate per-point depth based on image geometry.
 
-        J_list = []
-        for i in range(0, len(self.current_points_normalized), 2):
-            x = self.current_points_normalized[i]
-            y = self.current_points_normalized[i+1]
+        Args:
+            pixels: Nx2 array of (u, v) pixel coordinates.
+            K: 3x3 camera intrinsic matrix.
+            altitude: Height of the drone in meters (h).
+
+        Returns:
+            depths: Array of Z_i depth estimates for each pixel.
+        """
+        depths = []
+
+        for u, v in pixels:
+            pixel_homog = np.array([u, v, 1.0])
+            norm_coords = self.Kinv @ pixel_homog  # Gives [x_n, y_n, 1]
+            x_n, y_n = norm_coords[0], norm_coords[1]
+            Z_i = self.Z * np.sqrt(x_n**2 + y_n**2 + 1)
+            depths.append(Z_i)
+
+        return depths
+
+    def compute_interaction_matrix(self):
+        # J = np.empty((0, 6))
+        J = np.empty((0, 3))
+
+        depths = self.compute_depths(self.current_points)
+
+        for depth, p in zip(depths, self.current_points):
+            p_array = np.array([[p[0]], [p[1]]])
+
+            xy = self.Kinv @ e2h(p_array)
+            x = xy[0,0]
+            y = xy[1,0]
+
+            # J_point = self.K[:2,:2] @ np.array([
+            #     [-1/depth,     0,    x/depth,  x*y,     -(1+x*x),  y],
+            #     [    0, -1/depth,    y/depth,  1+y*y,   -x*y,     -x]
+            # ])
 
             J_point = self.K[:2,:2] @ np.array([
-                [-1/Z,     0,    x/Z,  x*y,     -(1+x*x),  y],
-                [    0, -1/Z,    y/Z,  1+y*y,   -x*y,     -x]
+                [-1/depth,     0,      y],
+                [    0, -1/depth,     -x]
             ])
 
-            J_list.append(J_point)
+            J = np.vstack([J, J_point])
         
-        J = np.vstack(J_list)
         # print(f"Interaction matrix shape: {J.shape}")
-        # print(f"Interaction matrix : {J}")
+        print(f"{J=}")
         # print("\n ----------------------------------- \n")
 
         return J
+    
+    import numpy as np
+
+    # def damped_pseudo_inverse(self, J, damping=0.01):
+    #     """
+    #     Computes the damped least-squares pseudo-inverse of a matrix J.
+
+    #     Args:
+    #         J (np.ndarray): Jacobian matrix of shape (m, n)
+    #         damping (float): Damping factor (mu), small positive scalar
+
+    #     Returns:
+    #         np.ndarray: Regularized pseudo-inverse of J
+    #     """
+    #     JT = J.T
+    #     JJ_T = J @ JT
+    #     mu_squared = damping**2
+    #     identity = np.eye(JJ_T.shape[0])
+    #     regularized_inv = np.linalg.inv(JJ_T + mu_squared * identity)
+    #     J_damped_pinv = JT @ regularized_inv
+    #     return J_damped_pinv
+
 
     def compute_velocities(self, plot=False):
         J = self.compute_interaction_matrix()
@@ -105,24 +169,33 @@ class ImageBasedVisualServo():
         print(f"J cond: {jcond}")
 
         J_pinv = np.linalg.pinv(J)
+        # J_pinv = self.damped_pseudo_inverse(J, damping=0.01)
 
-        err = self.goal_points_normalized - self.current_points_normalized
-        self.err_values.append(np.linalg.norm(err))
+        # err = self.goal_points_normalized - self.current_points_normalized
+        # self.err_values.append(np.linalg.norm(err))
+
+        err_uv = self.goal_points_flat - self.current_points_flat
+        self.err_uv_values.append(np.linalg.norm(err_uv))
 
         # print("--------------------------------------------")
-        print(f"err: {err}")
-        print(f"Current: {self.current_points_normalized} \n Goal: {self.goal_points_normalized}")
+        # print(f"err: {err}")
+        # print(f"err_uv: {err_uv}")
+        print(f"Current: {self.current_points} \n Goal: {self.goal_points}\n")
+        print(f"Current flat: {self.current_points_flat} \n Goal flat: {self.goal_points_flat}")
         print("--------------------------------------------")
 
         if (isinstance(self.lambda_factor, np.ndarray)):
-            vel = self.lambda_factor @ J_pinv @ err
+            vel = self.lambda_factor @ J_pinv @ err_uv
         else:
-            vel = self.lambda_factor * J_pinv @ err
+            vel = self.lambda_factor * J_pinv @ err_uv
+        
+        print(f"{err_uv=}")
+        print(f"{vel=}")
 
         return vel
     
     def plot_values(self):
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 8))
                     
         # Plot X values
         ax1.plot(range(len(self.jcond_values)), self.jcond_values, 'b-o')
@@ -131,11 +204,17 @@ class ImageBasedVisualServo():
         ax1.grid(True)
         
         # Plot Y values
-        ax2.plot(range(len(self.err_values)), self.err_values, 'r-o')
+        ax2.plot(range(len(self.err_uv_values)), self.err_uv_values, 'r-o')
         ax2.set_title('error')
         ax2.set_xlabel('idx')
         ax2.set_ylabel('err norm')
         ax2.grid(True)
+
+        # ax3.plot(range(len(self.err_uv_values)), self.err_uv_values, 'g-o')
+        # ax3.set_title('error')
+        # ax3.set_xlabel('idx')
+        # ax3.set_ylabel('err norm')
+        # ax3.grid(True)
 
         plt.savefig("_check_errs.jpg", bbox_inches='tight')
 
@@ -179,6 +258,7 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         path_to_file = "/home/mihaib08/Desktop/_research_2025/drone_lab/auto-follow/camera-parameters/sim-anafi-4k/intrinsic_matrix_half_size.pkl"
         with open(path_to_file, 'rb') as f:
             K = pickle.load(f)
+            print(f"{K=}")
         
         self.ibvs = ImageBasedVisualServo(K, self.goal_points_bbox)
 
@@ -230,12 +310,15 @@ class IBVSYoloProcessor(BaseVideoProcessor):
     def velocity_to_command(self, velocities):
         roll = 100 * velocities[0] / self.max_linear_speed
         pitch = -100 * velocities[1] / self.max_linear_speed
-        gaz = 100 * velocities[2] / self.max_height_linear_speed
-        yaw = 100 * velocities[5] / self.max_angular_speed
+        
+        # gaz = 100 * velocities[2] / self.max_height_linear_speed
+        gaz = 0
+        
+        yaw = 100 * velocities[2] / self.max_angular_speed
 
-        roll *= 1000
-        pitch *= 1000
-        yaw *= 1000
+        # roll *= 1000
+        # pitch *= 1000
+        # yaw *= 1000
 
         print(f"{roll=} | {pitch=} | {gaz=} | {yaw=}")
 
@@ -296,11 +379,11 @@ class IBVSYoloProcessor(BaseVideoProcessor):
                 ## STABILITY
                 ## ------------------------------------------------
 
-                if (not check_stability_bbox_oriented(points_bbox_oriented)):
-                    cv2.imshow("Drone View", plotted_frame)
-                    cv2.waitKey(1)
+                # if (not check_stability_bbox_oriented(points_bbox_oriented)):
+                #     cv2.imshow("Drone View", plotted_frame)
+                #     cv2.waitKey(1)
 
-                    return
+                #     return
 
                 ## ------------------------------------------------
 
@@ -314,31 +397,64 @@ class IBVSYoloProcessor(BaseVideoProcessor):
                 plot_bbox_keypoints(plotted_frame, points_bbox_oriented_int)
                 ## ------------------------------------------------
 
+                ## Compute and display depths for each point
+                ## ------------------------------------------------
+                depths = self.ibvs.compute_depths(points_bbox_oriented_int)
+                
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                font_scale = 0.4
+                font_thickness = 1
+                depth_color = (255, 255, 255)  # White text
+                
+                for i, (point, depth) in enumerate(zip(points_bbox_oriented_int, depths)):
+                    x, y = point
+                    depth_text = f"Z{i}: {depth:.2f}m"
+                    
+                    # Calculate text size for background rectangle
+                    text_size, _ = cv2.getTextSize(depth_text, font, font_scale, font_thickness)
+                    text_w, text_h = text_size
+                    
+                    # Position text with offset from point
+                    text_x = x + 10
+                    text_y = y - 10 if y > 30 else y + text_h + 10
+                    
+                    # Draw background rectangle for better readability
+                    cv2.rectangle(plotted_frame, 
+                                (text_x - 2, text_y - text_h - 2), 
+                                (text_x + text_w + 2, text_y + 2), 
+                                (0, 0, 0), -1)
+                    
+                    # Draw the depth text
+                    cv2.putText(plotted_frame, depth_text, (text_x, text_y), 
+                            font, font_scale, depth_color, font_thickness, cv2.LINE_AA)
+                ## ------------------------------------------------
+
                 ## confidence
                 # TODO have a plotter class with methods for each thing
                 # (bbox, ellipse, points) to be plotted
                 ## ------------------ 
-                conf_text = f"Conf: {best_conf:.2f}"
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                font_scale = 0.6
-                font_thickness = 1
-                text_size, _ = cv2.getTextSize(conf_text, font, font_scale, font_thickness)
-                text_x = xl
-                text_y = yl - 10 if yl > 20 else yl + text_size[1] + 5
-                cv2.putText(plotted_frame, conf_text, (text_x, text_y), font, font_scale, box_color, font_thickness, cv2.LINE_AA)
+                # conf_text = f"Conf: {best_conf:.2f}"
+                # font = cv2.FONT_HERSHEY_SIMPLEX
+                # font_scale = 0.6
+                # font_thickness = 1
+                # text_size, _ = cv2.getTextSize(conf_text, font, font_scale, font_thickness)
+                # text_x = xl
+                # text_y = yl - 10 if yl > 20 else yl + text_size[1] + 5
+                # cv2.putText(plotted_frame, conf_text, (text_x, text_y), font, font_scale, box_color, font_thickness, cv2.LINE_AA)
                 ## ------------------
 
-                self.ibvs.set_current_points(points_bbox_oriented)
-                # self.ibvs.set_current_points(points_bbox_oriented_int)
+                # self.ibvs.set_current_points(points_bbox_oriented)
+                self.ibvs.set_current_points(points_bbox_oriented_int)
                 vel = self.ibvs.compute_velocities()
+                # print(vel)
 
                 distance_from_goal = compute_distance(frame_center, (xc, yc))
-                print(f"Object center {(xc, yc)} | Frame center {frame_center} | {distance_from_goal=}")
+                # print(f"Object center {(xc, yc)} | Frame center {frame_center} | {distance_from_goal=}")
                 # if (distance_from_goal <= 8):
                 #     vel = np.zeros(6)
                 
-                # if (self._frame_count % 120 == 0):
-                #     self.ibvs.plot_values()
+                if (self._frame_count % 120 == 0):
+                    self.ibvs.plot_values()
 
                 ## ------------------------------------------------
                 ## Drone
