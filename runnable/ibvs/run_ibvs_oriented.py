@@ -40,10 +40,10 @@ class ImageBasedVisualServo():
         self.Kinv = np.linalg.inv(self.K)
         # print(f"{self.Kinv=}")
 
-        self.lambda_factor = 0.2
+        self.lambda_factor = 0.15
         
         # diagonal = [self.lambda_factor, self.lambda_factor, self.lambda_factor, self.lambda_factor, self.lambda_factor, self.lambda_factor]
-        diagonal = [self.lambda_factor, self.lambda_factor, self.lambda_factor]
+        diagonal = [self.lambda_factor, self.lambda_factor, self.lambda_factor * 4]
         
         self.lambda_factor = np.diag(diagonal)
 
@@ -195,7 +195,7 @@ class ImageBasedVisualServo():
         return vel
     
     def plot_values(self):
-        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 8))
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
                     
         # Plot X values
         ax1.plot(range(len(self.jcond_values)), self.jcond_values, 'b-o')
@@ -209,12 +209,6 @@ class ImageBasedVisualServo():
         ax2.set_xlabel('idx')
         ax2.set_ylabel('err norm')
         ax2.grid(True)
-
-        # ax3.plot(range(len(self.err_uv_values)), self.err_uv_values, 'g-o')
-        # ax3.set_title('error')
-        # ax3.set_xlabel('idx')
-        # ax3.set_ylabel('err norm')
-        # ax3.grid(True)
 
         plt.savefig("_check_errs.jpg", bbox_inches='tight')
 
