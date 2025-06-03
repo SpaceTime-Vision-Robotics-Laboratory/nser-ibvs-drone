@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+import cv2
 import ultralytics
 from ultralytics.engine.results import Results
 
@@ -16,6 +17,10 @@ class Target:
     box: tuple[int, int, int, int] | None = None
     is_lost: bool = True
 
+@dataclass(frozen=True)
+class TargetIBVS(Target):
+    masks_xy: list[list[tuple[int, int]]] | None = None
+    bbox_oriented: list[tuple[int, int, int, int]] | None = None
 
 class YoloEngine:
     def __init__(self, model_path: str | Path = Paths.SIM_CAR_YOLO_PATH):
@@ -47,4 +52,66 @@ class YoloEngine:
             size=(x2 - x1, y2 - y1),
             box=(x1, y1, x2, y2),
             is_lost=False
+        )
+
+class YoloEngineIBVS(YoloEngine):
+    def __init__(self, model_path: str | Path = Paths.SIM_CAR_IBVS_YOLO_PATH):
+        super().__init__(model_path)
+
+    def _compute_bbox_oriented(
+        self, frame: np.ndarray, xy_seg: list[tuple[int, int]]
+    ) -> list[tuple[int, int, int, int]]:
+
+        obj_frame = np.zeros(frame.shape[:2], dtype=np.uint8)
+        cv2.fillPoly(obj_frame, pts=[xy_seg], color=255)
+        contours, _ = cv2.findContours(obj_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        cont = contours[0]
+        rect = cv2.minAreaRect(cont)
+        box = [tuple(int(x) for x in point) for point in cv2.boxPoints(rect)]
+        return box
+
+    def _reorder_bbox_oriented(self, box: list[tuple[int, int, int, int]]) -> list[tuple[int, int, int, int]]:
+        pts = sorted(box, key=lambda x: x[1])
+
+        pts0 = pts[0]
+        pts1 = pts[1]
+
+        points_reordered = [pts0, pts1]
+
+        points_neighbours = [*box, box[0]]
+        for i in range(len(points_neighbours) - 1):
+            if ((points_neighbours[i] == pts0 and points_neighbours[i+1] == pts1) or
+                (points_neighbours[i] == pts1 and points_neighbours[i+1] == pts0)):
+                points_reordered = box[i:] + box[:i]
+                break
+
+        points_reordered = [tuple(map(int, p)) for p in points_reordered]
+
+        return points_reordered
+
+    def find_best_target(self, frame: np.ndarray, results: Results) -> TargetIBVS:
+        boxes = results.boxes
+        if not (boxes and boxes.conf is not None and len(boxes.conf) > 0):
+            return self._default_target
+
+        best_conf_index = boxes.conf.argmax()
+        best_conf = boxes.conf[best_conf_index].item()
+        coords = boxes.xyxy[best_conf_index].int().tolist()
+        x1, y1, x2, y2 = coords
+
+        masks_xy = results.masks.xy[best_conf_index]
+        masks_xy = [list(xy) for xy in masks_xy]
+        masks_xy = np.array(masks_xy).astype(np.int32)
+
+        points_bbox_oriented = self._compute_bbox_oriented(frame, masks_xy)
+        points_bbox_oriented = self._reorder_bbox_oriented(points_bbox_oriented)
+
+        return TargetIBVS(
+            confidence=best_conf,
+            center=((x1 + x2) // 2, (y1 + y2) // 2),
+            size=(x2 - x1, y2 - y1),
+            box=(x1, y1, x2, y2),
+            is_lost=False,
+            masks_xy=masks_xy,
+            bbox_oriented=points_bbox_oriented
         )

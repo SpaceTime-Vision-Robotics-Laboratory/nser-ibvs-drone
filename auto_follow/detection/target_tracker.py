@@ -1,8 +1,11 @@
 import time
 from dataclasses import dataclass
 
-from drone_base.config.video import VideoConfig
+import numpy as np
 
+from drone_base.config.video import VideoConfig
+from auto_follow.detection.yolo_engine import TargetIBVS
+from auto_follow.controllers.ibvs_controller import ImageBasedVisualServo
 
 @dataclass(frozen=True)
 class CommandInfo:
@@ -118,3 +121,38 @@ class TargetTracker:
             d_rot=derivative_rot_term,
             status=status
         )
+
+class TargetTrackerIBVS(TargetTracker):
+    def __init__(self, video_config: VideoConfig, ibvs_controller: ImageBasedVisualServo):
+        super().__init__(video_config)
+        self.max_linear_speed = 2 # m/s
+        self.max_height_linear_speed = 1 # m/s
+        self.max_angular_speed = np.deg2rad(60) # rad/s
+        self.ibvs_controller = ibvs_controller
+
+    def calculate_movement(self, target_data: TargetIBVS) -> CommandInfo:
+
+        self.ibvs_controller.set_current_points(target_data.bbox_oriented)
+        velocities = self.ibvs_controller.compute_velocities()
+
+        roll = int(100 * velocities[0] / self.max_linear_speed)
+        pitch = int(-100 * velocities[1] / self.max_linear_speed)
+        gaz = 0
+        yaw = int(100 * velocities[2] / self.max_angular_speed)
+
+        cmd_info = CommandInfo(
+            timestamp=time.time(),
+            x_cmd=roll,
+            y_cmd=pitch,
+            z_cmd=gaz,
+            rot_cmd=yaw,
+            x_offset=0,
+            y_offset=0,
+            p_rot=0,
+            d_rot=0,
+            status="IBVS"
+        )
+
+        print(f"{cmd_info}")
+
+        return cmd_info

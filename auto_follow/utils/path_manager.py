@@ -8,6 +8,8 @@ class Paths:
     MODELS_DIR: Final[Path] = BASE_DIR / "models"
     UNTRAINED_YOLO_PATH: Final[Path] = MODELS_DIR / "yolo11n.pt"
     REAL_CAR_YOLO_PATH: Final[Path] = MODELS_DIR / "yolon_car_detector.pt"
+    SIM_CAR_POSE_IBVS_YOLO_PATH: Final[Path] = MODELS_DIR / "30_05_best__yolo11n-seg_sim_car_bunker__front_back.pt"
+    SIM_CAR_IBVS_YOLO_PATH: Final[Path] = MODELS_DIR / "29_05_best__yolo11n-seg_sim_car_bunker__all.pt"
     SIM_CAR_YOLO_PATH: Final[Path] = MODELS_DIR / "yolov11n_car_detector_sim.pt"
     SIM_CAR_SIMPLE_YOLO_PATH: Final[Path] = MODELS_DIR / "yolo11n_car_detector_sim_simple.pt"
     SIM_CAR_CARLA_YOLO_PATH: Final[Path] = MODELS_DIR / "yolo11n_car_detector_sim_carla.pt"
@@ -19,6 +21,15 @@ class Paths:
 
     OUTPUT_DIR: Final[Path] = BASE_DIR / "output"
     DETECTOR_LOG_DIR: Final[Path] = OUTPUT_DIR / "detector-logs"
+
+    CAMERA_PARAMS_PATH: Final[Path] = (
+        BASE_DIR / "assets" / "camera_parameters" / "intrinsic_matrix.pkl"
+    )
+    CAMERA_PARAMS_HALF_SIZE_PATH: Final[Path] = (
+        BASE_DIR / "assets" / "camera_parameters" / "intrinsic_matrix_half_size.pkl"
+    )
+    GOAL_FRAME_PATH: Final[Path] = BASE_DIR / "assets" / "reference" / "images" / "frame_drone_sim_10m_center.png"
+    GOAL_FRAME_POINTS_PATH: Final[Path] = BASE_DIR / "assets" / "reference" / "data" / "frame_drone_sim_10m_center.json"
 
 
 if __name__ == '__main__':
