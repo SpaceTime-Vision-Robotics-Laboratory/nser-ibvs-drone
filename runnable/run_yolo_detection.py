@@ -1,15 +1,10 @@
-from pathlib import Path
-import sys
-import time
 import argparse
-# Modify this line to also make drone_base/main visible as a top-level module
-sys.path.append(str(Path(__file__).parent.parent))
-sys.path.append(str(Path(__file__).parent.parent / "drone_base"))
+import time
 
-from drone_base.main.config.drone import DroneIp, GimbalType
-from drone_base.main.stream.base_streaming_controller import BaseStreamingController
+from auto_follow.processors.simple_yolo_processor import SimpleYoloProcessor
+from drone_base.config.drone import DroneIp, GimbalType
+from drone_base.stream.base_streaming_controller import BaseStreamingController
 
-from main.processors.yolo_processor import YOLOProcessor
 
 class BasicController(BaseStreamingController):
     def __init__(self, **kwargs):
@@ -65,6 +60,7 @@ class BasicController(BaseStreamingController):
         self.frame_processor.frame_queue.empty()
         print("Initialization complete. Ready for tracking.")
 
+
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
     args.add_argument("--ip", type=str, default=DroneIp.SIMULATED)
@@ -74,7 +70,7 @@ if __name__ == "__main__":
 
     controller = BasicController(
         ip=args.ip,
-        processor_class=YOLOProcessor,
+        processor_class=SimpleYoloProcessor,
         speed=args.speed
     )
 
