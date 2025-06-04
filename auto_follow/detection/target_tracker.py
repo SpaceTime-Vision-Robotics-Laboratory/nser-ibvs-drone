@@ -147,9 +147,9 @@ class TargetTrackerIBVS(TargetTracker):
 
         if (abs(yaw) < const_yaw_threshold):
             yaw = 0
-        else:
-            roll = 0
-            pitch = 0
+        # else:
+        #     roll = 0
+        #     pitch = 0
 
         cmd_info = CommandInfo(
             timestamp=time.time(),

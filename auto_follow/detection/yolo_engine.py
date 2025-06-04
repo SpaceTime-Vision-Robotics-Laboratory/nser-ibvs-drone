@@ -127,3 +127,77 @@ class YoloEngineIBVS(YoloEngine):
             masks_xy=masks_xy,
             bbox_oriented=points_bbox_oriented
         )
+
+class YoloEngineIBVSPose(YoloEngineIBVS):
+    def __init__(self, model_path_pose: str | Path = Paths.SIM_CAR_POSE_IBVS_YOLO_PATH):
+        super().__init__()
+        self.model_pose = ultralytics.YOLO(model_path_pose)
+        self._default_target = TargetIBVS(confidence=-1.0)
+
+    def find_best_target(self, frame: np.ndarray, results: Results) -> TargetIBVS:
+        results_pose = self.model_pose.predict(frame, stream=False, verbose=False)[0]
+        # vis_frame = frame.copy()
+
+        best_back = {"conf": -1.0, "idx": None, "masks_xy": []}
+        best_front = {"conf": -1.0, "idx": None, "masks_xy": []}
+
+        for i, (cls, conf) in enumerate(zip(results_pose.boxes.cls, results_pose.boxes.conf)):
+            cls_id = int(cls.item())
+            conf_val = conf.item()
+
+            if cls_id == 0 and conf_val > best_back["conf"]:
+                best_back = {"conf": conf_val, "idx": i, "masks_xy": []}
+            elif cls_id == 1 and conf_val > best_front["conf"]:
+                best_front = {"conf": conf_val, "idx": i, "masks_xy": []}
+
+        combined_masks = []
+        bbox_oriented = []
+
+        confidence_threshold = 0.5
+
+        if best_back["conf"] > confidence_threshold and results_pose.masks is not None:
+            idx = best_back["idx"]
+            masks_xy = results_pose.masks.xy[idx]
+            masks_xy = [list(xy) for xy in masks_xy]
+            masks_xy = np.array(masks_xy).astype(np.int32)
+            best_back["masks_xy"] = masks_xy
+            combined_masks.append(masks_xy)
+
+            cv2.fillPoly(frame, pts=[masks_xy], color=(255, 0, 0, 8))
+
+        if best_front["conf"] > confidence_threshold and results_pose.masks is not None:
+            idx = best_front["idx"]
+            masks_xy = results_pose.masks.xy[idx]
+            masks_xy = [list(xy) for xy in masks_xy]
+            masks_xy = np.array(masks_xy).astype(np.int32)
+            best_front["masks_xy"] = masks_xy
+            combined_masks.append(masks_xy)
+
+            cv2.fillPoly(frame, pts=[masks_xy], color=(0, 0, 255, 8))
+
+        if not combined_masks:
+            return self._default_target
+
+        all_points = np.vstack(combined_masks) if combined_masks else np.array([])
+
+        if len(all_points) > 0:
+            x1, y1 = all_points.min(axis=0)
+            x2, y2 = all_points.max(axis=0)
+            box = (int(x1), int(y1), int(x2), int(y2))
+            center = ((x1 + x2) // 2, (y1 + y2) // 2)
+            size = (int(x2 - x1), int(y2 - y1))
+
+            bbox_oriented = self._compute_bbox_oriented(frame, all_points)
+            bbox_oriented = self._reorder_bbox_oriented(bbox_oriented, best_front["masks_xy"], best_back["masks_xy"])
+
+            return TargetIBVS(
+                confidence=max(best_back["conf"], best_front["conf"]),
+                center=center,
+                size=size,
+                box=box,
+                is_lost=False,
+                masks_xy=all_points,
+                bbox_oriented=bbox_oriented
+            )
+
+        return self._default_target

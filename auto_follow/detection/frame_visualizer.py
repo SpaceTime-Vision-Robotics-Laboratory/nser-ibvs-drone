@@ -136,5 +136,3 @@ class FrameVisualizerIBVS(FrameVisualizer):
             cv2.rectangle(frame, (text_x - 2, text_y - text_h - 2), (text_x + text_w + 2, text_y + 2), (0, 0, 0), -1)
             cv2.putText(frame, depth_text, (text_x, text_y), font, font_scale, depth_color, font_thickness, cv2.LINE_AA)
 
-        cv2.imshow(self.window_name, frame)
-        cv2.waitKey(1)

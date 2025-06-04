@@ -6,7 +6,7 @@ import numpy as np
 
 from auto_follow.detection.frame_visualizer import FrameVisualizerIBVS
 from auto_follow.detection.target_tracker import CommandInfo, TargetTrackerIBVS
-from auto_follow.detection.yolo_engine import YoloEngineIBVS
+from auto_follow.detection.yolo_engine import YoloEngineIBVS, YoloEngineIBVSPose
 from auto_follow.utils.path_manager import Paths
 from auto_follow.controllers.ibvs_controller import ImageBasedVisualServo
 
@@ -69,3 +69,19 @@ class IBVSYoloProcessor(BaseVideoProcessor):
             ),
             is_blocking=False
         )
+
+class IBVSPoseYoloProcessor(IBVSYoloProcessor):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.detector = YoloEngineIBVSPose(model_path_pose=Paths.SIM_CAR_POSE_IBVS_YOLO_PATH)
+
+    def _process_frame(self, frame: np.ndarray) -> np.ndarray:
+        results = self.detector.detect(frame)
+        target_data = self.detector.find_best_target(frame, results)
+
+        if (target_data.confidence == -1):
+            return frame
+
+        self.visualizer.display_frame(frame, target_data, self.ibvs_controller, self.ibvs_controller.goal_points)
+
+        return frame
