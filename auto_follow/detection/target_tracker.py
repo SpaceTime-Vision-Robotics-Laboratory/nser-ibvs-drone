@@ -140,9 +140,12 @@ class TargetTrackerIBVS(TargetTracker):
         roll = ceil(100 * velocities[0] / self.max_linear_speed)
         pitch = ceil(-100 * velocities[1] / self.max_linear_speed)
         gaz = 0
-        
+
         yaw = 100 * velocities[2] / self.max_angular_speed
-        if (abs(yaw) < 2):
+
+        const_yaw_threshold = 2
+
+        if (abs(yaw) < const_yaw_threshold):
             yaw = 0
         else:
             roll = 0

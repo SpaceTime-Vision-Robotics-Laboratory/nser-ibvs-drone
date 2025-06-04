@@ -2,16 +2,9 @@ import argparse
 
 import time
 
-import sys
-from pathlib import Path
-
-# Modify this line to also make drone_base/main visible as a top-level module
-sys.path.append(str(Path(__file__).parent.parent))
-print(sys.path)
-
 from auto_follow.processors.ibvs_yolo_processor import IBVSYoloProcessor
 from drone_base.config.drone import DroneIp
-from drone_base.config.drone import DroneIp, GimbalType
+from drone_base.config.drone import GimbalType
 from drone_base.stream.base_streaming_controller import BaseStreamingController
 
 class IBVSController(BaseStreamingController):

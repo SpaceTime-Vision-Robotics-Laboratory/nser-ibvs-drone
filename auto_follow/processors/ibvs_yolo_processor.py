@@ -25,7 +25,6 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         **kwargs
     ):
         super().__init__(**kwargs)
-        self.detector = YoloEngineIBVS(model_path)
 
         with open(camera_params_pth, 'rb') as f:
             camera_params = pickle.load(f)

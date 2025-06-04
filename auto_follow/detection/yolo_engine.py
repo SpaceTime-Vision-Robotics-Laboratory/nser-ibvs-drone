@@ -66,6 +66,10 @@ class YoloEngineIBVS(YoloEngine):
         obj_frame = np.zeros(frame.shape[:2], dtype=np.uint8)
         cv2.fillPoly(obj_frame, pts=[xy_seg], color=255)
         contours, _ = cv2.findContours(obj_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+        if not contours:
+            raise ValueError("No contours found for the segmentation mask")
+
         cont = contours[0]
         rect = cv2.minAreaRect(cont)
         box = [tuple(int(x) for x in point) for point in cv2.boxPoints(rect)]
@@ -92,7 +96,14 @@ class YoloEngineIBVS(YoloEngine):
 
     def find_best_target(self, frame: np.ndarray, results: Results) -> TargetIBVS:
         boxes = results.boxes
-        if not (boxes and boxes.conf is not None and len(boxes.conf) > 0 and boxes.conf.max() >= 0.85):
+        const_confidence_threshold = 0.85
+
+        if not (
+            boxes
+            and boxes.conf is not None
+            and len(boxes.conf) > 0
+            and boxes.conf.max() >= const_confidence_threshold
+        ):
             return self._default_target
 
         best_conf_index = boxes.conf.argmax()
