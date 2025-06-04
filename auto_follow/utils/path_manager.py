@@ -28,8 +28,12 @@ class Paths:
     CAMERA_PARAMS_HALF_SIZE_PATH: Final[Path] = (
         BASE_DIR / "assets" / "camera_parameters" / "intrinsic_matrix_half_size.pkl"
     )
-    GOAL_FRAME_PATH: Final[Path] = BASE_DIR / "assets" / "reference" / "images" / "frame_drone_sim_10m_center.png"
-    GOAL_FRAME_POINTS_PATH: Final[Path] = BASE_DIR / "assets" / "reference" / "data" / "frame_drone_sim_10m_center.json"
+    
+    GOAL_FRAME_PATH_90: Final[Path] = BASE_DIR / "assets" / "reference" / "images" / "frame_001009_10636251.png"
+    GOAL_FRAME_POINTS_PATH_90: Final[Path] = BASE_DIR / "assets" / "reference" / "data" / "frame_001009_10636251.json"
+
+    GOAL_FRAME_PATH_45: Final[Path] = BASE_DIR / "assets" / "reference" / "images" / "frame_002041_12392083__45.png"
+    GOAL_FRAME_POINTS_PATH_45: Final[Path] = BASE_DIR / "assets" / "reference" / "data" / "frame_002041_12392083__45.json"
 
 
 if __name__ == '__main__':

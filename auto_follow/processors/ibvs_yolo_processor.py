@@ -20,8 +20,8 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         self,
         model_path: str | Path = Paths.SIM_CAR_IBVS_YOLO_PATH,
         detector_log_dir: str | Path | None = Paths.DETECTOR_LOG_DIR,
-        goal_frame_points_pth: str | Path | None = Paths.GOAL_FRAME_POINTS_PATH,
-        camera_params_pth: str | Path | None = Paths.CAMERA_PARAMS_PATH,
+        goal_frame_points_pth: str | Path | None = Paths.GOAL_FRAME_POINTS_PATH_45,
+        camera_params_pth: str | Path | None = Paths.CAMERA_PARAMS_HALF_SIZE_PATH,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -48,6 +48,9 @@ class IBVSYoloProcessor(BaseVideoProcessor):
     def _process_frame(self, frame: np.ndarray) -> np.ndarray:
         results = self.detector.detect(frame)
         target_data = self.detector.find_best_target(frame, results)
+
+        if (target_data.confidence == -1):
+            return frame
 
         self.visualizer.display_frame(frame, target_data, self.ibvs_controller, self.ibvs_controller.goal_points)
 

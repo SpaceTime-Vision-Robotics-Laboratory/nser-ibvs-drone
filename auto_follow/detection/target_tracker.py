@@ -3,6 +3,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from math import ceil
+
 from drone_base.config.video import VideoConfig
 from auto_follow.detection.yolo_engine import TargetIBVS
 from auto_follow.controllers.ibvs_controller import ImageBasedVisualServo
@@ -133,19 +135,25 @@ class TargetTrackerIBVS(TargetTracker):
     def calculate_movement(self, target_data: TargetIBVS) -> CommandInfo:
 
         self.ibvs_controller.set_current_points(target_data.bbox_oriented)
-        velocities = self.ibvs_controller.compute_velocities()
+        velocities = self.ibvs_controller.compute_velocities(verbose=True)
 
-        roll = int(100 * velocities[0] / self.max_linear_speed)
-        pitch = int(-100 * velocities[1] / self.max_linear_speed)
+        roll = ceil(100 * velocities[0] / self.max_linear_speed)
+        pitch = ceil(-100 * velocities[1] / self.max_linear_speed)
         gaz = 0
-        yaw = int(100 * velocities[2] / self.max_angular_speed)
+        
+        yaw = 100 * velocities[2] / self.max_angular_speed
+        if (abs(yaw) < 2):
+            yaw = 0
+        else:
+            roll = 0
+            pitch = 0
 
         cmd_info = CommandInfo(
             timestamp=time.time(),
             x_cmd=roll,
             y_cmd=pitch,
             z_cmd=gaz,
-            rot_cmd=yaw,
+            rot_cmd=ceil(yaw),
             x_offset=0,
             y_offset=0,
             p_rot=0,

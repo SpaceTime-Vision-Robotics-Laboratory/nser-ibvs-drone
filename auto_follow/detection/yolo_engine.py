@@ -57,6 +57,7 @@ class YoloEngine:
 class YoloEngineIBVS(YoloEngine):
     def __init__(self, model_path: str | Path = Paths.SIM_CAR_IBVS_YOLO_PATH):
         super().__init__(model_path)
+        self._default_target = TargetIBVS(confidence=-1.0)
 
     def _compute_bbox_oriented(
         self, frame: np.ndarray, xy_seg: list[tuple[int, int]]
@@ -91,7 +92,7 @@ class YoloEngineIBVS(YoloEngine):
 
     def find_best_target(self, frame: np.ndarray, results: Results) -> TargetIBVS:
         boxes = results.boxes
-        if not (boxes and boxes.conf is not None and len(boxes.conf) > 0):
+        if not (boxes and boxes.conf is not None and len(boxes.conf) > 0 and boxes.conf.max() >= 0.85):
             return self._default_target
 
         best_conf_index = boxes.conf.argmax()

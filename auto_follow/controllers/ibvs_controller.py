@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 from auto_follow.utils.ibvs_math_fcn import e2h
 
 class ImageBasedVisualServo:
-    def __init__(self, camera_intrensic: np.ndarray, goal_points: list[tuple[int, int]], lambda_factor: float = 0.15,
-                 estimated_depth: float = 11.5, verbose: bool = False):
+    def __init__(self, camera_intrensic: np.ndarray, goal_points: list[tuple[int, int]], lambda_factor: float = 0.25,
+                 estimated_depth: float = 1.5, verbose: bool = False):
         self.K = camera_intrensic
         self.Kinv = np.linalg.inv(self.K)
 
-        self.lambda_factor = np.diag([lambda_factor, lambda_factor, lambda_factor * 4])
+        self.lambda_factor = np.diag([lambda_factor, lambda_factor, lambda_factor])
 
         self.goal_points = goal_points
         self.goal_points_flatten = np.hstack(goal_points)
