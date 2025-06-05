@@ -134,9 +134,121 @@ class YoloEngineIBVSPose(YoloEngineIBVS):
         self.model_pose = ultralytics.YOLO(model_path_pose)
         self._default_target = TargetIBVS(confidence=-1.0)
 
+    def _reorder_bbox_oriented(
+        self,
+        box: list[tuple[int, int]],
+        best_front: dict,
+        best_back: dict
+    ) -> list[tuple[int, int]]:
+        """
+        Reorder bounding box points to achieve a consistent clockwise order:
+        [front-left, front-right, back-right, back-left],
+        relative to the car's orientation determined by front and back mask centroids.
+        Falls back to parent's ordering if masks are insufficient.
+        """
+        # Early validation of mask data
+        if not self._validate_mask_data(best_front, best_back):
+            return super()._reorder_bbox_oriented(box)
+
+        # Process mask points and centroids
+        front_mask_points = np.array(best_front["masks_xy"])
+        back_mask_points = np.array(best_back["masks_xy"])
+        centroid_front = np.mean(front_mask_points, axis=0)
+        centroid_back = np.mean(back_mask_points, axis=0)
+        tol_err = 1e-3
+
+        # Convert box points to numpy arrays
+        box_np = [np.array(p, dtype=float) for p in box]
+
+        # Separate points into front and back candidates
+        front_points, back_points = self._separate_points_by_centroids(
+            box_np, centroid_front, centroid_back
+        )
+        if not front_points or not back_points:
+            return super()._reorder_bbox_oriented(box)
+
+        # Calculate car orientation vector
+        vec_car_orientation = centroid_back - centroid_front
+        if np.linalg.norm(vec_car_orientation) < tol_err:
+            return super()._reorder_bbox_oriented(box)
+
+        # Order points based on orientation
+        ordered_points = self._order_points_by_orientation(
+            front_points, back_points, vec_car_orientation, centroid_front, centroid_back
+        )
+        if not ordered_points:
+            return super()._reorder_bbox_oriented(box)
+
+        return [tuple(map(int, p)) for p in ordered_points]
+
+    def _validate_mask_data(self, best_front: dict, best_back: dict) -> bool:
+        """Validate that both front and back masks exist and are non-empty."""
+        front_masks = best_front.get("masks_xy")
+        back_masks = best_back.get("masks_xy")
+        return (front_masks is not None and back_masks is not None and
+                len(front_masks) > 0 and len(back_masks) > 0)
+
+    def _separate_points_by_centroids(
+        self, points: list[np.ndarray], centroid_front: np.ndarray, centroid_back: np.ndarray
+    ) -> tuple[list[np.ndarray], list[np.ndarray]]:
+        """Separate points into front and back based on distance to centroids."""
+        front_points = []
+        back_points = []
+        for point in points:
+            dist_to_front = np.linalg.norm(point - centroid_front)
+            dist_to_back = np.linalg.norm(point - centroid_back)
+            if dist_to_front < dist_to_back:
+                front_points.append(point)
+            else:
+                back_points.append(point)
+        return front_points, back_points
+
+    def _order_points_by_orientation(
+        self,
+        front_points: list[np.ndarray],
+        back_points: list[np.ndarray],
+        vec_car_orientation: np.ndarray,
+        centroid_front: np.ndarray,
+        centroid_back: np.ndarray
+    ) -> list[np.ndarray] | None:
+        """Order points based on car orientation and cross products."""
+        # Order front points
+        fp1, fp2 = front_points
+        cross_fp1 = self._calculate_cross_product(vec_car_orientation, fp1, centroid_front)
+        front_ordered = self._order_pair_by_cross_product(fp1, fp2, cross_fp1)
+        if not front_ordered:
+            return None
+
+        # Order back points
+        bp1, bp2 = back_points
+        cross_bp1 = self._calculate_cross_product(vec_car_orientation, bp1, centroid_back)
+        back_ordered = self._order_pair_by_cross_product(bp1, bp2, cross_bp1)
+        if not back_ordered:
+            return None
+
+        return [*front_ordered, *back_ordered]
+
+    def _calculate_cross_product(
+        self, vec_orientation: np.ndarray, point: np.ndarray, centroid: np.ndarray
+    ) -> float:
+        """Calculate cross product for point ordering."""
+        return (vec_orientation[0] * (point[1] - centroid[1]) -
+                vec_orientation[1] * (point[0] - centroid[0]))
+
+    def _order_pair_by_cross_product(
+        self, p1: np.ndarray, p2: np.ndarray, cross_p1: float
+    ) -> tuple[np.ndarray, np.ndarray] | None:
+        """Order a pair of points based on cross product."""
+        tol_err = 1e-9
+
+        if cross_p1 > tol_err:
+            return p1, p2
+        elif cross_p1 < -tol_err:
+            return p2, p1
+        return None
+
     def find_best_target(self, frame: np.ndarray, results: Results) -> TargetIBVS:
         results_pose = self.model_pose.predict(frame, stream=False, verbose=False)[0]
-        # vis_frame = frame.copy()
 
         best_back = {"conf": -1.0, "idx": None, "masks_xy": []}
         best_front = {"conf": -1.0, "idx": None, "masks_xy": []}
@@ -188,7 +300,8 @@ class YoloEngineIBVSPose(YoloEngineIBVS):
             size = (int(x2 - x1), int(y2 - y1))
 
             bbox_oriented = self._compute_bbox_oriented(frame, all_points)
-            bbox_oriented = self._reorder_bbox_oriented(bbox_oriented, best_front["masks_xy"], best_back["masks_xy"])
+            print(f"Bbox oriented: {bbox_oriented} | Type: {type(bbox_oriented)}")
+            bbox_oriented = self._reorder_bbox_oriented(bbox_oriented, best_front, best_back)
 
             return TargetIBVS(
                 confidence=max(best_back["conf"], best_front["conf"]),

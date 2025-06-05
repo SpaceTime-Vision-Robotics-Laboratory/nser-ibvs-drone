@@ -84,4 +84,7 @@ class IBVSPoseYoloProcessor(IBVSYoloProcessor):
 
         self.visualizer.display_frame(frame, target_data, self.ibvs_controller, self.ibvs_controller.goal_points)
 
+        command_info = self.target_tracker.calculate_movement(target_data)
+        self.perform_movement(command_info)
+
         return frame
