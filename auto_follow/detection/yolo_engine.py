@@ -134,21 +134,20 @@ class YoloEngineIBVSPose(YoloEngineIBVS):
         self.model_pose = ultralytics.YOLO(model_path_pose)
         self._default_target = TargetIBVS(confidence=-1.0)
 
-    def _reorder_bbox_oriented(self, box: list[tuple[int, int]], best_front: dict, best_back: dict) -> list[tuple[int, int]]:
+    def _reorder_bbox_oriented(
+        self,
+        box: list[tuple[int, int]],
+        best_front: dict,
+        best_back: dict
+    ) -> list[tuple[int, int]]:
         """
         Reorder bounding box points to achieve a consistent clockwise order:
         [front-left, front-right, back-right, back-left],
         relative to the car's orientation determined by front and back mask centroids.
         Falls back to parent's ordering if masks are insufficient.
         """
-        front_masks_xy_raw = best_front.get("masks_xy")
-        back_masks_xy_raw = best_back.get("masks_xy")
-
-        if front_masks_xy_raw is None or back_masks_xy_raw is None:
-            return super()._reorder_bbox_oriented(box)
-
-        front_mask_points = np.array(front_masks_xy_raw)
-        back_mask_points = np.array(back_masks_xy_raw)
+        front_mask_points = np.array(best_front.get("masks_xy", []))
+        back_mask_points = np.array(best_back.get("masks_xy", []))
 
         if front_mask_points.size == 0 or back_mask_points.size == 0:
             return super()._reorder_bbox_oriented(box)
@@ -168,23 +167,30 @@ class YoloEngineIBVSPose(YoloEngineIBVS):
             else:
                 back_points_candidates.append(point_np)
 
-        if len(front_points_candidates) != 2 or len(back_points_candidates) != 2:
+        max_number_of_points = 2
+        tol_err_norm = 1e-3
+        tol_err_cross_product = 1e-9
+
+        if len(front_points_candidates) != max_number_of_points or len(back_points_candidates) != max_number_of_points:
             return super()._reorder_bbox_oriented(box)
 
         vec_car_orientation = centroid_back - centroid_front
-        if np.linalg.norm(vec_car_orientation) < 1e-3: # Centroids are too close
+        if np.linalg.norm(vec_car_orientation) < tol_err_norm: # Centroids are too close
              return super()._reorder_bbox_oriented(box)
 
         # Order front points
         fp1, fp2 = front_points_candidates[0], front_points_candidates[1]
         # Cross product: vec_car_orientation X (point - relevant_centroid)
         # Positive Z means point is to the "left" of the car's axis.
-        cross_fp1 = vec_car_orientation[0] * (fp1[1] - centroid_front[1]) - vec_car_orientation[1] * (fp1[0] - centroid_front[0])
+        cross_fp1 = (
+            vec_car_orientation[0] * (fp1[1] - centroid_front[1]) -
+            vec_car_orientation[1] * (fp1[0] - centroid_front[0])
+        )
 
-        if cross_fp1 > 1e-9: # fp1 is left (allowing for small floating point inaccuracies)
+        if cross_fp1 > tol_err_cross_product: # fp1 is left (allowing for small floating point inaccuracies)
             p1_front_left = fp1
             p2_front_right = fp2
-        elif cross_fp1 < -1e-9: # fp1 is right
+        elif cross_fp1 < -tol_err_cross_product: # fp1 is right
             p1_front_left = fp2
             p2_front_right = fp1
         else: # Collinear or very close to axis, fallback or use arbitrary but consistent order
@@ -194,12 +200,15 @@ class YoloEngineIBVSPose(YoloEngineIBVS):
 
         # Order back points
         bp1, bp2 = back_points_candidates[0], back_points_candidates[1]
-        cross_bp1 = vec_car_orientation[0] * (bp1[1] - centroid_back[1]) - vec_car_orientation[1] * (bp1[0] - centroid_back[0])
+        cross_bp1 = (
+            vec_car_orientation[0] * (bp1[1] - centroid_back[1]) -
+            vec_car_orientation[1] * (bp1[0] - centroid_back[0])
+        )
 
-        if cross_bp1 > 1e-9: # bp1 is left
+        if cross_bp1 > tol_err_cross_product: # bp1 is left
             p4_back_left = bp1
             p3_back_right = bp2
-        elif cross_bp1 < -1e-9: # bp1 is right
+        elif cross_bp1 < -tol_err_cross_product: # bp1 is right
             p4_back_left = bp2
             p3_back_right = bp1
         else: # Collinear or very close to axis
