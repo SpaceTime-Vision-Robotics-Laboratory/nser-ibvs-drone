@@ -1,0 +1,19 @@
+Meshes:
+  - Name: "Bunker"
+    FbxPath: "${MODELS_DIR}/bunker-detailed.fbx"
+    Location: "0 0 25"
+    Rotation: "0 0 90"
+    Scale: "1 1 1"
+    SnapToGround: false
+  - Name: "Carpet"
+    FbxPath: "${MODELS_DIR}/carpet-2k.fbx"
+    Location: "0 0 26"
+    Rotation: "0 0 -90"
+    Scale: "1 1 1"
+    SnapToGround: true
+  - Name: "McLaren"
+    FbxPath: "${MODELS_DIR}/mc-laren.fbx"
+    Location: "0 0 26"
+    Rotation: "0 0 -90"
+    Scale: "1 1 1"
+    SnapToGround: true

@@ -1,0 +1,7 @@
+Meshes:
+  - Name: "McLaren"
+    FbxPath: "${MODELS_DIR}/mc-laren.fbx"
+    Location: "0 0 12"
+    Rotation: "0 0 -90"
+    Scale: "1 1 1"
+    SnapToGround: true
