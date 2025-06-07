@@ -25,6 +25,7 @@ class MaskSplitterEngineIBVS(YoloEngineIBVS):
         )
 
         self.max_number_of_points = 2
+        self.contour_2d_dimensions = 2
         self.tol_err_norm = 1e-3
         self.tol_err_cross_product = 1e-9
 
@@ -119,7 +120,7 @@ class MaskSplitterEngineIBVS(YoloEngineIBVS):
             if contours_back:
                 largest_contour_back = max(contours_back, key=cv2.contourArea)
                 masks_xy_back = largest_contour_back.squeeze().astype(np.int32)
-                if masks_xy_back.ndim == 2:
+                if masks_xy_back.ndim == self.contour_2d_dimensions:
                     best_back["masks_xy"] = masks_xy_back
                     cv2.fillPoly(frame, pts=[masks_xy_back], color=(255, 0, 0, 8))
 
@@ -128,7 +129,7 @@ class MaskSplitterEngineIBVS(YoloEngineIBVS):
             if contours_front:
                 largest_contour_front = max(contours_front, key=cv2.contourArea)
                 masks_xy_front = largest_contour_front.squeeze().astype(np.int32)
-                if masks_xy_front.ndim == 2:
+                if masks_xy_front.ndim == self.contour_2d_dimensions:
                     best_front["masks_xy"] = masks_xy_front
                     cv2.fillPoly(frame, pts=[masks_xy_front], color=(0, 0, 255, 8))
 

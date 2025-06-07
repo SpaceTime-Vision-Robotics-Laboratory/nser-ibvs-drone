@@ -14,7 +14,8 @@ class Paths:
     SIM_CAR_YOLO_PATH: Final[Path] = MODELS_DIR / "yolov11n_car_detector_sim.pt"
     SIM_CAR_SIMPLE_YOLO_PATH: Final[Path] = MODELS_DIR / "yolo11n_car_detector_sim_simple.pt"
     SIM_CAR_CARLA_YOLO_PATH: Final[Path] = MODELS_DIR / "yolo11n_car_detector_sim_carla.pt"
-    SIM_MASK_SPLITTER_CAR_HIGH_PATH: Final[Path] = MODELS_DIR / "mask_splitter-sim-high-quality-partition-v10-dropout_0-augmentations_multi_scenes.pt"
+    SIM_MASK_SPLITTER_CAR_HIGH_PATH: Final[
+        Path] = MODELS_DIR / "mask_splitter-sim-high-quality-partition-v10-dropout_0-augmentations_multi_scenes.pt"
 
     # PID config:
     PID_CONFIG_DIR: Final[Path] = BASE_DIR / "config" / "pid"

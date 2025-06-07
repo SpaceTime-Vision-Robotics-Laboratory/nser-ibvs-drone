@@ -96,7 +96,7 @@ class MaskSplitterInference:
                 model = torch.compile(model)
             return model
         except Exception as e:
-            raise RuntimeError(f"Failed to load model from {self.model_path}: {str(e)}")
+            raise RuntimeError(f"Failed to load model from {self.model_path}: {e}")
 
     def warm_up(self, image: np.ndarray, mask: np.ndarray, num_iterations: int = 10):
         """
