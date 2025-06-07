@@ -1,4 +1,3 @@
-import pickle
 import json
 from pathlib import Path
 
@@ -6,10 +5,10 @@ import numpy as np
 
 from auto_follow.detection.frame_visualizer import FrameVisualizerIBVS
 from auto_follow.detection.target_tracker import CommandInfo, TargetTrackerIBVS
-from auto_follow.detection.yolo_engine import YoloEngineIBVS, YoloEngineIBVSPose
+from auto_follow.detection.yolo_ibvs import YoloEngineIBVS
+from auto_follow.ibvs.ibvs_controller import ImageBasedVisualServo
+from auto_follow.utils.cam_params import infer_intrinsic_matrix
 from auto_follow.utils.path_manager import Paths
-from auto_follow.controllers.ibvs_controller import ImageBasedVisualServo
-
 from drone_base.control.operations import PilotingCommand
 from drone_base.stream.base_video_processor import BaseVideoProcessor
 from drone_base.utils.readable_time import date_time_now_to_file_name
@@ -17,20 +16,22 @@ from drone_base.utils.readable_time import date_time_now_to_file_name
 
 class IBVSYoloProcessor(BaseVideoProcessor):
     def __init__(
-        self,
-        model_path: str | Path = Paths.SIM_CAR_IBVS_YOLO_PATH,
-        detector_log_dir: str | Path | None = Paths.DETECTOR_LOG_DIR,
-        goal_frame_points_pth: str | Path | None = Paths.GOAL_FRAME_POINTS_PATH_45,
-        camera_params_pth: str | Path | None = Paths.CAMERA_PARAMS_HALF_SIZE_PATH,
-        **kwargs
+            self,
+            model_path: str | Path = Paths.SIM_CAR_IBVS_YOLO_PATH,
+            detector_log_dir: str | Path | None = Paths.DETECTOR_LOG_DIR,
+            goal_frame_points_path: str | Path | None = Paths.GOAL_FRAME_POINTS_PATH_45,
+            camera_params_path: str | Path | None = Paths.CAMERA_SIM_ANAFI_4k_DIR,
+            **kwargs
     ):
         super().__init__(**kwargs)
 
-        with open(camera_params_pth, 'rb') as f:
-            camera_params = pickle.load(f)
-        self.K = camera_params
+        camera_params = infer_intrinsic_matrix(camera_params_path)
+        if isinstance(camera_params, tuple):
+            _, self.K = camera_params
+        else:
+            self.K = camera_params
 
-        with open(goal_frame_points_pth, "r") as f:
+        with open(goal_frame_points_path, "r") as f:
             goal_points = json.load(f)
         goal_points_bbox = goal_points["bbox_oriented_points"]
         goal_points_bbox = goal_points_bbox[:4]
@@ -48,7 +49,7 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         results = self.detector.detect(frame)
         target_data = self.detector.find_best_target(frame, results)
 
-        if (target_data.confidence == -1):
+        if target_data.confidence == -1:
             return frame
 
         self.visualizer.display_frame(frame, target_data, self.ibvs_controller, self.ibvs_controller.goal_points)
@@ -69,22 +70,3 @@ class IBVSYoloProcessor(BaseVideoProcessor):
             ),
             is_blocking=False
         )
-
-class IBVSPoseYoloProcessor(IBVSYoloProcessor):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.detector = YoloEngineIBVSPose(model_path_pose=Paths.SIM_CAR_POSE_IBVS_YOLO_PATH)
-
-    def _process_frame(self, frame: np.ndarray) -> np.ndarray:
-        results = self.detector.detect(frame)
-        target_data = self.detector.find_best_target(frame, results)
-
-        if (target_data.confidence == -1):
-            return frame
-
-        self.visualizer.display_frame(frame, target_data, self.ibvs_controller, self.ibvs_controller.goal_points)
-
-        command_info = self.target_tracker.calculate_movement(target_data)
-        self.perform_movement(command_info)
-
-        return frame

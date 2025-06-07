@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 
-from auto_follow.detection.yolo_engine import Target, TargetIBVS
-from auto_follow.controllers.ibvs_controller import ImageBasedVisualServo
-from auto_follow.utils.ibvs_math_fcn import plot_bbox_keypoints
+from auto_follow.detection.targets import Target, TargetIBVS
+from auto_follow.ibvs.ibvs_controller import ImageBasedVisualServo
+from auto_follow.ibvs.ibvs_math_fcn import plot_bbox_keypoints
 from drone_base.config.video import VideoConfig
 
 
@@ -96,13 +96,18 @@ class FrameVisualizer:
         cv2.imshow(self.window_name, frame)
         cv2.waitKey(1)
 
+
 class FrameVisualizerIBVS(FrameVisualizer):
     def __init__(self, video_config: VideoConfig):
         super().__init__(video_config)
 
-    def display_frame(self, frame: np.ndarray, target_data: TargetIBVS, ibvs_controller: ImageBasedVisualServo,
-                      goal_points: list[tuple[int, int]]) -> None:
-
+    def display_frame(
+            self,
+            frame: np.ndarray,
+            target_data: TargetIBVS,
+            ibvs_controller: ImageBasedVisualServo,
+            goal_points: list[tuple[int, int]]
+    ) -> None:
         xy_seg = target_data.masks_xy
         xl, yl = target_data.bbox_oriented[0]
         xr, yr = target_data.bbox_oriented[2]
@@ -110,7 +115,7 @@ class FrameVisualizerIBVS(FrameVisualizer):
         yc = (yl + yr) // 2
 
         cv2.circle(frame, (xc, yc), 5, (255, 255, 0), -1)
-        cv2.drawContours(frame, [np.int0(target_data.bbox_oriented)], 0, (36,255,12), 3)
+        cv2.drawContours(frame, [np.array(target_data.bbox_oriented, dtype=int)], 0, (36, 255, 12), 3)
 
         plot_bbox_keypoints(frame, target_data.bbox_oriented)
         plot_bbox_keypoints(frame, goal_points)
@@ -136,4 +141,3 @@ class FrameVisualizerIBVS(FrameVisualizer):
 
             cv2.rectangle(frame, (text_x - 2, text_y - text_h - 2), (text_x + text_w + 2, text_y + 2), (0, 0, 0), -1)
             cv2.putText(frame, depth_text, (text_x, text_y), font, font_scale, depth_color, font_thickness, cv2.LINE_AA)
-

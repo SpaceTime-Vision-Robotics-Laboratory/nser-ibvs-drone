@@ -7,3 +7,4 @@ ruff
 scipy
 pandas
 pyyaml
+torchinfo
