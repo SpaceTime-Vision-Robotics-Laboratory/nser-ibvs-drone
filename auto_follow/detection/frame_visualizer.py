@@ -108,7 +108,7 @@ class FrameVisualizerIBVS(FrameVisualizer):
             ibvs_controller: ImageBasedVisualServo,
             goal_points: list[tuple[int, int]]
     ) -> None:
-        xy_seg = target_data.masks_xy
+        _xy_seg = target_data.masks_xy
         xl, yl = target_data.bbox_oriented[0]
         xr, yr = target_data.bbox_oriented[2]
         xc = (xl + xr) // 2
@@ -120,24 +120,25 @@ class FrameVisualizerIBVS(FrameVisualizer):
         plot_bbox_keypoints(frame, target_data.bbox_oriented)
         plot_bbox_keypoints(frame, goal_points)
 
-        depths = ibvs_controller.compute_depths(xy_seg)
+        # depths = ibvs_controller.compute_depths(xy_seg)
 
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        font_scale = 0.4
-        font_thickness = 1
-        depth_color = (255, 255, 255)  # White text
+        # font = cv2.FONT_HERSHEY_SIMPLEX
+        # font_scale = 0.4
+        # font_thickness = 1
+        # depth_color = (255, 255, 255)  # White text
 
-        for i, (point, depth) in enumerate(zip(target_data.bbox_oriented, depths)):
-            x, y = point
-            depth_text = f"Z{i}: {depth:.2f}m"
+        # for i, (point, depth) in enumerate(zip(target_data.bbox_oriented, depths)):
+        #     x, y = point
+        #     depth_text = f"Z{i}: {depth:.2f}m"
 
-            text_size, _ = cv2.getTextSize(depth_text, font, font_scale, font_thickness)
-            text_w, text_h = text_size
+        #     text_size, _ = cv2.getTextSize(depth_text, font, font_scale, font_thickness)
+        #     text_w, text_h = text_size
 
-            constant_point_above = 30
+        #     constant_point_above = 30
 
-            text_x = x + 10
-            text_y = y - 10 if y > constant_point_above else y + text_h + 10
+        #     text_x = x + 10
+        #     text_y = y - 10 if y > constant_point_above else y + text_h + 10
 
-            cv2.rectangle(frame, (text_x - 2, text_y - text_h - 2), (text_x + text_w + 2, text_y + 2), (0, 0, 0), -1)
-            cv2.putText(frame, depth_text, (text_x, text_y), font, font_scale, depth_color, font_thickness, cv2.LINE_AA)
+        #     cv2.rectangle(frame, (text_x - 2, text_y - text_h - 2), (text_x + text_w + 2, text_y + 2), (0, 0, 0), -1)
+        #     cv2.putText(frame, depth_text, (text_x, text_y), font,
+        #                 font_scale, depth_color, font_thickness, cv2.LINE_AA)

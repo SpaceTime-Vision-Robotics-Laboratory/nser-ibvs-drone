@@ -116,6 +116,7 @@ class ImageBasedVisualServo:
             print("-" * 25)
 
         logs = {
+            "jacobian_matrix": jacobian_matrix.tolist(),
             "jcond": jcond,
             "current_points_flatten": self.current_points_flatten,
             "goal_points_flatten": self.goal_points_flatten,

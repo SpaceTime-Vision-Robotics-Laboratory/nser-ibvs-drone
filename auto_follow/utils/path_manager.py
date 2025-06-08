@@ -26,6 +26,7 @@ class Paths:
     # Results / Output:
     OUTPUT_DIR: Final[Path] = BASE_DIR / "output"
     DETECTOR_LOG_DIR: Final[Path] = OUTPUT_DIR / "detector-logs"
+    LOG_PARQUET_DIR: Final[Path] = OUTPUT_DIR / "parquet-logs"
 
     # Camera parameters:
     CAMERA_PARAMS_DIR: Final[Path] = BASE_DIR / "assets" / "camera_parameters"

@@ -133,9 +133,9 @@ class TargetTrackerIBVS(TargetTracker):
         self.max_angular_speed = np.deg2rad(60)  # rad/s
         self.ibvs_controller = ibvs_controller
 
-    def calculate_movement(self, target_data: TargetIBVS) -> CommandInfo:
+    def calculate_movement(self, target_data: TargetIBVS) -> tuple[CommandInfo, dict]:
         self.ibvs_controller.set_current_points(target_data.bbox_oriented)
-        velocities, logs = self.ibvs_controller.compute_velocities(verbose=True)
+        velocities, logs = self.ibvs_controller.compute_velocities(verbose=False)
 
         roll = ceil(100 * velocities[0] / self.max_linear_speed)
         pitch = ceil(-100 * velocities[1] / self.max_linear_speed)
