@@ -115,7 +115,15 @@ class ImageBasedVisualServo:
             print(f"Velocity: {vel}")
             print("-" * 25)
 
-        return vel
+        logs = {
+            "jcond": jcond,
+            "current_points_flatten": self.current_points_flatten,
+            "goal_points_flatten": self.goal_points_flatten,
+            "err_uv": err_uv,
+            "velocity": vel
+        }
+
+        return vel, logs
 
     def plot_values(self):
         _, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))

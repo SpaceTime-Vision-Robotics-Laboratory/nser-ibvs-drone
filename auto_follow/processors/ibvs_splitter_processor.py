@@ -28,7 +28,12 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
 
         self.visualizer.display_frame(frame, target_data, self.ibvs_controller, self.ibvs_controller.goal_points)
 
-        command_info = self.target_tracker.calculate_movement(target_data)
+        command_info, logs = self.target_tracker.calculate_movement(target_data)
+
+        self.logger.info("Target data: %s", target_data)
+        self.logger.info("Command info: %s", command_info)
+        self.logger.info("Logs IBVS Splitter: %s", logs)
+
         self.perform_movement(command_info)
 
         return frame

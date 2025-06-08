@@ -135,7 +135,7 @@ class TargetTrackerIBVS(TargetTracker):
 
     def calculate_movement(self, target_data: TargetIBVS) -> CommandInfo:
         self.ibvs_controller.set_current_points(target_data.bbox_oriented)
-        velocities = self.ibvs_controller.compute_velocities(verbose=True)
+        velocities, logs = self.ibvs_controller.compute_velocities(verbose=True)
 
         roll = ceil(100 * velocities[0] / self.max_linear_speed)
         pitch = ceil(-100 * velocities[1] / self.max_linear_speed)
@@ -164,6 +164,4 @@ class TargetTrackerIBVS(TargetTracker):
             status="IBVS"
         )
 
-        print(f"{cmd_info}")
-
-        return cmd_info
+        return cmd_info, logs

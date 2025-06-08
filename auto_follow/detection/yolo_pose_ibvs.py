@@ -2,7 +2,6 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-import ultralytics
 from ultralytics.engine.results import Results
 
 from auto_follow.detection.targets import TargetIBVS
@@ -12,8 +11,7 @@ from auto_follow.utils.path_manager import Paths
 
 class YoloEngineIBVSPose(YoloEngineIBVS):
     def __init__(self, model_path_pose: str | Path = Paths.SIM_CAR_POSE_IBVS_YOLO_PATH):
-        super().__init__()
-        self.model_pose = ultralytics.YOLO(model_path_pose)
+        super().__init__(model_path=model_path_pose)
         self._default_target = TargetIBVS(confidence=-1.0)
 
         self.max_number_of_points = 2
@@ -100,7 +98,7 @@ class YoloEngineIBVSPose(YoloEngineIBVS):
         return [tuple(map(int, p)) for p in ordered_box_np]
 
     def find_best_target(self, frame: np.ndarray, results: Results) -> TargetIBVS:
-        results_pose = self.model_pose.predict(frame, stream=False, verbose=False)[0]
+        results_pose = self.model.predict(frame, stream=False, verbose=False)[0]
 
         best_back = {"conf": -1.0, "idx": None, "masks_xy": []}
         best_front = {"conf": -1.0, "idx": None, "masks_xy": []}
@@ -169,6 +167,4 @@ if __name__ == '__main__':
     from torchinfo import summary
 
     y = YoloEngineIBVSPose()
-    print(summary(y.model))
-    print("\n")
-    print(summary(y.model_pose))
+    summary(y.model)
