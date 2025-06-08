@@ -2,7 +2,7 @@ from pathlib import Path
 
 import torch
 from torch import nn
-from torchinfo import summary
+# from torchinfo import summary
 
 
 class DoubleConv(nn.Module):

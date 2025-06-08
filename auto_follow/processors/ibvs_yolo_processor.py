@@ -36,7 +36,7 @@ class IBVSYoloProcessor(BaseVideoProcessor):
         goal_points_bbox = goal_points["bbox_oriented_points"]
         goal_points_bbox = goal_points_bbox[:4]
 
-        self.ibvs_controller = ImageBasedVisualServo(self.K, goal_points_bbox)
+        self.ibvs_controller = ImageBasedVisualServo(self.K, goal_points_bbox, lambda_factor=0.25)
         self.detector = YoloEngineIBVS(model_path)
         self.target_tracker = TargetTrackerIBVS(self.config, self.ibvs_controller)
         self.visualizer = FrameVisualizerIBVS(self.config)
@@ -56,6 +56,9 @@ class IBVSYoloProcessor(BaseVideoProcessor):
 
         command_info = self.target_tracker.calculate_movement(target_data)
         self.perform_movement(command_info)
+
+        if (self._frame_count % 120 == 0):
+            self.ibvs_controller.plot_values()
 
         return frame
 

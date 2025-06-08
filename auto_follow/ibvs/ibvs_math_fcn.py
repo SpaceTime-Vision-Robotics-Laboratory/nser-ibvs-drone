@@ -73,12 +73,13 @@ def check_stability(points_bbox: list[tuple[float, float]], mean: float, std: fl
     sides = get_rectangle_sides(points_bbox)
 
     r = (1. * sides[1]) / sides[0]
+    print(f"{r=}")
     if abs(r - mean) >= std:
         return False
 
     return True
 
-
+## TODO these two below are for the simple scene in the simulator (with the yellow car from Sphinx)
 def check_stability_bbox_simple(points_bbox: list[tuple[float, float]]) -> bool:
     """
     Check if the bbox is stable that works on Simple BBOX(not oriented)

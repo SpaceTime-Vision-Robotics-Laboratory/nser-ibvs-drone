@@ -1,3 +1,6 @@
+# import matplotlib
+# matplotlib.use('agg')
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -17,6 +20,7 @@ class ImageBasedVisualServo:
         self.Kinv = np.linalg.inv(self.K)
 
         self.lambda_factor = np.diag([lambda_factor, lambda_factor, lambda_factor])
+        print(f"lambda: {self.lambda_factor}")
 
         self.goal_points = goal_points
         self.goal_points_flatten = np.hstack(goal_points)
