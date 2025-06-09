@@ -7,7 +7,8 @@ import pandas as pd
 
 from auto_follow.detection.frame_visualizer import FrameVisualizer
 from auto_follow.detection.target_tracker import TargetTracker, CommandInfo
-from auto_follow.detection.yolo_engine import YoloEngine, Target
+from auto_follow.detection.targets import Target
+from auto_follow.detection.yolo_engine import YoloEngine
 from auto_follow.utils.path_manager import Paths
 from drone_base.config.drone import DroneIp
 from drone_base.control.operations import PilotingCommand, MovementByCommand
@@ -66,7 +67,7 @@ class StateYoloProcessor(BaseVideoProcessor):
         self._is_lost_count = 0
         self.MAX_IS_LOST_COUNT = 45
 
-    def _process_frame(self, frame: np.ndarray) -> np.ndarray: # noqa: PLR0911
+    def _process_frame(self, frame: np.ndarray) -> np.ndarray:  # noqa: PLR0911
         if self._frame_count % 15 == 0:
             self.logger.info("Current state: %s", self.current_state)
         if not self._check_start_drone_state():
@@ -175,7 +176,6 @@ class StateYoloProcessor(BaseVideoProcessor):
         self.log_command(command_info)
         self.perform_movement(command_info)
         return self.visualizer.draw_frame(frame=frame, target_data=target_data, moved_up=False)[0]
-
 
     def perform_movement(self, command_info: CommandInfo | None) -> None:
         if self.current_state == SearchState.FOLLOW_CAR:

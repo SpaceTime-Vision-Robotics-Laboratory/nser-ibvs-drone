@@ -36,6 +36,12 @@ Full command to setup the scene:
 parrot-ue4-carla -level=town_10 -ams-path="DefaultPath,Pickup:*"
 ```
 
+Command to only spawn the Anafi AI:
+
+```
+sphinx "/opt/parrot-sphinx/usr/share/sphinx/drones/anafi.drone"::firmware="https://firmware.parrot.com/Versions/anafi/pc/%23latest/images/anafi-pc.ext2.zip"
+```
+
 Command to spawn the Anafi AI in the car:
 
 ```
