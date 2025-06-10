@@ -109,7 +109,11 @@ class MaskSplitterEngineIBVS(YoloEngineIBVS):
         return [tuple(map(int, p)) for p in ordered_box_np]
 
     def find_best_target(self, frame: np.ndarray, results: Results | None) -> TargetIBVS:
-        _, mask = self.segment_image(frame=frame)
+        _, mask, masks_xy = self.segment_image(frame=frame)
+
+        if (masks_xy.shape[1] != 2):
+            return self._default_target
+
         front_mask, back_mask = self.splitter_model.infer(image=frame, mask=mask)
 
         best_back = {"conf": 0.8, "idx": None, "masks_xy": []}
@@ -151,7 +155,7 @@ class MaskSplitterEngineIBVS(YoloEngineIBVS):
             center = ((x1 + x2) // 2, (y1 + y2) // 2)
             size = (int(x2 - x1), int(y2 - y1))
 
-            bbox_oriented = self._compute_bbox_oriented(frame, all_points)
+            bbox_oriented = self._compute_bbox_oriented(frame, masks_xy)
             print(f"Bbox oriented: {bbox_oriented} | Type: {type(bbox_oriented)}")
             bbox_oriented = self._reorder_bbox_oriented(bbox_oriented, best_front, best_back)
 

@@ -8,6 +8,7 @@ from auto_follow.detection.targets import TargetIBVS
 from auto_follow.ibvs.ibvs_controller import ImageBasedVisualServo
 from drone_base.config.video import VideoConfig
 
+from auto_follow.ibvs.ibvs_math_fcn import check_stability
 
 @dataclass(frozen=True)
 class CommandInfo:
@@ -134,8 +135,49 @@ class TargetTrackerIBVS(TargetTracker):
         self.ibvs_controller = ibvs_controller
 
     def calculate_movement(self, target_data: TargetIBVS) -> tuple[CommandInfo, dict]:
+        ## stats for bunker env, 45 deg:
+        # Mean: 2.086637462915059
+        # Median: 2.106382978723404
+        # Standard Deviation: 0.4195746235153355
+        # Minimum: 1.0
+        # Maximum: 3.1379310344827585
+        # if (not check_stability(target_data.bbox_oriented, mean=2.1, std=0.9)):
+        #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        #     print(f"NOT STABLE")
+        #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        #     ## TODO better to not send any command when the stability check fails
+        #     ## ^ separate the actual (0,0,0) command from _no_ command
+        #     ## TODO will need to _exclude_ these from training the distilled net
+        #     roll = 0
+        #     pitch = 0
+        #     yaw = 0
+
+        #     cmd_info = CommandInfo(
+        #         timestamp=time.time(),
+        #         x_cmd=0,
+        #         y_cmd=0,
+        #         z_cmd=0,
+        #         rot_cmd=0,
+        #         x_offset=0,
+        #         y_offset=0,
+        #         p_rot=0,
+        #         d_rot=0,
+        #         status="IBVS"
+        #     )
+
+        #     logs = {
+        #         "jacobian_matrix": None,
+        #         "jcond": -1,
+        #         "current_points_flatten": None,
+        #         "goal_points_flatten": None,
+        #         "err_uv": [0],
+        #         "velocity": None
+        #     }
+            
+        #     return cmd_info, logs
+
         self.ibvs_controller.set_current_points(target_data.bbox_oriented)
-        velocities, logs = self.ibvs_controller.compute_velocities(verbose=False)
+        velocities, logs = self.ibvs_controller.compute_velocities(verbose=True)
 
         roll = ceil(100 * velocities[0] / self.max_linear_speed)
         pitch = ceil(-100 * velocities[1] / self.max_linear_speed)
@@ -143,7 +185,9 @@ class TargetTrackerIBVS(TargetTracker):
 
         yaw = 100 * velocities[2] / self.max_angular_speed
 
-        const_yaw_threshold = 2
+        const_yaw_threshold = 8 # for simple
+        # const_yaw_threshold = 2 # for pose
+        # const_yaw_threshold = 10 # for splitter
 
         if abs(yaw) < const_yaw_threshold:
             yaw = 0

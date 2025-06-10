@@ -15,7 +15,7 @@ class YoloEngineIBVS(YoloEngine):
         super().__init__(model_path)
         self._default_target = TargetIBVS(confidence=-1.0)
 
-        self.confidence_threshold = 0.85
+        self.confidence_threshold = 0.75
 
     def _compute_bbox_oriented(self, frame: np.ndarray, xy_seg: np.ndarray) -> list[tuple[int, ...]]:
         """

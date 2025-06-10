@@ -73,6 +73,8 @@ def check_stability(points_bbox: list[tuple[float, float]], mean: float, std: fl
     sides = get_rectangle_sides(points_bbox)
 
     r = (1. * sides[1]) / sides[0]
+    print(f"{r=}")
+
     if abs(r - mean) >= std:
         return False
 

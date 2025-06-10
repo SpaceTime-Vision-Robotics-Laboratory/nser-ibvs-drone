@@ -9,8 +9,8 @@ class ImageBasedVisualServo:
             self,
             camera_intrensic: np.ndarray,
             goal_points: list[tuple[int, int]],
-            lambda_factor: float = 0.25,
-            estimated_depth: float = 1.5,
+            lambda_factor: float = 0.30,
+            estimated_depth: float = 1.,
             verbose: bool = False
     ):
         self.K = camera_intrensic
