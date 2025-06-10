@@ -111,6 +111,8 @@ class MaskSplitterEngineIBVS(YoloEngineIBVS):
     def find_best_target(self, frame: np.ndarray, results: Results | None) -> TargetIBVS:
         _, mask, masks_xy = self.segment_image(frame=frame)
 
+        ## check that the returned masks_xy is the one containing the points
+        ## and not the default_mask
         if (masks_xy.shape[1] != 2):
             return self._default_target
 

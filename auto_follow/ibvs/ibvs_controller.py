@@ -16,6 +16,7 @@ class ImageBasedVisualServo:
         self.K = camera_intrensic
         self.Kinv = np.linalg.inv(self.K)
 
+        self.lambda_factor_val = lambda_factor
         self.lambda_factor = np.diag([lambda_factor, lambda_factor, lambda_factor])
 
         self.goal_points = goal_points
@@ -101,6 +102,12 @@ class ImageBasedVisualServo:
         err_uv = self.goal_points_flatten - self.current_points_flatten
         self.err_uv_values.append(np.linalg.norm(err_uv))
 
+        if (self.err_uv_values[-1] < 80):
+            print(f"err: {self.err_uv_values[-1]}")
+            self.lambda_factor = np.diag([0.1, 0.1, 0.1])
+        else:
+            self.lambda_factor = np.diag([self.lambda_factor_val, self.lambda_factor_val, self.lambda_factor_val])
+
         if isinstance(self.lambda_factor, np.ndarray):
             vel = self.lambda_factor @ jacobian_matrix_pinv @ err_uv
         else:
@@ -111,7 +118,7 @@ class ImageBasedVisualServo:
             print(f"J cond: {jcond}")
             print(f"Current points flat: {self.current_points_flatten}")
             print(f"Goal points flat: {self.goal_points_flatten}")
-            print(f"Error uv: {err_uv}")
+            print(f"Error uv: {err_uv} | error norm: {self.err_uv_values[-1]}")
             print(f"Velocity: {vel}")
             print("-" * 25)
 

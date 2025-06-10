@@ -185,9 +185,9 @@ class TargetTrackerIBVS(TargetTracker):
 
         yaw = 100 * velocities[2] / self.max_angular_speed
 
-        const_yaw_threshold = 8 # for simple
+        # const_yaw_threshold = 8 # for simple
         # const_yaw_threshold = 2 # for pose
-        # const_yaw_threshold = 10 # for splitter
+        const_yaw_threshold = 8 # for splitter
 
         if abs(yaw) < const_yaw_threshold:
             yaw = 0

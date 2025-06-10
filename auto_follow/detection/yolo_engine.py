@@ -65,6 +65,7 @@ class YoloEngine:
 
         boxes = results.boxes
 
+        ## check for the box with the largest confidence to be above the threshold
         if not (
             boxes
             and boxes.conf is not None
@@ -98,10 +99,13 @@ class YoloEngine:
 
         best_conf_index = boxes.conf.argmax()
 
+        ## will also return the xy point coordinates of the mask
+        ## ^ for the oriented bbox computation 
         masks_xy = results.masks.xy[best_conf_index]
         masks_xy = [list(xy) for xy in masks_xy]
         masks_xy = np.array(masks_xy).astype(np.int32)
 
+        ## select only the mask corresponding to the largest confidence value
         mask = results.masks.data[best_conf_index]
 
         binary_mask = self._process_mask(mask, frame_width, frame_height)
