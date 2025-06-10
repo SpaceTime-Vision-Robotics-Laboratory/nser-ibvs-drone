@@ -104,7 +104,7 @@ class ImageBasedVisualServo:
 
         if (self.err_uv_values[-1] < 80):
             print(f"err: {self.err_uv_values[-1]}")
-            self.lambda_factor = np.diag([0.1, 0.1, 0.1])
+            self.lambda_factor = np.diag([0.16, 0.16, 0.2])
         else:
             self.lambda_factor = np.diag([self.lambda_factor_val, self.lambda_factor_val, self.lambda_factor_val])
 
