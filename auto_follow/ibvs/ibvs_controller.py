@@ -33,6 +33,8 @@ class ImageBasedVisualServo:
         self.Z = estimated_depth
         self.verbose = verbose
 
+        self.err_threshold = 80
+
     def compute_normalized_image_plane_coordinates(self, points: list[tuple[int, int]]) -> np.ndarray:
         points_normalized = []
         for p in points:
@@ -102,7 +104,7 @@ class ImageBasedVisualServo:
         err_uv = self.goal_points_flatten - self.current_points_flatten
         self.err_uv_values.append(np.linalg.norm(err_uv))
 
-        if (self.err_uv_values[-1] < 80):
+        if (self.err_uv_values[-1] < self.err_threshold):
             print(f"err: {self.err_uv_values[-1]}")
             self.lambda_factor = np.diag([0.1, 0.1, 0.1])
         else:

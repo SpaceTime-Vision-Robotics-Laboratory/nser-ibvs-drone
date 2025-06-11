@@ -73,10 +73,12 @@ class YoloEngine:
             and boxes.conf.max() >= self.confidence_threshold
         ):
             # print(f"conf: {self.confidence_threshold}")
-            return (frame, default_mask, default_mask, results) if are_results_returned else (frame, default_mask, default_mask)
+            return (frame, default_mask, default_mask, results) \
+                if are_results_returned else (frame, default_mask, default_mask)
 
         if results.masks is None or len(results.masks.data) == 0:
-            return (frame, default_mask, default_mask, results) if are_results_returned else (frame, default_mask, default_mask)
+            return (frame, default_mask, default_mask, results) \
+                  if are_results_returned else (frame, default_mask, default_mask)
 
         annotated_frame = np.array(frame)
         masks = []
@@ -92,7 +94,7 @@ class YoloEngine:
         #     for c in range(3):
         #         overlay[:, :, c][mask_bool] = self.segmentation_color[c]
         #     annotated_frame = cv2.addWeighted(annotated_frame, self.alpha, overlay, 1 - self.alpha, 0, overlay)
-        
+
         ## -----------------------------------
 
         ## =======================================
@@ -100,7 +102,7 @@ class YoloEngine:
         best_conf_index = boxes.conf.argmax()
 
         ## will also return the xy point coordinates of the mask
-        ## ^ for the oriented bbox computation 
+        ## ^ for the oriented bbox computation
         masks_xy = results.masks.xy[best_conf_index]
         masks_xy = [list(xy) for xy in masks_xy]
         masks_xy = np.array(masks_xy).astype(np.int32)

@@ -8,7 +8,6 @@ from auto_follow.detection.targets import TargetIBVS
 from auto_follow.ibvs.ibvs_controller import ImageBasedVisualServo
 from drone_base.config.video import VideoConfig
 
-from auto_follow.ibvs.ibvs_math_fcn import check_stability
 
 @dataclass(frozen=True)
 class CommandInfo:
@@ -136,6 +135,9 @@ class TargetTrackerIBVS(TargetTracker):
 
         self.const_yaw_threshold = 8
 
+        self.velocity_low_threshold = 0.002
+        self.velocity_high_threshold = 0.005
+
     def calculate_movement(self, target_data: TargetIBVS) -> tuple[CommandInfo, dict]:
         self.ibvs_controller.set_current_points(target_data.bbox_oriented)
         velocities, logs = self.ibvs_controller.compute_velocities(verbose=False)
@@ -148,11 +150,11 @@ class TargetTrackerIBVS(TargetTracker):
 
         if abs(yaw) < self.const_yaw_threshold:
             yaw = 0
-        
-        if 0.002 <= abs(velocities[0]) <= 0.005:
+
+        if self.velocity_low_threshold <= abs(velocities[0]) <= self.velocity_high_threshold:
             roll = -1 if velocities[0] < 0 else 1
-        
-        if 0.002 <= abs(velocities[1]) <= 0.005:
+
+        if self.velocity_low_threshold <= abs(velocities[1]) <= self.velocity_high_threshold:
             pitch = 1 if velocities[1] < 0 else -1
 
         cmd_info = CommandInfo(

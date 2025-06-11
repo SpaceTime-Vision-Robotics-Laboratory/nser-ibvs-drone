@@ -91,7 +91,7 @@ class MaskSplitterEngineIBVS(YoloEngineIBVS):
 
         ## check that the returned masks_xy is the one containing the points
         ## and not the default_mask
-        if (masks_xy.shape[1] != 2):
+        if (masks_xy.shape[1] != 2): # noqa: PLR2004
             return self._default_target
 
         front_mask, back_mask = self.splitter_model.infer(image=frame, mask=mask)
