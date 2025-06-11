@@ -53,7 +53,4 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
 
         self.perform_movement(command_info)
 
-        if (self._frame_count % 120 == 0):
-            self.ibvs_controller.plot_values()
-
         return frame
