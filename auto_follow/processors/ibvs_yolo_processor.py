@@ -1,9 +1,9 @@
 import json
+import time
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import time
 
 from auto_follow.detection.frame_visualizer import FrameVisualizerIBVS
 from auto_follow.detection.target_tracker import CommandInfo, TargetTrackerIBVS
@@ -12,6 +12,7 @@ from auto_follow.ibvs.ibvs_controller import ImageBasedVisualServo
 from auto_follow.utils.cam_params import infer_intrinsic_matrix
 from auto_follow.utils.path_manager import Paths
 from drone_base.control.operations import PilotingCommand
+from drone_base.control.states import FlightState, GimbalOrientation
 from drone_base.stream.base_video_processor import BaseVideoProcessor
 from drone_base.utils.readable_time import date_time_now_to_file_name
 
@@ -50,7 +51,7 @@ class IBVSYoloProcessor(BaseVideoProcessor):
 
         self.parquet_path = logs_parquet_path
         if self.parquet_path is not None:
-            self.parquet_path = Path(self.parquet_path) / date_time_now_to_file_name()
+            self.parquet_path = Path(self.parquet_path)
             self.parquet_path.mkdir(parents=True, exist_ok=True)
             self.log_parquet = pd.DataFrame(columns=[
                 "timestamp",
@@ -125,3 +126,18 @@ class IBVSYoloProcessor(BaseVideoProcessor):
             ),
             is_blocking=False
         )
+
+    def _check_start_drone_state(self) -> bool:
+        """
+        Validates that the drone is ready to process commands and sets states.
+
+        If the drone is flying and has tilted camera then it can accept commands and will return true. False otherwise.
+        """
+        fly_state, gimbal_state = self.drone_commander.state.get_state()
+        if fly_state != FlightState.FLYING:
+            return False
+
+        if gimbal_state != GimbalOrientation.TILTED:
+            return False
+
+        return True

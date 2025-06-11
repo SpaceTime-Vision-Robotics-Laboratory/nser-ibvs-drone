@@ -1,0 +1,5 @@
+alpha: 0.2
+wp: 0.2
+ws: 0.3
+filter_order: 30
+mode: fir

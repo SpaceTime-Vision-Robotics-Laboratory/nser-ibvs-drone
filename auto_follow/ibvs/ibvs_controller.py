@@ -104,8 +104,7 @@ class ImageBasedVisualServo:
         err_uv = self.goal_points_flatten - self.current_points_flatten
         self.err_uv_values.append(np.linalg.norm(err_uv))
 
-        if (self.err_uv_values[-1] < self.err_threshold):
-            print(f"err: {self.err_uv_values[-1]}")
+        if self.err_uv_values[-1] < self.err_threshold:
             self.lambda_factor = np.diag([0.1, 0.1, 0.1])
         else:
             self.lambda_factor = np.diag([self.lambda_factor_val, self.lambda_factor_val, self.lambda_factor_val])

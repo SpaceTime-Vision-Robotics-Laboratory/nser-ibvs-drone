@@ -26,6 +26,11 @@ class Paths:
     PID_X_PATH: Final[Path] = PID_CONFIG_DIR / "pid_x.yaml"
     LOW_PASS_FILTER_PATH: Final[Path] = PID_CONFIG_DIR / "low_pass_filter.yaml"
 
+    # Simulator Config
+    SIMULATOR_CONFIG_DIR: Final[Path] = BASE_DIR / "config" / "simulator"
+    BUNKER_ANAFI_4K_CONFIG_PATH: Final[Path] = SIMULATOR_CONFIG_DIR / "bunker-online-4k-config.yaml"
+
+
     # Results / Output:
     OUTPUT_DIR: Final[Path] = BASE_DIR / "output"
     DETECTOR_LOG_DIR: Final[Path] = OUTPUT_DIR / "detector-logs"

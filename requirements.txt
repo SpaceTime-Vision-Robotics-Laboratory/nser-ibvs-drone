@@ -8,3 +8,5 @@ scipy
 pandas
 pyyaml
 torchinfo
+python-dotenv
+pyarrow

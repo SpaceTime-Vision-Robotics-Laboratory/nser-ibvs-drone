@@ -1,0 +1,18 @@
+paths:
+  sphinx:
+    command: "/home/brittle/Games/MyGames/DroneSimulation/bunker/installed/LinuxNoEditor/UnrealApp.sh"
+    level: "main_details"
+    quality: "low"
+    config_file: "assets/environment/config/add_mc_laren.yaml"
+
+    firmware:
+      base_command: "sphinx"
+      drone_path: "/opt/parrot-sphinx/usr/share/sphinx/drones/anafi.drone"
+      firmware_url: "https://firmware.parrot.com/Versions/anafi/pc/%23latest/images/anafi-pc.ext2.zip"
+      pose: "-1 1 0.3 0 -0 5.495"
+
+  scripts:
+    controller: "auto_follow/controllers/ibvs_splitter_controller.py"
+    save_dir_name: "bunker-online-4k-config-test-down-left"
+
+
