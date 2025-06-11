@@ -1,9 +1,5 @@
 import argparse
 
-from pathlib import Path
-import sys
-sys.path.append(str(Path(__file__).parent.parent))
-
 from auto_follow.controllers.ibvs_controller import IBVSController
 from auto_follow.processors.ibvs_yolo_processor import IBVSYoloProcessor
 from auto_follow.utils.path_manager import Paths
@@ -15,8 +11,8 @@ def main(args: argparse.Namespace):
         ip=args.ip,
         processor_class=IBVSYoloProcessor,
         speed=args.speed,
-        # log_path=Paths.OUTPUT_DIR / "logs",
-        # results_path=Paths.OUTPUT_DIR / "results",
+        log_path=Paths.OUTPUT_DIR / "logs",
+        results_path=Paths.OUTPUT_DIR / "results",
     )
 
     if args.simulated:
