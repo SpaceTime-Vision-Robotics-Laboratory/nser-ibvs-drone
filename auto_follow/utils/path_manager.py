@@ -17,6 +17,9 @@ class Paths:
     SIM_MASK_SPLITTER_CAR_HIGH_PATH: Final[
         Path] = MODELS_DIR / "mask_splitter-sim-high-quality-partition-v10-dropout_0-augmentations_multi_scenes.pt"
 
+    SIM_MASK_SPLITTER_CAR_LOW_PATH: Final[
+        Path] = MODELS_DIR / "mask_splitter-epoch_10-dropout_0-low_x2-and-high_x0_quality_early_stop.pt"
+
     # PID config:
     PID_CONFIG_DIR: Final[Path] = BASE_DIR / "config" / "pid"
     PID_FWD_PATH: Final[Path] = PID_CONFIG_DIR / "pid_forward.yaml"
@@ -39,8 +42,9 @@ class Paths:
     REFERENCE_IMAGES_DIR: Final[Path] = BASE_DIR / "assets" / "reference" / "images"
     GOAL_FRAME_PATH_90: Final[Path] = REFERENCE_IMAGES_DIR / "frame_001009_10636251.png"
     GOAL_FRAME_POINTS_PATH_90: Final[Path] = REFERENCE_DATA_DIR / "frame_001009_10636251.json"
-    GOAL_FRAME_PATH_45: Final[Path] = REFERENCE_IMAGES_DIR / "frame_002041_12392083__45.png"
-    GOAL_FRAME_POINTS_PATH_45: Final[Path] = REFERENCE_DATA_DIR / "frame_002041_12392083__45.json"
+
+    GOAL_FRAME_PATH_45: Final[Path] = REFERENCE_IMAGES_DIR / "frame_001030_26999571__45__takeoff.png"
+    GOAL_FRAME_POINTS_PATH_45: Final[Path] = REFERENCE_DATA_DIR / "frame_001030_26999571__45__takeoff.json"
 
 
 if __name__ == '__main__':

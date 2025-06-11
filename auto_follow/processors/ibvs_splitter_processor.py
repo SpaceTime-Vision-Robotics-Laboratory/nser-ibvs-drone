@@ -12,7 +12,7 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
     def __init__(
             self,
             model_path: str | Path = Paths.SIM_CAR_IBVS_YOLO_PATH,
-            splitter_model_path: str | Path = Paths.SIM_MASK_SPLITTER_CAR_HIGH_PATH,
+            splitter_model_path: str | Path = Paths.SIM_MASK_SPLITTER_CAR_LOW_PATH,
             **kwargs
     ):
         super().__init__(model_path=model_path, **kwargs)
@@ -28,6 +28,9 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
             "timestamp": timestamp,
             "frame_idx": self._frame_count,
         }
+
+        if (self._frame_count % 2 == 1):
+            return frame
 
         target_data = self.detector.find_best_target(frame, None)
 

@@ -70,46 +70,30 @@ class MaskSplitterEngineIBVS(YoloEngineIBVS):
         if np.linalg.norm(vec_car_orientation) < self.tol_err_norm:  # Centroids are too close
             return super()._reorder_bbox_oriented(box)
 
-        # Order front points
-        fp1, fp2 = front_points_candidates[0], front_points_candidates[1]
-        # Cross product: vec_car_orientation X (point - relevant_centroid)
-        # Positive Z means point is to the "left" of the car's axis.
-        cross_fp1 = (
-                vec_car_orientation[0] * (fp1[1] - centroid_front[1]) -
-                vec_car_orientation[1] * (fp1[0] - centroid_front[0])
-        )
+        pts0 = tuple(map(int, front_points_candidates[0]))
+        pts1 = tuple(map(int, front_points_candidates[1]))
 
-        if cross_fp1 > self.tol_err_cross_product:  # fp1 is left (allowing for small floating point inaccuracies)
-            p1_front_left = fp1
-            p2_front_right = fp2
-        elif cross_fp1 < -self.tol_err_cross_product:  # fp1 is right
-            p1_front_left = fp2
-            p2_front_right = fp1
-        else:  # Collinear or very close to axis, fallback or use arbitrary but consistent order
-            # Fallback for simplicity if points are perfectly collinear with axis in an unexpected way
-            return super()._reorder_bbox_oriented(box)
+        points_reordered = [pts0, pts1]
 
-        # Order back points
-        bp1, bp2 = back_points_candidates[0], back_points_candidates[1]
-        cross_bp1 = (
-                vec_car_orientation[0] * (bp1[1] - centroid_back[1]) -
-                vec_car_orientation[1] * (bp1[0] - centroid_back[0])
-        )
+        points_neighbours = [*box, box[0]]
+        for i in range(len(points_neighbours) - 1):
+            if ((points_neighbours[i] == pts0 and points_neighbours[i + 1] == pts1) or
+                    (points_neighbours[i] == pts1 and points_neighbours[i + 1] == pts0)):
+                points_reordered = box[i:] + box[:i]
+                break
 
-        if cross_bp1 > self.tol_err_cross_product:  # bp1 is left
-            p4_back_left = bp1
-            p3_back_right = bp2
-        elif cross_bp1 < -self.tol_err_cross_product:  # bp1 is right
-            p4_back_left = bp2
-            p3_back_right = bp1
-        else:  # Collinear or very close to axis
-            return super()._reorder_bbox_oriented(box)
+        points_reordered = [tuple(map(int, p)) for p in points_reordered]
 
-        ordered_box_np = [p1_front_left, p2_front_right, p3_back_right, p4_back_left]
-        return [tuple(map(int, p)) for p in ordered_box_np]
+        return points_reordered
 
     def find_best_target(self, frame: np.ndarray, results: Results | None) -> TargetIBVS:
-        _, mask = self.segment_image(frame=frame)
+        _, mask, masks_xy = self.segment_image(frame=frame)
+
+        ## check that the returned masks_xy is the one containing the points
+        ## and not the default_mask
+        if (masks_xy.shape[1] != 2): # noqa: PLR2004
+            return self._default_target
+
         front_mask, back_mask = self.splitter_model.infer(image=frame, mask=mask)
 
         best_back = {"conf": 0.8, "idx": None, "masks_xy": []}
@@ -151,8 +135,7 @@ class MaskSplitterEngineIBVS(YoloEngineIBVS):
             center = ((x1 + x2) // 2, (y1 + y2) // 2)
             size = (int(x2 - x1), int(y2 - y1))
 
-            bbox_oriented = self._compute_bbox_oriented(frame, all_points)
-            print(f"Bbox oriented: {bbox_oriented} | Type: {type(bbox_oriented)}")
+            bbox_oriented = self._compute_bbox_oriented(frame, masks_xy)
             bbox_oriented = self._reorder_bbox_oriented(bbox_oriented, best_front, best_back)
 
             return TargetIBVS(

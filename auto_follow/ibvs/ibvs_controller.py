@@ -9,13 +9,14 @@ class ImageBasedVisualServo:
             self,
             camera_intrensic: np.ndarray,
             goal_points: list[tuple[int, int]],
-            lambda_factor: float = 0.25,
-            estimated_depth: float = 1.5,
+            lambda_factor: float = 0.30,
+            estimated_depth: float = 1.,
             verbose: bool = False
     ):
         self.K = camera_intrensic
         self.Kinv = np.linalg.inv(self.K)
 
+        self.lambda_factor_val = lambda_factor
         self.lambda_factor = np.diag([lambda_factor, lambda_factor, lambda_factor])
 
         self.goal_points = goal_points
@@ -31,6 +32,8 @@ class ImageBasedVisualServo:
 
         self.Z = estimated_depth
         self.verbose = verbose
+
+        self.err_threshold = 80
 
     def compute_normalized_image_plane_coordinates(self, points: list[tuple[int, int]]) -> np.ndarray:
         points_normalized = []
@@ -101,6 +104,12 @@ class ImageBasedVisualServo:
         err_uv = self.goal_points_flatten - self.current_points_flatten
         self.err_uv_values.append(np.linalg.norm(err_uv))
 
+        if (self.err_uv_values[-1] < self.err_threshold):
+            print(f"err: {self.err_uv_values[-1]}")
+            self.lambda_factor = np.diag([0.1, 0.1, 0.1])
+        else:
+            self.lambda_factor = np.diag([self.lambda_factor_val, self.lambda_factor_val, self.lambda_factor_val])
+
         if isinstance(self.lambda_factor, np.ndarray):
             vel = self.lambda_factor @ jacobian_matrix_pinv @ err_uv
         else:
@@ -111,7 +120,7 @@ class ImageBasedVisualServo:
             print(f"J cond: {jcond}")
             print(f"Current points flat: {self.current_points_flatten}")
             print(f"Goal points flat: {self.goal_points_flatten}")
-            print(f"Error uv: {err_uv}")
+            print(f"Error uv: {err_uv} | error norm: {self.err_uv_values[-1]}")
             print(f"Velocity: {vel}")
             print("-" * 25)
 

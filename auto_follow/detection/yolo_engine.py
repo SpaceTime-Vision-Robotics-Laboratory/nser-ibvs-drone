@@ -59,28 +59,71 @@ class YoloEngine:
         :return: Tuple of (annotated_frame, default_mask)
         """
         results = self.detect(frame)
+
         frame_height, frame_width = frame.shape[:2]
         default_mask = np.zeros((frame_height, frame_width), dtype=np.uint8)
 
+        boxes = results.boxes
+
+        ## check for the box with the largest confidence to be above the threshold
+        if not (
+            boxes
+            and boxes.conf is not None
+            and len(boxes.conf) > 0
+            and boxes.conf.max() >= self.confidence_threshold
+        ):
+            # print(f"conf: {self.confidence_threshold}")
+            return (frame, default_mask, default_mask, results) \
+                if are_results_returned else (frame, default_mask, default_mask)
+
         if results.masks is None or len(results.masks.data) == 0:
-            return (frame, default_mask, results) if are_results_returned else (frame, default_mask)
+            return (frame, default_mask, default_mask, results) \
+                  if are_results_returned else (frame, default_mask, default_mask)
 
         annotated_frame = np.array(frame)
         masks = []
 
-        for i, mask in enumerate(results.masks.data):
-            binary_mask = self._process_mask(mask, frame_width, frame_height)
-            masks.append(binary_mask)
+        ## -----------------------------------
 
-            overlay = np.zeros_like(frame)
-            mask_bool = binary_mask > 0
-            for c in range(3):
-                overlay[:, :, c][mask_bool] = self.segmentation_color[c]
-            annotated_frame = cv2.addWeighted(annotated_frame, self.alpha, overlay, 1 - self.alpha, 0, overlay)
+        # for i, mask in enumerate(results.masks.data):
+        #     binary_mask = self._process_mask(mask, frame_width, frame_height)
+        #     masks.append(binary_mask)
+
+        #     overlay = np.zeros_like(frame)
+        #     mask_bool = binary_mask > 0
+        #     for c in range(3):
+        #         overlay[:, :, c][mask_bool] = self.segmentation_color[c]
+        #     annotated_frame = cv2.addWeighted(annotated_frame, self.alpha, overlay, 1 - self.alpha, 0, overlay)
+
+        ## -----------------------------------
+
+        ## =======================================
+
+        best_conf_index = boxes.conf.argmax()
+
+        ## will also return the xy point coordinates of the mask
+        ## ^ for the oriented bbox computation
+        masks_xy = results.masks.xy[best_conf_index]
+        masks_xy = [list(xy) for xy in masks_xy]
+        masks_xy = np.array(masks_xy).astype(np.int32)
+
+        ## select only the mask corresponding to the largest confidence value
+        mask = results.masks.data[best_conf_index]
+
+        binary_mask = self._process_mask(mask, frame_width, frame_height)
+        masks.append(binary_mask)
+
+        overlay = np.zeros_like(frame)
+        mask_bool = binary_mask > 0
+        for c in range(3):
+            overlay[:, :, c][mask_bool] = self.segmentation_color[c]
+        annotated_frame = cv2.addWeighted(annotated_frame, self.alpha, overlay, 1 - self.alpha, 0, overlay)
+
+        ## =======================================
 
         self._draw_boxes(annotated_frame, results)
 
-        output = (annotated_frame, masks[0] if masks else default_mask)
+        output = (annotated_frame, masks[0], masks_xy if masks else default_mask)
         return (*output, results) if are_results_returned else output
 
     def _draw_boxes(self, frame: np.ndarray, results: Results):

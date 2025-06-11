@@ -19,7 +19,7 @@ class IBVSSplitterController(BaseStreamingController):
         self.drone_commander.tilt_camera(pitch_deg=-45, reference_type=GimbalType.REF_ABSOLUTE)
         time.sleep(2)
 
-        self.drone_commander.move_by(forward=0, right=1, down=-0.5, rotation=0)
+        self.drone_commander.move_by(forward=0, right=0, down=0, rotation=0)
 
         self.frame_processor.frame_queue.empty()
 
