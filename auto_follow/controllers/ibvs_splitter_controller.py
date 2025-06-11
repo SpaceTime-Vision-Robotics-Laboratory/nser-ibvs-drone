@@ -1,37 +1,39 @@
-import time
+import argparse
+from functools import partial
+from pathlib import Path
 
+from auto_follow.controllers.eval_streaming_controller import EvaluationStreamingController
 from auto_follow.processors.ibvs_splitter_processor import IBVSSplitterProcessor
-from drone_base.config.drone import GimbalType, DroneIp
-from drone_base.stream.base_streaming_controller import BaseStreamingController
+from auto_follow.utils.path_manager import Paths
+from drone_base.config.drone import DroneIp
+from drone_base.config.video import VideoConfig
+from drone_base.utils.readable_time import date_time_now_to_file_name
 
 
-class IBVSSplitterController(BaseStreamingController):
-    def __init__(self, ip: DroneIp, processor_class=IBVSSplitterProcessor, **kwargs):
-        super().__init__(ip=ip, processor_class=processor_class, **kwargs)
-
-    def initialize_position(self):
-        if not self.drone.connection_state():
-            print("Connecting to drone...")
-            self.drone_commander.connect()
-
-        self.drone_commander.take_off()
-        time.sleep(3)
-        self.drone_commander.tilt_camera(pitch_deg=-45, reference_type=GimbalType.REF_ABSOLUTE)
-        time.sleep(2)
-
-        self.drone_commander.move_by(forward=0, right=0, down=0, rotation=0)
-
-        self.frame_processor.frame_queue.empty()
+class IBVSSplitterController(EvaluationStreamingController):
+    def __init__(self, ip: DroneIp, parquet_log_path: str | Path | None = None, **kwargs):
+        if parquet_log_path is None:
+            parquet_log_path = Paths.LOG_PARQUET_DIR
+        self.start_time = date_time_now_to_file_name()
+        self.parquet_log_path = parquet_log_path / self.start_time
+        _processor = partial(IBVSSplitterProcessor, logs_parquet_path=self.parquet_log_path)
+        super().__init__(ip=ip, processor_class=_processor, **kwargs)
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='IBVS Splitter Controller')
+    parser.add_argument("--log_path", type=str, default=Paths.OUTPUT_DIR / "logs")
+    parser.add_argument("--results_path", type=str, default=Paths.OUTPUT_DIR / "results")
+    parser.add_argument("--parquet_logs_path", type=str, default=Paths.OUTPUT_DIR / "parquet-logs")
+    args = parser.parse_args()
+
     ip = DroneIp.SIMULATED
     controller = IBVSSplitterController(
         ip=ip,
-        processor_class=IBVSSplitterProcessor,
+        log_path=Path(args.log_path),
+        results_path=Path(args.results_path),
+        parquet_log_path=Path(args.parquet_logs_path),
+        video_config=VideoConfig(width=640, height=360, cam_mode="recording", save_extension="jpg"),
     )
-
-    if ip == DroneIp.SIMULATED:
-        controller.initialize_position()
 
     controller.run()
