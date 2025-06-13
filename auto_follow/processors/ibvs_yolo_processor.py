@@ -31,7 +31,7 @@ class IBVSYoloProcessor(BaseVideoProcessor):
 
         camera_params = infer_intrinsic_matrix(camera_params_path)
         if isinstance(camera_params, tuple):
-            _, self.K = camera_params
+            _, self.K, self.K_rec = camera_params
         else:
             self.K = camera_params
 

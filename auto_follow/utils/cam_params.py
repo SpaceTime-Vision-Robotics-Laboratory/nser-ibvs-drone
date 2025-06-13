@@ -74,10 +74,24 @@ def infer_intrinsic_matrix(param_dir: str | Path) -> np.ndarray | tuple[np.ndarr
     param_path = Path(param_dir)
     if "sim" in param_path.name:
         intrinsic_matrix_path, intrinsic_matrix_half_path = get_paths_for_sim_params_res(param_dir)
-        return read_pkl_file(intrinsic_matrix_path), read_pkl_file(intrinsic_matrix_half_path)
+        intrinsic_full_sim = read_pkl_file(intrinsic_matrix_path)
+        intrinsic_1080 = scale_intrinsic_matrix_by_size(intrinsic_full_sim, original_size=(1280, 720), new_size=(1280, 1080))
+        return read_pkl_file(intrinsic_matrix_path), read_pkl_file(intrinsic_matrix_half_path), intrinsic_1080 
 
     elif "real" in param_path.name:
         _, _, intrinsic_matrix_path, _, _ = get_paths_for_param_res(param_dir)
         return read_pkl_file(intrinsic_matrix_path)
 
     raise ValueError(f"Wrong camera parameters name format for ({param_path.name}) in \"{param_path}\"")
+
+
+
+if __name__ == "__main__":
+    params = infer_intrinsic_matrix(param_dir=Paths.CAMERA_SIM_ANAFI_4k_DIR)
+
+    print(params)
+    print(f"Scaled Params: \n {params[-1]}")
+    
+    print(f"Scaled params half: \n{scale_intrinsic_matrix_by_size(params[-1], original_size=(1280, 1080), new_size=(640, 360))}")
+
+    print(f"Already halfed {params[1]}")

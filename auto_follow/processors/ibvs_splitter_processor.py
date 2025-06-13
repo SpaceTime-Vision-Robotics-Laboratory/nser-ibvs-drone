@@ -13,8 +13,8 @@ from auto_follow.utils.path_manager import Paths
 class IBVSSplitterProcessor(IBVSYoloProcessor):
     def __init__(
             self,
-            model_path: str | Path = Paths.SIM_CAR_IBVS_YOLO_PATH,
-            splitter_model_path: str | Path = Paths.SIM_MASK_SPLITTER_CAR_LOW_PATH,
+            model_path: str | Path = Paths.REAL_CAR_IBVS_YOLO_PATH,
+            splitter_model_path: str | Path = Paths.REAL_MASK_SPLITTER_CAR,
             error_window_size: int = 5,
             **kwargs
     ):
@@ -28,6 +28,8 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
         self._hard_goal_enter_time = None
         self._flight_start_time = None
         self._flight_end_time = None
+
+        print(f"{model_path=} | {splitter_model_path=}")
 
         self.error_window_size = error_window_size
         self.recent_errors = deque(maxlen=self.error_window_size)

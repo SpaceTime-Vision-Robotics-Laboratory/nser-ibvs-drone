@@ -20,6 +20,8 @@ class EvaluationStreamingController(BaseStreamingController):
         self.manual_controller.start()
         self.frame_processor.start()
 
+        # self.drone_commander.execute_command(TiltCommand(pitch_deg=-45), is_blocking=False)
+
         if self.will_stop_after_mission:
             self.drone_commander.take_off()
             sleep(3)
