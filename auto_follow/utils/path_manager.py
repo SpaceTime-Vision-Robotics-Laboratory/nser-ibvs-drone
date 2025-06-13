@@ -19,7 +19,7 @@ class Paths:
 
     SIM_MASK_SPLITTER_CAR_LOW_PATH: Final[
         Path] = MODELS_DIR / "mask_splitter-epoch_10-dropout_0-low_x2-and-high_x0_quality_early_stop.pt"
-    
+    SIM_STUDENT_NET_TEMPORAL_PATH: Final[Path] = MODELS_DIR / "sim_temporal_student_best_model.pth"
     SIM_STUDENT_NET_PATH: Final[Path] = MODELS_DIR / "student_best_model.pth"
 
     # PID config:
