@@ -192,12 +192,12 @@ def run_simulation_loop(
 
 if __name__ == '__main__':
     target_r = 1
-    sphinx_bunker_base_dir = "/home/brittle/Games/MyGames/DroneSimulation"
+    sphinx_bunker_base_dir = "/home/sebnae/shared_drive/ws/drone_ws/simulator_env"
     is_student = True
     scenes = [
         "bunker-online-4k-config-test-down-left.yaml",
         "bunker-online-4k-config-test-down-right.yaml",
-        "bunker-online-4k-config-test-front-small-offset-right.yaml"
+        "bunker-online-4k-config-test-front-small-offset-right.yaml",
         "bunker-online-4k-config-test-front-small-offset-left.yaml",
         "bunker-online-4k-config-test-left.yaml",
         "bunker-online-4k-config-test-right.yaml",
