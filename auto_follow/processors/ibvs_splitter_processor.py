@@ -29,6 +29,8 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
         self._flight_start_time = None
         self._flight_end_time = None
 
+        print(f"{model_path=} | {splitter_model_path=}")
+
         self.error_window_size = error_window_size
         self.recent_errors = deque(maxlen=self.error_window_size)
         self.results_path = self.frame_saver.output_dir.parent / "flight_duration.json"

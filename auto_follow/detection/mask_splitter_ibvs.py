@@ -35,7 +35,7 @@ class MaskSplitterEngineIBVS(YoloEngineIBVS):
             best_front: dict,
             best_back: dict
     ) -> list[tuple[int, ...]]:
-        return super()._reorder_bbox_oriented(box)
+        # return super()._reorder_bbox_oriented(box) ## to only run the dummy segmentation
 
         """
         Reorder bounding box points to achieve a consistent clockwise order:
