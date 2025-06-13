@@ -1,6 +1,6 @@
 paths:
   sphinx:
-    command: "/home/sebnae/shared_drive/ws/drone_ws/simulator_env/bunker/installed/LinuxNoEditor/UnrealApp.sh"
+    command: "bunker/installed/LinuxNoEditor/UnrealApp.sh"
     level: "main_details"
     quality: "low"
     config_file: "assets/environment/config/add_mc_laren.yaml"
@@ -12,7 +12,7 @@ paths:
       pose: "-1 1 0.3 0 -0 5.495"
 
   scripts:
-    controller: "auto_follow/controllers/student_controller.py"
-    save_dir_name: "TEST_bunker-online-4k-config-test-down-left"
+    controller: "auto_follow/controllers/ibvs_splitter_controller.py"
+    save_dir_name: "bunker-online-4k-config-test-down-left"
 
 
