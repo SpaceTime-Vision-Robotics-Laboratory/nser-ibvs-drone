@@ -184,30 +184,30 @@ def run_simulation_loop(target_runs: int = 2, config_path: str | Path = Paths.BU
 
 
 if __name__ == '__main__':
-    target_r = 5
+    target_r = 1
     run_simulation_loop(
         target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-down-left.yaml"
     )
     run_simulation_loop(
         target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-down-right.yaml"
     )
-    run_simulation_loop(
-        target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-up-left.yaml"
-    )
-    run_simulation_loop(
-        target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-up-right.yaml"
-    )
-    run_simulation_loop(
-        target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-left.yaml"
-    )
-    run_simulation_loop(
-        target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-right.yaml"
-    )
-    run_simulation_loop(
-        target_runs=target_r,
-        config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-front-small-offset-left.yaml"
-    )
-    run_simulation_loop(
-        target_runs=target_r,
-        config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-front-small-offset-right.yaml"
-    )
+    # run_simulation_loop(
+    #     target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-up-left.yaml"
+    # )
+    # run_simulation_loop(
+    #     target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-up-right.yaml"
+    # )
+    # run_simulation_loop(
+    #     target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-left.yaml"
+    # )
+    # run_simulation_loop(
+    #     target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-right.yaml"
+    # )
+    # run_simulation_loop(
+    #     target_runs=target_r,
+    #     config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-front-small-offset-left.yaml"
+    # )
+    # run_simulation_loop(
+    #     target_runs=target_r,
+    #     config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-front-small-offset-right.yaml"
+    # )
