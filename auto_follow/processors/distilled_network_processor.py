@@ -69,6 +69,9 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
         target_data = self.detector.find_best_target(frame, results)
         if target_data.confidence == -1:
             self._command_zero_time = None
+            
+            self.check_timout_landing(timestamp)
+            
             return frame
 
         command = self.student_engine.predict(frame)

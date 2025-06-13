@@ -57,6 +57,7 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
         if target_data.confidence == -1:
             self._soft_goal_enter_time = None
             self.recent_errors.clear()
+            self.check_timout_landing(timestamp)
             return frame
 
         self.visualizer.display_frame(frame, target_data, self.ibvs_controller, self.ibvs_controller.goal_points)
