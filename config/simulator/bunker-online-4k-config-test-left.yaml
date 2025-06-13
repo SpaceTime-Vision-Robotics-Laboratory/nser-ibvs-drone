@@ -1,6 +1,6 @@
 paths:
   sphinx:
-    command: "/home/brittle/Games/MyGames/DroneSimulation/bunker/installed/LinuxNoEditor/UnrealApp.sh"
+    command: "/media/mihaib08/0AC68039C68026D3/models/_research_drone/bunker-cars/bunker/installed/LinuxNoEditor/UnrealApp.sh"
     level: "main_details"
     quality: "low"
     config_file: "assets/environment/config/add_mc_laren.yaml"
@@ -8,7 +8,7 @@ paths:
     firmware:
       base_command: "sphinx"
       drone_path: "/opt/parrot-sphinx/usr/share/sphinx/drones/anafi.drone"
-      firmware_url: "https://firmware.parrot.com/Versions/anafi/pc/%23latest/images/anafi-pc.ext2.zip"
+      firmware_url: "/home/mihaib08/Desktop/_Res/drone/anafi-pc.ext2.zip"
       pose: "0 1 0.3 0 -0 -1.57"
 
   scripts:

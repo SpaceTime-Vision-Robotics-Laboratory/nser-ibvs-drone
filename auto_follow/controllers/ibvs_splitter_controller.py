@@ -27,7 +27,7 @@ if __name__ == '__main__':
     parser.add_argument("--parquet_logs_path", type=str, default=Paths.OUTPUT_DIR / "parquet-logs")
     args = parser.parse_args()
 
-    ip = DroneIp.SIMULATED
+    ip = DroneIp.WIRELESS
     controller = IBVSSplitterController(
         ip=ip,
         log_path=Path(args.log_path),

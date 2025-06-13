@@ -133,7 +133,7 @@ class TargetTrackerIBVS(TargetTracker):
         self.max_angular_speed = np.deg2rad(60)  # rad/s
         self.ibvs_controller = ibvs_controller
 
-        self.const_yaw_threshold = 8
+        self.const_yaw_threshold = 20
 
         self.velocity_low_threshold = 0.002
         self.velocity_high_threshold = 0.005
@@ -151,11 +151,11 @@ class TargetTrackerIBVS(TargetTracker):
         if abs(yaw) < self.const_yaw_threshold:
             yaw = 0
 
-        if self.velocity_low_threshold <= abs(velocities[0]) <= self.velocity_high_threshold:
-            roll = -1 if velocities[0] < 0 else 1
+        # if self.velocity_low_threshold <= abs(velocities[0]) <= self.velocity_high_threshold:
+        #     roll = -1 if velocities[0] < 0 else 1
 
-        if self.velocity_low_threshold <= abs(velocities[1]) <= self.velocity_high_threshold:
-            pitch = 1 if velocities[1] < 0 else -1
+        # if self.velocity_low_threshold <= abs(velocities[1]) <= self.velocity_high_threshold:
+        #     pitch = 1 if velocities[1] < 0 else -1
 
         cmd_info = CommandInfo(
             timestamp=time.time(),

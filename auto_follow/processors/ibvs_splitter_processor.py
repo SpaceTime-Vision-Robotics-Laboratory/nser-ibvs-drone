@@ -13,8 +13,8 @@ from auto_follow.utils.path_manager import Paths
 class IBVSSplitterProcessor(IBVSYoloProcessor):
     def __init__(
             self,
-            model_path: str | Path = Paths.SIM_CAR_IBVS_YOLO_PATH,
-            splitter_model_path: str | Path = Paths.SIM_MASK_SPLITTER_CAR_LOW_PATH,
+            model_path: str | Path = Paths.REAL_CAR_IBVS_YOLO_PATH,
+            splitter_model_path: str | Path = Paths.REAL_MASK_SPLITTER_CAR,
             error_window_size: int = 5,
             **kwargs
     ):
