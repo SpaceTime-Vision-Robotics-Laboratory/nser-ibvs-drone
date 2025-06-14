@@ -17,7 +17,8 @@ class ImageBasedVisualServo:
         self.Kinv = np.linalg.inv(self.K)
 
         self.lambda_factor_val = lambda_factor
-        self.lambda_factor = np.diag([lambda_factor, lambda_factor, lambda_factor])
+        self.lambda_factor = np.diag([lambda_factor * 2.5, lambda_factor * 2.5, lambda_factor * 1.15])
+        self.lambda_factor_low = np.diag([0.5, 0.5, 0.1])
 
         self.goal_points = goal_points
         self.goal_points_flatten = np.hstack(goal_points)
@@ -33,7 +34,7 @@ class ImageBasedVisualServo:
         self.Z = estimated_depth
         self.verbose = verbose
 
-        self.err_threshold = 80
+        self.err_threshold = 60
 
     def compute_normalized_image_plane_coordinates(self, points: list[tuple[int, int]]) -> np.ndarray:
         points_normalized = []
@@ -105,14 +106,14 @@ class ImageBasedVisualServo:
         self.err_uv_values.append(np.linalg.norm(err_uv))
 
         if self.err_uv_values[-1] < self.err_threshold:
-            self.lambda_factor = np.diag([0.1, 0.1, 0.1])
+            lambda_factor = self.lambda_factor_low
         else:
-            self.lambda_factor = np.diag([self.lambda_factor_val, self.lambda_factor_val, self.lambda_factor_val])
+            lambda_factor = self.lambda_factor
 
-        if isinstance(self.lambda_factor, np.ndarray):
-            vel = self.lambda_factor @ jacobian_matrix_pinv @ err_uv
+        if isinstance(lambda_factor, np.ndarray):
+            vel = lambda_factor @ jacobian_matrix_pinv @ err_uv
         else:
-            vel = self.lambda_factor * jacobian_matrix_pinv @ err_uv
+            vel = lambda_factor * jacobian_matrix_pinv @ err_uv
 
         if verbose:
             print("-" * 25)
