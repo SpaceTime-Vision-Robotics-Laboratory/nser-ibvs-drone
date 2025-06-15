@@ -17,8 +17,8 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
 
     def __init__(
             self,
-            model_path: str | Path = Paths.SIM_CAR_IBVS_YOLO_PATH,
-            student_model_path: str | Path = Paths.SIM_STUDENT_NEW_PATH_REAL_WORLD_DISTRIBUTION,
+            model_path: str | Path = Paths.REAL_CAR_IBVS_YOLO_PATH,
+            student_model_path: str | Path = Paths.REAL_STUNDENT_NET_PRETRAINED_REAL_WORLD_DISTRIBUTION,
             logs_parquet_path: str | Path | None = Paths.LOG_PARQUET_DIR,
             error_window_size: int = 5,
             **kwargs
@@ -26,6 +26,9 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
         super().__init__(model_path=model_path, **kwargs)
         self.student_engine = StudentEngine(student_model_path)
         self.int_threshold = 0.5
+
+        print(f"SEG PATH: {model_path}")
+        print(f"Student model PATH: {student_model_path}")
 
         self.parquet_path = logs_parquet_path
         if self.parquet_path is not None:
@@ -69,7 +72,7 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
         }
         
 
-        if self._frame_count % 2 == 1:
+        if self._frame_count % 2 != 0:
             self._add_cmd_visualization(frame, self.last_command_info)
             return frame
         
@@ -167,7 +170,8 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
         :returns: A tuple of (If goal reached, If reached within a threshold and if all commands are 0)
         """
         # On real we need to put on 2 as a threshold from data with error less than 40
-        return np.all(self.recent_commands == 0)
+        # return np.all(self.recent_commands == 0)
+        return np.all(np.abs(self.recent_commands) <= 1)
 
     def _save_parquet_logs(self, parquet_row: dict, command_info: CommandInfo, logs: dict) -> None:
         parquet_row["x_cmd"] = command_info.x_cmd

@@ -10,7 +10,10 @@ class Paths:
     UNTRAINED_YOLO_PATH: Final[Path] = MODELS_DIR / "yolo11n.pt"
     REAL_CAR_YOLO_PATH: Final[Path] = MODELS_DIR / "yolon_car_detector.pt"
     SIM_CAR_POSE_IBVS_YOLO_PATH: Final[Path] = MODELS_DIR / "30_05_best__yolo11n-seg_sim_car_bunker__front_back.pt"
+    
     SIM_CAR_IBVS_YOLO_PATH: Final[Path] = MODELS_DIR / "29_05_best__yolo11n-seg_sim_car_bunker__all.pt"
+    REAL_CAR_IBVS_YOLO_PATH: Final[Path] = MODELS_DIR / "real-yolo-car-full-segmentation.pt"
+    
     SIM_CAR_YOLO_PATH: Final[Path] = MODELS_DIR / "yolov11n_car_detector_sim.pt"
     SIM_CAR_SIMPLE_YOLO_PATH: Final[Path] = MODELS_DIR / "yolo11n_car_detector_sim_simple.pt"
     SIM_CAR_CARLA_YOLO_PATH: Final[Path] = MODELS_DIR / "yolo11n_car_detector_sim_carla.pt"

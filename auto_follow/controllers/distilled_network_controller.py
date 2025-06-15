@@ -21,12 +21,24 @@ class DistilledStudentController(EvaluationStreamingController):
 
 
 if __name__ == '__main__':
+    # experiment_name = "real-student-down-left"
+    # experiment_name = "real-student-down-right"
+    # experiment_name = "real-student-front-small-offset-right"
+    # experiment_name = "real-student-front-small-offset-left"
+    # experiment_name = "real-student-left"
+    # experiment_name = "real-student-right"
+    # experiment_name = "real-student-up-left"
+    # experiment_name = "real-student-up-right"
+
+    # experiment_name = "real-student-random-spawn-test"
+    
+
     parser = argparse.ArgumentParser(description='Distilled Student Controller (No Splitter Validation)')
-    parser.add_argument("--log_path", type=str, default=Paths.OUTPUT_DIR / "logs")
-    parser.add_argument("--results_path", type=str, default=Paths.OUTPUT_DIR / "results")
-    parser.add_argument("--parquet_logs_path", type=str, default=Paths.OUTPUT_DIR / "parquet-logs")
+    parser.add_argument("--log_path", type=str, default=Paths.OUTPUT_DIR / experiment_name / "logs")
+    parser.add_argument("--results_path", type=str, default=Paths.OUTPUT_DIR / experiment_name / "results")
+    parser.add_argument("--parquet_logs_path", type=str, default=Paths.OUTPUT_DIR / experiment_name / "parquet-logs")
     args = parser.parse_args()
-    ip = DroneIp.SIMULATED
+    ip = DroneIp.WIRELESS
     controller = DistilledStudentController(
         ip=ip,
         log_path=Path(args.log_path),
