@@ -77,7 +77,7 @@ class PathConfig:
         firmware_command = f'{firmware["base_command"]} "{firmware["drone_path"]}'
         if pose is not None:
             firmware_command += f'::pose={pose}'
-        firmware_command += f'::firmware={firmware["firmware_url"]}"'
+        firmware_command += f'::firmware={"/home/mihaib08/Desktop/_Res/drone/anafi-pc.ext2.zip"}"'
 
         sphinx_full_path = str(Path(sphinx_base_dir) / sphinx["command"])
         quality = sphinx.get('quality')

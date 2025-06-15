@@ -192,8 +192,8 @@ def run_simulation_loop(
 
 if __name__ == '__main__':
     target_r = 1
-    sphinx_bunker_base_dir = "/home/sebnae/shared_drive/ws/drone_ws/simulator_env"
-    is_student = True
+    sphinx_bunker_base_dir = "/media/mihaib08/0AC68039C68026D3/models/_research_drone/bunker-cars"
+    is_student = False
     scenes = [
         "bunker-online-4k-config-test-down-left.yaml",
         "bunker-online-4k-config-test-down-right.yaml",

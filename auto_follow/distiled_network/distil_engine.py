@@ -21,7 +21,7 @@ class StudentEngine:
             transforms.Resize(image_size),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
-        self.denormalize = torch.tensor([9.0, 5.0, 24.0], device=self.device)
+        self.denormalize = torch.tensor([30.0, 30.0, 40.0], device=self.device)
 
     def preprocess(self, image: np.ndarray) -> torch.Tensor:
         image = torch.from_numpy(image).to(self.device).permute(2, 0, 1).float() / 255.0

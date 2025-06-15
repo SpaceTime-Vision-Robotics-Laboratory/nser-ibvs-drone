@@ -25,6 +25,10 @@ class Paths:
     SIM_STUDENT_NET_TEMPORAL_PATH: Final[Path] = MODELS_DIR / "sim_temporal_student_best_model.pth"
     SIM_STUDENT_NET_PATH: Final[Path] = MODELS_DIR / "student_best_model.pth"
 
+    REAL_STUDENT_NET_NO_PRETRAIN_PATH: Final[Path] = MODELS_DIR / "student_train_only_real.pth"
+    REAL_STUDENT_NET_PRETRAIN_PATH: Final[Path] = MODELS_DIR / "student_model_pretrained.pth"
+    REAL_STUDENT_NET_AUGMENTED_PATH: Final[Path] = MODELS_DIR / "student_best_model_augments.pth"
+
     REAL_MASK_SPLITTER_CAR: Final[
         Path] = MODELS_DIR / "mask_splitter-epoch_10-dropout_0-_x2_real_early_stop.pt"
 

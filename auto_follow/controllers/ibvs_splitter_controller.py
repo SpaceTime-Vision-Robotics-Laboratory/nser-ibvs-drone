@@ -21,14 +21,14 @@ class IBVSSplitterController(EvaluationStreamingController):
 
 
 if __name__ == '__main__':
-    experiment_name = "real-ibvs-front-small-offset-right"
+    # experiment_name = "real-ibvs-front-small-offset-right"
     parser = argparse.ArgumentParser(description='IBVS Splitter Controller')
-    parser.add_argument("--log_path", type=str, default=Paths.OUTPUT_DIR / experiment_name / "logs")
-    parser.add_argument("--results_path", type=str, default=Paths.OUTPUT_DIR / experiment_name / "results")
-    parser.add_argument("--parquet_logs_path", type=str, default=Paths.OUTPUT_DIR / experiment_name / "parquet-logs")
+    parser.add_argument("--log_path", type=str, default=Paths.OUTPUT_DIR / "logs")
+    parser.add_argument("--results_path", type=str, default=Paths.OUTPUT_DIR / "results")
+    parser.add_argument("--parquet_logs_path", type=str, default=Paths.OUTPUT_DIR / "parquet-logs")
     args = parser.parse_args()
 
-    ip = DroneIp.WIRELESS
+    ip = DroneIp.SIMULATED
     controller = IBVSSplitterController(
         ip=ip,
         log_path=Path(args.log_path),
