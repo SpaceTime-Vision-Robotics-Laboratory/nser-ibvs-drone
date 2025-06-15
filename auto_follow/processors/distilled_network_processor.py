@@ -68,10 +68,11 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
             "frame_idx": self._frame_count,
         }
         
-        self._add_cmd_visualization(frame, drone_command)
-        if self._frame_count % 2 == 1:
-            return frame
 
+        if self._frame_count % 2 == 1:
+            self._add_cmd_visualization(frame, self.last_command_info)
+            return frame
+        
         results = self.detector.detect(frame)
         target_data = self.detector.find_best_target(frame, results)
         if target_data.confidence == -1:
@@ -111,7 +112,7 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
 
         self.last_command_info = drone_command
         self.perform_movement(drone_command)
-        
+        self._add_cmd_visualization(frame, self.last_command_info)
         return frame
 
     def check_goal_reached(self, timestamp: float):
