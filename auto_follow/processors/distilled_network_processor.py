@@ -17,13 +17,14 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
 
     def __init__(
             self,
-            model_path: str | Path = Paths.SIM_STUDENT_NET_PATH,
+            model_path: str | Path = Paths.SIM_CAR_IBVS_YOLO_PATH,
+            student_model_path: str | Path = Paths.SIM_STUDENT_NEW_PATH_REAL_WORLD_DISTRIBUTION,
             logs_parquet_path: str | Path | None = Paths.LOG_PARQUET_DIR,
             error_window_size: int = 5,
             **kwargs
     ):
-        super().__init__(**kwargs)
-        self.student_engine = StudentEngine(model_path)
+        super().__init__(model_path=model_path, **kwargs)
+        self.student_engine = StudentEngine(student_model_path)
         self.int_threshold = 0.5
 
         self.parquet_path = logs_parquet_path
@@ -49,6 +50,8 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
         self.error_window_size = error_window_size
         self.results_path = self.frame_saver.output_dir.parent / "flight_duration.json"
         self.recent_commands = np.ones((self.error_window_size, 3))
+        
+        self.last_command_info = None
 
     def _process_frame(self, frame: np.ndarray) -> np.ndarray:
         if not self._check_start_drone_state():
@@ -64,6 +67,10 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
             "timestamp": timestamp,
             "frame_idx": self._frame_count,
         }
+        
+        self._add_cmd_visualization(frame, drone_command)
+        if self._frame_count % 2 == 1:
+            return frame
 
         results = self.detector.detect(frame)
         target_data = self.detector.find_best_target(frame, results)
@@ -102,9 +109,9 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
         self.check_goal_reached(timestamp)
         self.check_timout_landing(timestamp)
 
+        self.last_command_info = drone_command
         self.perform_movement(drone_command)
-        self._add_cmd_visualization(frame, drone_command)
-
+        
         return frame
 
     def check_goal_reached(self, timestamp: float):
@@ -158,6 +165,7 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
         Check if at goal using median of recent errors for stability. Need at least 3 values for meaningful median.
         :returns: A tuple of (If goal reached, If reached within a threshold and if all commands are 0)
         """
+        # On real we need to put on 2 as a threshold from data with error less than 40
         return np.all(self.recent_commands == 0)
 
     def _save_parquet_logs(self, parquet_row: dict, command_info: CommandInfo, logs: dict) -> None:
@@ -170,6 +178,8 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
         self.log_parquet.to_parquet(self.parquet_path / "logs.parquet", index=False)
 
     def _add_cmd_visualization(self, frame: np.ndarray, drone_command: CommandInfo) -> None:
+        if drone_command is None:
+            return
         overlay = np.array(frame)
         cv2.rectangle(overlay, (5, 10), (105, 100), (0, 0, 0), -1)  # Black rectangle
         cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)  # 40% overlay opacity
