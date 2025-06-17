@@ -83,9 +83,13 @@ def load_json_metadata(results_dir: str | Path, scene_dir_names: list[str]) -> p
     return pd.DataFrame(all_metadata)
 
 
-def load_parquet_data(results_dir: str | Path, scene_dir_names: list[str]):
+def load_parquet_data(results_dir: str | Path, scene_dir_names: list[str], is_student=False):
     all_logs = []
     results_dir = Path(results_dir)
+
+    parquet_log_name = "logs.parquet"
+    if is_student:
+        parquet_log_name = "logs-teacher-output.parquet"
 
     for scene_name in scene_dir_names:
         parquet_logs_path = results_dir / scene_name / "parquet-logs"
@@ -95,7 +99,7 @@ def load_parquet_data(results_dir: str | Path, scene_dir_names: list[str]):
 
         scene_direction = extract_direction(scene_name)
         for experiment_run in os.listdir(parquet_logs_path):
-            parquet_file = parquet_logs_path / experiment_run / "logs.parquet"
+            parquet_file = parquet_logs_path / experiment_run / parquet_log_name
             if parquet_file.exists():
                 df = pd.read_parquet(parquet_file)
                 df["run"] = experiment_run
