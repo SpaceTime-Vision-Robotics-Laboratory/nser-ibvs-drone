@@ -75,10 +75,10 @@ def benchmark_evaluators(input_directory: str):
     print(f"  FPS: {1000 / np.mean(student_times):.1f}")
 
     print(f"StudentEvaluator Segmentation:")
-    print(f"  Average: {np.mean(student_evaluator_seg):.2f} ms")
-    print(f"  Min: {np.min(student_evaluator_seg):.2f} ms")
-    print(f"  Max: {np.max(student_evaluator_seg):.2f} ms")
-    print(f"  FPS: {1000 / np.mean(student_evaluator_seg):.1f}")
+    print(f"  Average: {np.mean(student_times_seg):.2f} ms")
+    print(f"  Min: {np.min(student_times_seg):.2f} ms")
+    print(f"  Max: {np.max(student_times_seg):.2f} ms")
+    print(f"  FPS: {1000 / np.mean(student_times_seg):.1f}")
 
     print(f"\nIBVSEvaluator:")
     print(f"  Average: {np.mean(ibvs_times):.2f} ms")
