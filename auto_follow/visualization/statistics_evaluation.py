@@ -90,7 +90,7 @@ def compute_error_statistics_for_time_criteria(
         duration_df: pd.DataFrame,
         threshold: float = 1.0,
         duration: float = 3.0
-) -> tuple[pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Compute error statistics for last 3 seconds and for first stable 3-second period.
 
@@ -115,15 +115,10 @@ def compute_error_statistics_for_time_criteria(
             print(f"No stable period found for run: {run_id}")
             continue
 
-        # TODO: this needs to be fixed.
-        stable_period_end_time = stable_period_data["timestamp"].iloc[-1]
+        stable_period_end_time = stable_period_data["timestamp"].iloc[0]
         run_start_time = run_group["timestamp"].min()
-        run_end_time = run_group["timestamp"].max()
+        adjusted_flight_duration = stable_period_end_time - run_start_time + 3
         
-        # Adjusted flight duration = total time - time up to end of stable period
-        adjusted_flight_duration = run_end_time - stable_period_end_time
-        
-        # Update the duration_df
         mask = updated_duration_df["run"] == run_id
         updated_duration_df.loc[mask, "flight_duration"] = adjusted_flight_duration
 
@@ -388,29 +383,34 @@ def run_stats(
 
     threshold = 1
     err_stats, iou_stats = compute_error_statistics(parquet_data, json_flight_data)
-    err_stats_1_thresh, iou_stats_1_thresh, updated_time_df = compute_error_statistics_for_time_criteria(
-        parquet_data, json_flight_data, threshold=threshold, duration=3.0
-    )
+    if is_student and not is_real:
+        err_stats_1_thresh, iou_stats_1_thresh, updated_time_df = compute_error_statistics_for_time_criteria(
+            parquet_data, json_flight_data, threshold=threshold, duration=3.0
+        )
+        err_stats_1_thresh.to_csv(save_path_dir / f"{save_path_name}_err_stats_1_threshold-total.csv", header=True)
+        iou_stats_1_thresh.to_csv(save_path_dir / f"{save_path_name}_iou_stats_1_threshold-total.csv", header=True)
+        plot_statistics_summary(err_stats_1_thresh, iou_stats_1_thresh, save_path_dir, threshold=threshold)
+        err_stats_1_thresh = err_stats_1_thresh.groupby("direction").mean(numeric_only=True)
+        iou_stats_1_thresh = iou_stats_1_thresh.groupby("direction").mean(numeric_only=True)
+        err_stats_1_thresh.to_csv(save_path_dir / f"{save_path_name}_err_stats_threshold_{threshold}-mean.csv",
+                                  header=True)
+        iou_stats_1_thresh.to_csv(save_path_dir / f"{save_path_name}_iou_stats_threshold_{threshold}-mean.csv",
+                                  header=True)
+
     cmd_stats = compute_command_statistics(parquet_data, json_flight_data)
     err_stats.to_csv(save_path_dir / f"{save_path_name}_error_stats-total.csv", header=True)
     iou_stats.to_csv(save_path_dir / f"{save_path_name}_iou_stats-total.csv", header=True)
     cmd_stats.to_csv(save_path_dir / f"{save_path_name}_cmd_stats-total.csv", header=True)
-    err_stats_1_thresh.to_csv(save_path_dir / f"{save_path_name}_err_stats_1_threshold-total.csv", header=True)
-    iou_stats_1_thresh.to_csv(save_path_dir / f"{save_path_name}_iou_stats_1_threshold-total.csv", header=True)
+
     plot_statistics_summary(err_stats, iou_stats, save_path_dir, threshold=0)
-    plot_statistics_summary(err_stats_1_thresh, iou_stats_1_thresh, save_path_dir, threshold=threshold)
 
     err_stats_mean = err_stats.groupby("direction").mean(numeric_only=True)
     iou_stats_mean = iou_stats.groupby("direction").mean(numeric_only=True)
     cmd_stats_mean = cmd_stats.groupby("direction").mean(numeric_only=True)
-    err_stats_1_thresh = err_stats_1_thresh.groupby("direction").mean(numeric_only=True)
-    iou_stats_1_thresh = iou_stats_1_thresh.groupby("direction").mean(numeric_only=True)
+
     err_stats_mean.to_csv(save_path_dir / f"{save_path_name}_error_stats-mean.csv", header=True)
     iou_stats_mean.to_csv(save_path_dir / f"{save_path_name}_iou_stats-mean.csv", header=True)
     cmd_stats_mean.to_csv(save_path_dir / f"{save_path_name}_cmd_stats-mean.csv", header=True)
-    err_stats_1_thresh.to_csv(save_path_dir / f"{save_path_name}_err_stats_threshold_{threshold}-mean.csv", header=True)
-    iou_stats_1_thresh.to_csv(save_path_dir / f"{save_path_name}_iou_stats_threshold_{threshold}-mean.csv", header=True)
-
     duration_stats, distance_stats = compute_flight_duration_distance_statistics(
         parquet_data, json_flight_data, metadata_df
     )
@@ -445,40 +445,40 @@ def run_stats(
 if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
 
-    # sim_ibvs_path = Path("/home/brittle/Desktop/work/Data/car-data/droid-data/sim/sim-ibvs-results-merged")
-    # run_stats(
-    #     base_path=sim_ibvs_path,
-    #     save_path_name="sim-ibvs-results",
-    #     scenes_names=ConfigsDirName.SIM,
-    #     is_student=False,
-    #     is_real=False,
-    # )
+    sim_ibvs_path = Path("/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged")
+    run_stats(
+        base_path=sim_ibvs_path,
+        save_path_name="sim-ibvs-results",
+        scenes_names=ConfigsDirName.SIM,
+        is_student=False,
+        is_real=False,
+    )
 
-    sim_student_path = Path("/home/brittle/Desktop/work/Data/car-data/droid-data/sim/sim-student-results-merged")
+    sim_student_path = Path("/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student-with-teacher-output/sim-student-with-teacher-output-merged")
     run_stats(
         base_path=sim_student_path,
-        save_path_name="sim-student-results",
+        save_path_name="sim-student-results-v2",
         scenes_names=ConfigsDirName.SIM,
         is_student=True,
         is_real=False,
     )
 
-    # real_ibvs_path = Path(
-    #     "/home/brittle/Desktop/work/Data/car-data/droid-data/real/real-world-ibvs-results-merged")
-    # run_stats(
-    #     base_path=real_ibvs_path,
-    #     save_path_name="real-ibvs-results",
-    #     scenes_names=ConfigsDirName.REAL,
-    #     is_student=False,
-    #     is_real=True,
-    # )
-    #
-    # real_student_path = Path(
-    #     "/home/brittle/Desktop/work/Data/car-data/droid-data/real/real-student-with-teacher-output")
-    # run_stats(
-    #     base_path=real_student_path,
-    #     save_path_name="real-student-results",
-    #     scenes_names=ConfigsDirName.REAL,
-    #     is_student=True,
-    #     is_real=True,
-    # )
+    real_ibvs_path = Path(
+        "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged")
+    run_stats(
+        base_path=real_ibvs_path,
+        save_path_name="real-ibvs-results",
+        scenes_names=ConfigsDirName.REAL,
+        is_student=False,
+        is_real=True,
+    )
+
+    real_student_path = Path(
+        "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/real-student-with-teacher-output")
+    run_stats(
+        base_path=real_student_path,
+        save_path_name="real-student-results",
+        scenes_names=ConfigsDirName.REAL,
+        is_student=True,
+        is_real=True,
+    )

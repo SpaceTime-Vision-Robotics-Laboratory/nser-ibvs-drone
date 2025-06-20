@@ -369,10 +369,12 @@ def run_comparison_analysis(
     teacher_error_stats, teacher_iou_stats = compute_error_statistics(teacher_parquet_data, teacher_json_flight_data)
     if is_real:
         student_error_stats, student_iou_stats = compute_error_statistics(student_parquet_data, student_json_flight_data)
+        plot_flight_durations_comparison(teacher_json_flight_data, student_json_flight_data, save_path=save_path_dir)
     else:
         student_error_stats, student_iou_stats, updated_student_time_data = compute_error_statistics_for_time_criteria(
             student_parquet_data, student_json_flight_data, threshold=1.0, duration=3.0
         )
+        plot_flight_durations_comparison(teacher_json_flight_data, updated_student_time_data, save_path=save_path_dir)
 
     print(
         f"Teacher - Total scenes: {teacher_parquet_data['scene'].nunique()}, Total runs: {teacher_parquet_data['run'].nunique()}")
@@ -382,20 +384,13 @@ def run_comparison_analysis(
     print(f"Student - Error stats: {len(student_error_stats)} runs, IoU stats: {len(student_iou_stats)} runs")
 
     print("Creating comparison plots...")
+    plot_distances_comparison(teacher_metadata_df, student_metadata_df, save_path=save_path_dir)
+    plot_error_norms_comparison(teacher_error_stats, student_error_stats, save_path=save_path_dir)
+    plot_iou_comparison(teacher_iou_stats, student_iou_stats, save_path=save_path_dir)
 
-
-    if is_real:
-        plot_flight_durations_comparison(teacher_json_flight_data, student_json_flight_data, save_path=save_path_dir)
-    else:
-        plot_flight_durations_comparison(teacher_json_flight_data, updated_student_time_data, save_path=save_path_dir)
-
-    # plot_distances_comparison(teacher_metadata_df, student_metadata_df, save_path=save_path_dir)
-    # plot_error_norms_comparison(teacher_error_stats, student_error_stats, save_path=save_path_dir)
-    # plot_iou_comparison(teacher_iou_stats, student_iou_stats, save_path=save_path_dir)
-
-    # plot_command_distribution_magnitude_comparison(teacher_parquet_data, student_parquet_data, save_path=save_path_dir)
-    # plot_command_distribution_comparison(teacher_parquet_data, student_parquet_data, save_path=save_path_dir)
-    # print(f"Comparison plots saved to: {save_path_dir}")
+    plot_command_distribution_magnitude_comparison(teacher_parquet_data, student_parquet_data, save_path=save_path_dir)
+    plot_command_distribution_comparison(teacher_parquet_data, student_parquet_data, save_path=save_path_dir)
+    print(f"Comparison plots saved to: {save_path_dir}")
 
 
 def reset_matplotlib_state():
@@ -410,14 +405,17 @@ def reset_matplotlib_state():
 if __name__ == "__main__":
     pd.set_option("display.max_columns", None)
 
-    teacher_path = "/home/brittle/Desktop/work/Data/car-data/droid-data/sim/sim-ibvs-results-merged"
-    student_path = "/home/brittle/Desktop/work/Data/car-data/droid-data/sim/sim-student-results-merged"
+    teacher_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/car-ibvs-sim-results-good"
+    student_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student-with-teacher-output/sim-student-with-teacher-output-pc-sebi"
+
+    teacher_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged"
+    student_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student-with-teacher-output/sim-student-with-teacher-output-merged"
 
     try:
         run_comparison_analysis(
             teacher_base_path=Path(teacher_path),
             student_base_path=Path(student_path),
-            save_path_name="teacher_student_comparison-sim",
+            save_path_name="teacher_student_comparison-sim_v2",
             scenes_names=ConfigsDirName.SIM,
             is_real=False,
         )
@@ -425,18 +423,18 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error in comparison analysis: {e}")
 
-    # teacher_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results"
-    # teacher_path = "/home/brittle/Desktop/work/Data/car-data/droid-data/real/real-world-ibvs-results-merged"
-    # student_path = "/home/brittle/Desktop/work/Data/car-data/droid-data/real/real-student-with-teacher-output"
+    teacher_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results"
+    teacher_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged"
+    student_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/real-student-with-teacher-output"
 
-    # try:
-    #     run_comparison_analysis(
-    #         teacher_base_path=Path(teacher_path),
-    #         student_base_path=Path(student_path),
-    #         save_path_name="teacher_student_comparison-real",
-    #         scenes_names=ConfigsDirName.REAL,
-    #         is_real=True,
-    #     )
-    #     print("Comparison analysis completed successfully!")
-    # except Exception as e:
-    #     print(f"Error in comparison analysis: {e}")
+    try:
+        run_comparison_analysis(
+            teacher_base_path=Path(teacher_path),
+            student_base_path=Path(student_path),
+            save_path_name="teacher_student_comparison-real",
+            scenes_names=ConfigsDirName.REAL,
+            is_real=True,
+        )
+        print("Comparison analysis completed successfully!")
+    except Exception as e:
+        print(f"Error in comparison analysis: {e}")
