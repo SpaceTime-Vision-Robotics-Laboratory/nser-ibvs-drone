@@ -85,6 +85,141 @@ def compute_error_statistics(parquet_df: pd.DataFrame, duration_df: pd.DataFrame
     return pd.DataFrame(err_norm_stats), pd.DataFrame(iou_stats)
 
 
+def compute_error_statistics_for_time_criteria(
+        parquet_df: pd.DataFrame,
+        duration_df: pd.DataFrame,
+        threshold: float = 1.0,
+        duration: float = 3.0
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Compute error statistics for last 3 seconds and for first stable 3-second period.
+
+    Returns:
+        tuple: (err_norm_stats, iou_stats, stable_period_stats)
+    """
+    err_norm_stats = []
+    iou_stats = []
+    updated_duration_df = duration_df.copy()
+
+    for run_id, run_group in parquet_df.groupby("run"):
+        duration_row = duration_df[duration_df["run"] == run_id]
+        if duration_row.empty:
+            continue
+
+        direction = duration_row.iloc[0]["direction"]
+        original_flight_duration = duration_row.iloc[0]["flight_duration"]
+
+        stable_period_data = get_first_stable_period(run_group, threshold=threshold, duration=duration)
+
+        if stable_period_data is None or stable_period_data.empty:
+            print(f"No stable period found for run: {run_id}")
+            continue
+
+        # TODO: this needs to be fixed.
+        stable_period_end_time = stable_period_data["timestamp"].iloc[-1]
+        run_start_time = run_group["timestamp"].min()
+        run_end_time = run_group["timestamp"].max()
+        
+        # Adjusted flight duration = total time - time up to end of stable period
+        adjusted_flight_duration = run_end_time - stable_period_end_time
+        
+        # Update the duration_df
+        mask = updated_duration_df["run"] == run_id
+        updated_duration_df.loc[mask, "flight_duration"] = adjusted_flight_duration
+
+        err_uv_norms = stable_period_data["err_uv"].apply(lambda v: np.linalg.norm(v))
+        err_norm_stats.append({
+            "run": run_id,
+            "direction": direction,
+            "stable_period_start": stable_period_data["timestamp"].iloc[0],
+            "stable_period_end": stable_period_data["timestamp"].iloc[-1],
+            "stable_period_duration": stable_period_data["timestamp"].iloc[-1] - stable_period_data["timestamp"].iloc[0],
+            "original_flight_duration": original_flight_duration,
+            "adjusted_flight_duration": adjusted_flight_duration,
+            "err_norm_mean": err_uv_norms.mean(),
+            "err_norm_median": err_uv_norms.median(),
+            "err_norm_std": err_uv_norms.std(),
+            "err_norm_min": err_uv_norms.min(),
+            "err_norm_max": err_uv_norms.max(),
+        })
+
+        run_iou = []
+        for _, row in stable_period_data.iterrows():
+            curr_points = row["current_points_flatten"]
+            goal_points = row["goal_points_flatten"]
+            if curr_points is None or goal_points is None:
+                print(f"Unable to compute iou statistics for stable period in run: {run_id}")
+                continue
+            curr_bbox = points_to_bbox(curr_points)
+            goal_bbox = points_to_bbox(goal_points)
+            iou = compute_iou(curr_bbox, goal_bbox)
+            run_iou.append(iou)
+
+        if len(run_iou) > 0:
+            iou_stats.append({
+                "run": run_id,
+                "direction": direction,
+                "stable_period_start": stable_period_data["timestamp"].iloc[0],
+                "stable_period_end": stable_period_data["timestamp"].iloc[-1],
+                "stable_period_duration": stable_period_data["timestamp"].iloc[-1] -
+                                          stable_period_data["timestamp"].iloc[0],
+                "original_flight_duration": original_flight_duration,
+                "adjusted_flight_duration": adjusted_flight_duration,
+                "iou_mean": np.mean(run_iou),
+                "iou_median": np.median(run_iou),
+                "iou_std": np.std(run_iou),
+                "iou_min": np.min(run_iou),
+                "iou_max": np.max(run_iou),
+            })
+
+    return pd.DataFrame(err_norm_stats), pd.DataFrame(iou_stats), updated_duration_df
+
+def get_first_stable_period(run_data: pd.DataFrame, threshold: float = 1.0, duration: float = 3.0) -> pd.DataFrame:
+    """
+    Get the DataFrame subset for the first period where |x_cmd|, |y_cmd|, and |rot_cmd|
+    are all <= threshold for >= duration seconds.
+
+    :param run_data: DataFrame containing the run data
+    :param threshold: Maximum absolute value for commands to be considered stable
+    :param duration: Minimum duration in seconds for a stability period
+    :return: DataFrame subset of the first stable period, or None if no stable period found
+    """
+    if len(run_data) < 2:
+        return None
+
+    run_data = run_data.sort_values('timestamp').reset_index(drop=True)
+    stable_mask = (
+            (np.abs(run_data['x_cmd']) <= threshold) &
+            (np.abs(run_data['y_cmd']) <= threshold) &
+            (np.abs(run_data['rot_cmd']) <= threshold)
+    )
+
+    current_period_start_idx = None
+
+    for idx, is_stable in enumerate(stable_mask):
+        current_time = run_data.iloc[idx]['timestamp']
+
+        if is_stable and current_period_start_idx is None:
+            current_period_start_idx = idx
+            current_period_start_time = current_time
+        elif not is_stable and current_period_start_idx is not None:
+            period_duration = current_time - current_period_start_time
+
+            if period_duration >= duration:
+                return run_data.iloc[current_period_start_idx:idx].copy()
+
+            current_period_start_idx = None
+
+    if current_period_start_idx is not None:
+        final_time = run_data.iloc[-1]['timestamp']
+        period_duration = final_time - current_period_start_time
+
+        if period_duration >= duration:
+            return run_data.iloc[current_period_start_idx:].copy()
+
+    return None
+
+
 def compute_flight_duration_distance_statistics(
         parquet_df: pd.DataFrame, duration_df: pd.DataFrame, metadata_df: pd.DataFrame
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -165,7 +300,7 @@ def compute_command_statistics(data_parquet: pd.DataFrame, duration_df: pd.DataF
     return pd.DataFrame(stats)
 
 
-def plot_statistics_summary(err_stats: pd.DataFrame, iou_stats: pd.DataFrame, save_path_dir: Path):
+def plot_statistics_summary(err_stats: pd.DataFrame, iou_stats: pd.DataFrame, save_path_dir: Path, threshold: int = 0):
     def plot_metric(df, value_col, group_col, title, ylabel, filename):
         plt.figure(figsize=(10, 6))
         ax = sns.barplot(
@@ -182,7 +317,7 @@ def plot_statistics_summary(err_stats: pd.DataFrame, iou_stats: pd.DataFrame, sa
         ax.set_ylabel(ylabel)
         plt.xticks(rotation=45, ha="right")
         plt.tight_layout()
-        plt.savefig(save_path_dir / filename, dpi=300)
+        plt.savefig(save_path_dir / f"threshold_{threshold}-{filename}", dpi=300)
         plt.close()
 
     plot_metric(
@@ -251,19 +386,30 @@ def run_stats(
     summary = summary.sort_values('unique_runs', ascending=False)
     print(summary)
 
+    threshold = 1
     err_stats, iou_stats = compute_error_statistics(parquet_data, json_flight_data)
+    err_stats_1_thresh, iou_stats_1_thresh, updated_time_df = compute_error_statistics_for_time_criteria(
+        parquet_data, json_flight_data, threshold=threshold, duration=3.0
+    )
     cmd_stats = compute_command_statistics(parquet_data, json_flight_data)
     err_stats.to_csv(save_path_dir / f"{save_path_name}_error_stats-total.csv", header=True)
     iou_stats.to_csv(save_path_dir / f"{save_path_name}_iou_stats-total.csv", header=True)
     cmd_stats.to_csv(save_path_dir / f"{save_path_name}_cmd_stats-total.csv", header=True)
-    plot_statistics_summary(err_stats, iou_stats, save_path_dir)
+    err_stats_1_thresh.to_csv(save_path_dir / f"{save_path_name}_err_stats_1_threshold-total.csv", header=True)
+    iou_stats_1_thresh.to_csv(save_path_dir / f"{save_path_name}_iou_stats_1_threshold-total.csv", header=True)
+    plot_statistics_summary(err_stats, iou_stats, save_path_dir, threshold=0)
+    plot_statistics_summary(err_stats_1_thresh, iou_stats_1_thresh, save_path_dir, threshold=threshold)
 
     err_stats_mean = err_stats.groupby("direction").mean(numeric_only=True)
     iou_stats_mean = iou_stats.groupby("direction").mean(numeric_only=True)
     cmd_stats_mean = cmd_stats.groupby("direction").mean(numeric_only=True)
+    err_stats_1_thresh = err_stats_1_thresh.groupby("direction").mean(numeric_only=True)
+    iou_stats_1_thresh = iou_stats_1_thresh.groupby("direction").mean(numeric_only=True)
     err_stats_mean.to_csv(save_path_dir / f"{save_path_name}_error_stats-mean.csv", header=True)
     iou_stats_mean.to_csv(save_path_dir / f"{save_path_name}_iou_stats-mean.csv", header=True)
     cmd_stats_mean.to_csv(save_path_dir / f"{save_path_name}_cmd_stats-mean.csv", header=True)
+    err_stats_1_thresh.to_csv(save_path_dir / f"{save_path_name}_err_stats_threshold_{threshold}-mean.csv", header=True)
+    iou_stats_1_thresh.to_csv(save_path_dir / f"{save_path_name}_iou_stats_threshold_{threshold}-mean.csv", header=True)
 
     duration_stats, distance_stats = compute_flight_duration_distance_statistics(
         parquet_data, json_flight_data, metadata_df
@@ -299,17 +445,16 @@ def run_stats(
 if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
 
-    sim_ibvs_path = Path("/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged")
-    run_stats(
-        base_path=sim_ibvs_path,
-        save_path_name="sim-ibvs-results",
-        scenes_names=ConfigsDirName.SIM,
-        is_student=False,
-        is_real=False,
-    )
+    # sim_ibvs_path = Path("/home/brittle/Desktop/work/Data/car-data/droid-data/sim/sim-ibvs-results-merged")
+    # run_stats(
+    #     base_path=sim_ibvs_path,
+    #     save_path_name="sim-ibvs-results",
+    #     scenes_names=ConfigsDirName.SIM,
+    #     is_student=False,
+    #     is_real=False,
+    # )
 
-    sim_student_path = Path(
-        "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student-with-teacher-output/sim-student-with-teacher-output-merged")
+    sim_student_path = Path("/home/brittle/Desktop/work/Data/car-data/droid-data/sim/sim-student-results-merged")
     run_stats(
         base_path=sim_student_path,
         save_path_name="sim-student-results",
@@ -318,22 +463,22 @@ if __name__ == '__main__':
         is_real=False,
     )
 
-    real_ibvs_path = Path(
-        "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged")
-    run_stats(
-        base_path=real_ibvs_path,
-        save_path_name="real-ibvs-results",
-        scenes_names=ConfigsDirName.REAL,
-        is_student=False,
-        is_real=True,
-    )
-
-    real_student_path = Path(
-        "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/real-student-with-teacher-output")
-    run_stats(
-        base_path=real_student_path,
-        save_path_name="real-student-results",
-        scenes_names=ConfigsDirName.REAL,
-        is_student=True,
-        is_real=True,
-    )
+    # real_ibvs_path = Path(
+    #     "/home/brittle/Desktop/work/Data/car-data/droid-data/real/real-world-ibvs-results-merged")
+    # run_stats(
+    #     base_path=real_ibvs_path,
+    #     save_path_name="real-ibvs-results",
+    #     scenes_names=ConfigsDirName.REAL,
+    #     is_student=False,
+    #     is_real=True,
+    # )
+    #
+    # real_student_path = Path(
+    #     "/home/brittle/Desktop/work/Data/car-data/droid-data/real/real-student-with-teacher-output")
+    # run_stats(
+    #     base_path=real_student_path,
+    #     save_path_name="real-student-results",
+    #     scenes_names=ConfigsDirName.REAL,
+    #     is_student=True,
+    #     is_real=True,
+    # )

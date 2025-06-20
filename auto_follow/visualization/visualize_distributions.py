@@ -520,7 +520,7 @@ def reset_matplotlib_state():
 if __name__ == "__main__":
     pd.set_option("display.max_columns", None)
 
-    sim_ibvs_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged"
+    sim_ibvs_path = "/home/brittle/Desktop/work/Data/car-data/droid-data/sim/sim-ibvs-results-merged"
     sim_ibvs_path = Path(sim_ibvs_path)
     try:
         run_plot_analysis_on_scenes(
@@ -534,44 +534,44 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"SIM prob: {e}")
 
-    sim_student_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student-with-teacher-output/sim-student-with-teacher-output-merged"
-    sim_student_path = Path(sim_student_path)
-    try:
-        run_plot_analysis_on_scenes(
-            base_path=sim_student_path,
-            save_path_name="plots-sim-student",
-            scenes_names=ConfigsDirName.SIM,
-            is_student=True,
-            is_real=False,
-            random_runs=5
-        )
-    except Exception as e:
-        print(f"SIM prob: {e}")
-
-    real_ibvs_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged"
-    real_ibvs_path = Path(real_ibvs_path)
-    try:
-        run_plot_analysis_on_scenes(
-            base_path=real_ibvs_path,
-            save_path_name="plots-real-ibvs",
-            scenes_names=ConfigsDirName.REAL,
-            is_student=False,
-            is_real=True,
-            random_runs=5
-        )
-    except Exception as e:
-        print(f"SIM prob: {e}")
-
-    real_student_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/real-student-with-teacher-output"
-    real_student_path = Path(real_student_path)
-    try:
-        run_plot_analysis_on_scenes(
-            base_path=real_student_path,
-            save_path_name="plots-real-student",
-            scenes_names=ConfigsDirName.REAL,
-            is_student=True,
-            is_real=True,
-            random_runs=5
-        )
-    except Exception as e:
-        print(f"SIM prob: {e}")
+    # sim_student_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student-with-teacher-output/sim-student-with-teacher-output-merged"
+    # sim_student_path = Path(sim_student_path)
+    # try:
+    #     run_plot_analysis_on_scenes(
+    #         base_path=sim_student_path,
+    #         save_path_name="plots-sim-student",
+    #         scenes_names=ConfigsDirName.SIM,
+    #         is_student=True,
+    #         is_real=False,
+    #         random_runs=5
+    #     )
+    # except Exception as e:
+    #     print(f"SIM prob: {e}")
+    #
+    # real_ibvs_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged"
+    # real_ibvs_path = Path(real_ibvs_path)
+    # try:
+    #     run_plot_analysis_on_scenes(
+    #         base_path=real_ibvs_path,
+    #         save_path_name="plots-real-ibvs",
+    #         scenes_names=ConfigsDirName.REAL,
+    #         is_student=False,
+    #         is_real=True,
+    #         random_runs=5
+    #     )
+    # except Exception as e:
+    #     print(f"SIM prob: {e}")
+    #
+    # real_student_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/real-student-with-teacher-output"
+    # real_student_path = Path(real_student_path)
+    # try:
+    #     run_plot_analysis_on_scenes(
+    #         base_path=real_student_path,
+    #         save_path_name="plots-real-student",
+    #         scenes_names=ConfigsDirName.REAL,
+    #         is_student=True,
+    #         is_real=True,
+    #         random_runs=5
+    #     )
+    # except Exception as e:
+    #     print(f"SIM prob: {e}")
