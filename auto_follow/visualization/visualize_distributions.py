@@ -358,8 +358,8 @@ def plot_velocity_distributions(
         "right": "#d62728",
         "up-left": "#9467bd",
         "up-right": "#8c564b",
-        "front-small-offset-right": "#e377c2",
-        "front-small-offset-left": "#7f7f7f"
+        "front-right": "#e377c2",
+        "front-left": "#7f7f7f"
     }
 
     for cmd, title, ylabel in commands_to_plot:
@@ -457,10 +457,10 @@ def plot_velocity_distributions(
         ax.spines["left"].set_linewidth(1)
         ax.spines["bottom"].set_linewidth(1)
 
-        if i == 0:  # Only show legend on first subplot
-            ax.legend(fontsize=10, loc="best")
+        if i == 3:  # Only show legend on first subplot
+            ax.legend(loc="best", fontsize='xx-large')
 
-    plt.suptitle("Command and Error Evolution", fontsize=16, fontweight="bold")
+    # plt.suptitle("Command and Error Evolution", fontsize=16, fontweight="bold")
     plt.tight_layout()
     plt.savefig(save_path / "evolution_over_time_commands_errors_rl_style_combined.png", dpi=300, bbox_inches="tight")
     plt.close()
@@ -520,19 +520,19 @@ def reset_matplotlib_state():
 if __name__ == "__main__":
     pd.set_option("display.max_columns", None)
 
-    sim_ibvs_path = "/home/brittle/Desktop/work/Data/car-data/droid-data/sim/sim-ibvs-results-merged"
-    sim_ibvs_path = Path(sim_ibvs_path)
-    try:
-        run_plot_analysis_on_scenes(
-            base_path=sim_ibvs_path,
-            save_path_name="plots-sim-ibvs",
-            scenes_names=ConfigsDirName.SIM,
-            is_student=False,
-            is_real=False,
-            random_runs=5
-        )
-    except Exception as e:
-        print(f"SIM prob: {e}")
+    # sim_ibvs_path = "/home/brittle/Desktop/work/Data/car-data/droid-data/sim/sim-ibvs-results-merged"
+    # sim_ibvs_path = Path(sim_ibvs_path)
+    # try:
+    #     run_plot_analysis_on_scenes(
+    #         base_path=sim_ibvs_path,
+    #         save_path_name="plots-sim-ibvs",
+    #         scenes_names=ConfigsDirName.SIM,
+    #         is_student=False,
+    #         is_real=False,
+    #         random_runs=5
+    #     )
+    # except Exception as e:
+    #     print(f"SIM prob: {e}")
 
     # sim_student_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student-with-teacher-output/sim-student-with-teacher-output-merged"
     # sim_student_path = Path(sim_student_path)
@@ -548,7 +548,8 @@ if __name__ == "__main__":
     # except Exception as e:
     #     print(f"SIM prob: {e}")
     #
-    # real_ibvs_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged"
+    
+    # real_ibvs_path = "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/real/real-world-ibvs-results-merged"
     # real_ibvs_path = Path(real_ibvs_path)
     # try:
     #     run_plot_analysis_on_scenes(
@@ -561,17 +562,18 @@ if __name__ == "__main__":
     #     )
     # except Exception as e:
     #     print(f"SIM prob: {e}")
+    
     #
-    # real_student_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/real-student-with-teacher-output"
-    # real_student_path = Path(real_student_path)
-    # try:
-    #     run_plot_analysis_on_scenes(
-    #         base_path=real_student_path,
-    #         save_path_name="plots-real-student",
-    #         scenes_names=ConfigsDirName.REAL,
-    #         is_student=True,
-    #         is_real=True,
-    #         random_runs=5
-    #     )
-    # except Exception as e:
-    #     print(f"SIM prob: {e}")
+    real_student_path = "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/real-student-21-06"
+    real_student_path = Path(real_student_path)
+    try:
+        run_plot_analysis_on_scenes(
+            base_path=real_student_path,
+            save_path_name="plots-real-student-01",
+            scenes_names=ConfigsDirName.REAL,
+            is_student=True,
+            is_real=True,
+            random_runs=5
+        )
+    except Exception as e:
+        print(f"SIM prob: {e}")
