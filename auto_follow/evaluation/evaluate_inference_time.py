@@ -70,18 +70,21 @@ def benchmark_evaluators(input_directory: str):
     print("\n=== RESULTS ===")
     print(f"StudentEvaluator:")
     print(f"  Average: {np.mean(student_times):.2f} ms")
+    print(f"  Median: {np.median(student_times):.2f} ms")
     print(f"  Min: {np.min(student_times):.2f} ms")
     print(f"  Max: {np.max(student_times):.2f} ms")
     print(f"  FPS: {1000 / np.mean(student_times):.1f}")
 
     print(f"StudentEvaluator Segmentation:")
     print(f"  Average: {np.mean(student_times_seg):.2f} ms")
+    print(f"  Median: {np.median(student_times_seg):.2f} ms")
     print(f"  Min: {np.min(student_times_seg):.2f} ms")
     print(f"  Max: {np.max(student_times_seg):.2f} ms")
     print(f"  FPS: {1000 / np.mean(student_times_seg):.1f}")
 
     print(f"\nIBVSEvaluator:")
     print(f"  Average: {np.mean(ibvs_times):.2f} ms")
+    print(f"  Median: {np.median(ibvs_times):.2f} ms")
     print(f"  Min: {np.min(ibvs_times):.2f} ms")
     print(f"  Max: {np.max(ibvs_times):.2f} ms")
     print(f"  FPS: {1000 / np.mean(ibvs_times):.1f}")
@@ -93,8 +96,12 @@ def benchmark_evaluators(input_directory: str):
     print(f"\n{faster} is {speedup:.2f}x faster")
     print(f"\n{faster_seg} is {speedup_seg:.2f}x faster")
 
+    return student_times, student_times_seg, ibvs_times
+
 
 if __name__ == '__main__':
     path = "/home/brittle/Desktop/work/space-time-vision-repos/auto-follow/output/bunker-online-4k-config-test-front-small-offset-left-student/results/2025-06-16_02-01-23/frames"
 
-    benchmark_evaluators(path)
+
+    for i in range(30):
+        s_times, s_seg_times, i_times = benchmark_evaluators(path)
