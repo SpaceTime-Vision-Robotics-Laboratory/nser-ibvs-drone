@@ -31,6 +31,10 @@ class Paths:
     
     REAL_STUNDENT_NET_PRETRAINED_REAL_WORLD_DISTRIBUTION: Final[Path] = MODELS_DIR / "student_real_pretrained_on_real_distribution.pth"
 
+    # 21/06 - check real student
+    REAL_STUDENT_NET_X3: Final[Path] = MODELS_DIR / "student_real_pretrained_augX3_80_runs.pth"
+    REAL_STUDENT_NET_X5: Final[Path] = MODELS_DIR / "student_real_model_pretrained_x5.pth"
+
     # PID config:
     PID_CONFIG_DIR: Final[Path] = BASE_DIR / "config" / "pid"
     PID_FWD_PATH: Final[Path] = PID_CONFIG_DIR / "pid_forward.yaml"
@@ -61,6 +65,10 @@ class Paths:
 
     GOAL_FRAME_PATH_45: Final[Path] = REFERENCE_IMAGES_DIR / "frame_001030_26999571__45__takeoff.png"
     GOAL_FRAME_POINTS_PATH_45: Final[Path] = REFERENCE_DATA_DIR / "frame_001030_26999571__45__takeoff.json"
+    GOAL_FRAME_POINTS_PATH_45_SIM: Final[Path] = REFERENCE_DATA_DIR / "frame_001030_26999571__45__takeoff.json"
+    GOAL_FRAME_POINTS_PATH_45_REAL: Final[Path] = REFERENCE_DATA_DIR / "____frame_001160_9928240_real_45_recording.json"
+
+    CAR_GOAL_PLOT: Final[Path] = REFERENCE_IMAGES_DIR / "real_car_90_90.png"
 
 
 if __name__ == '__main__':
