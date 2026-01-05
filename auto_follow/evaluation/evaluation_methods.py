@@ -3,6 +3,7 @@ import time
 from pathlib import Path
 
 import numpy as np
+import torch
 
 from auto_follow.detection.mask_splitter_ibvs import MaskSplitterEngineIBVS
 from auto_follow.detection.target_tracker import TargetTrackerIBVS, CommandInfo
@@ -19,13 +20,14 @@ class StudentEvaluator:
             self,
             student_model_path: str | Path = Paths.SIM_STUDENT_NEW_PATH_REAL_WORLD_DISTRIBUTION,
             segmentation_model_path: str | Path | None = None,
+            device: str | None = None
     ):
         self.student_model_path = Path(student_model_path)
         if segmentation_model_path is not None:
             self.segmentation_model_path = Path(segmentation_model_path)
             self.detector = YoloEngineIBVS(self.segmentation_model_path)
 
-        self.student_engine = StudentEngine(student_model_path)
+        self.student_engine = StudentEngine(student_model_path, device=device)
         self.int_threshold = 0.5
 
     def predict_command_on_frame(self, frame: np.ndarray) -> tuple[int, int, int] | CommandInfo:
@@ -71,7 +73,6 @@ class IBVSEvaluator:
             splitter_model_path: str | Path = Paths.SIM_MASK_SPLITTER_CAR_LOW_PATH,
             goal_frame_points_path: str | Path | None = Paths.GOAL_FRAME_POINTS_PATH_45,
             camera_params_path: str | Path | None = Paths.CAMERA_SIM_ANAFI_4k_DIR,
-
     ):
         camera_params = infer_intrinsic_matrix(camera_params_path)
         if isinstance(camera_params, tuple):

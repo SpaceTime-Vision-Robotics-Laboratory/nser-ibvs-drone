@@ -474,7 +474,7 @@ if __name__ == '__main__':
     )
 
     real_student_path = Path(
-        "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/real-student-with-teacher-output")
+        "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/real-student-with-teacher-output-new/results-real-student-21-06")
     run_stats(
         base_path=real_student_path,
         save_path_name="real-student-results",

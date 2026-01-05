@@ -139,7 +139,6 @@ def plot_command_distribution(parquet_df: pd.DataFrame, save_path: str | Path = 
     parquet_df["y_cmd_norm"] = 2 * (parquet_df["y_cmd"] - y_min) / (y_max - y_min) - 1
     parquet_df["rot_cmd_norm"] = 2 * (parquet_df["rot_cmd"] - rot_min) / (rot_max - rot_min) - 1
 
-    # Set number of bins (e.g., 50) for each command
     num_bins = 50
     x_bins = np.linspace(x_min, x_max, num_bins + 1)
     y_bins = np.linspace(y_min, y_max, num_bins + 1)
@@ -216,7 +215,6 @@ def plot_velocity_distributions(
         else:
             logs_df_normalized.loc[run_mask, "normalized_time"] = 0
 
-    # Create time bins for aggregation
     time_bins = np.linspace(0, 100, 21)  # 20 bins from 0% to 100%
     logs_df_normalized["time_bin"] = pd.cut(logs_df_normalized["normalized_time"],
                                             bins=time_bins, labels=False, include_lowest=True)
@@ -249,7 +247,6 @@ def plot_velocity_distributions(
 
     stats_df = pd.DataFrame(stats_by_config)
 
-    # Create comprehensive time series plots
     fig, axes = plt.subplots(4, 2, figsize=(20, 16))
     fig.suptitle("Command and Error Statistics Over Time by Configuration", fontsize=16, fontweight="bold")
 
@@ -350,7 +347,6 @@ def plot_velocity_distributions(
         ("err_norm", "Error Evolution", "Error Norm")
     ]
 
-    # Define a nice color palette
     config_colors = {
         "down-left": "#1f77b4",
         "down-right": "#ff7f0e",
@@ -358,8 +354,8 @@ def plot_velocity_distributions(
         "right": "#d62728",
         "up-left": "#9467bd",
         "up-right": "#8c564b",
-        "front-right": "#e377c2",
-        "front-left": "#7f7f7f"
+        "front-small-offset-right": "#e377c2",
+        "front-small-offset-left": "#7f7f7f"
     }
 
     for cmd, title, ylabel in commands_to_plot:
@@ -374,22 +370,15 @@ def plot_velocity_distributions(
 
             color = config_colors.get(config_label, "#000000")
 
-            # Get data
             x = config_stats["time_percent"].values
             y_mean = config_stats[f"{cmd}_mean"].values
             y_std = config_stats[f"{cmd}_std"].values
             y_25 = config_stats[f"{cmd}_25"].values
             y_75 = config_stats[f"{cmd}_75"].values
 
-            # Plot mean line
             plt.plot(x, y_mean, color=color, linewidth=2.5, label=config_label, alpha=0.9)
-
             # Plot confidence interval using standard deviation
-            plt.fill_between(x, y_mean - y_std, y_mean + y_std,
-                             color=color, alpha=0.2)
-
-            # Alternative: use percentiles for confidence interval (uncomment if preferred)
-            # plt.fill_between(x, y_25, y_75, color=color, alpha=0.2)
+            plt.fill_between(x, y_mean - y_std, y_mean + y_std, color=color, alpha=0.2)
 
         plt.title(title, fontsize=16, fontweight="bold", pad=20)
         plt.xlabel("Flight Progress (%)", fontsize=14)
@@ -428,17 +417,12 @@ def plot_velocity_distributions(
             config_label = config_label_map.get(config, config)
             color = config_colors.get(config_label, "#000000")
 
-            # Get data
             x = config_stats["time_percent"].values
             y_mean = config_stats[f"{cmd}_mean"].values
             y_std = config_stats[f"{cmd}_std"].values
 
-            # Plot mean line
             ax.plot(x, y_mean, color=color, linewidth=2, label=config_label, alpha=0.9)
-
-            # Plot confidence interval
-            ax.fill_between(x, y_mean - y_std, y_mean + y_std,
-                            color=color, alpha=0.2)
+            ax.fill_between(x, y_mean - y_std, y_mean + y_std, color=color, alpha=0.2)
 
         ax.set_title(title, fontsize=14, fontweight="bold")
         ax.set_xlabel("Flight Progress (%)", fontsize=12)
@@ -520,56 +504,54 @@ def reset_matplotlib_state():
 if __name__ == "__main__":
     pd.set_option("display.max_columns", None)
 
-    # sim_ibvs_path = "/home/brittle/Desktop/work/Data/car-data/droid-data/sim/sim-ibvs-results-merged"
-    # sim_ibvs_path = Path(sim_ibvs_path)
-    # try:
-    #     run_plot_analysis_on_scenes(
-    #         base_path=sim_ibvs_path,
-    #         save_path_name="plots-sim-ibvs",
-    #         scenes_names=ConfigsDirName.SIM,
-    #         is_student=False,
-    #         is_real=False,
-    #         random_runs=5
-    #     )
-    # except Exception as e:
-    #     print(f"SIM prob: {e}")
+    sim_ibvs_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged"
+    sim_ibvs_path = Path(sim_ibvs_path)
+    try:
+        run_plot_analysis_on_scenes(
+            base_path=sim_ibvs_path,
+            save_path_name="plots-sim-ibvs",
+            scenes_names=ConfigsDirName.SIM,
+            is_student=False,
+            is_real=False,
+            random_runs=5
+        )
+    except Exception as e:
+        print(f"SIM prob: {e}")
 
-    # sim_student_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student-with-teacher-output/sim-student-with-teacher-output-merged"
-    # sim_student_path = Path(sim_student_path)
-    # try:
-    #     run_plot_analysis_on_scenes(
-    #         base_path=sim_student_path,
-    #         save_path_name="plots-sim-student",
-    #         scenes_names=ConfigsDirName.SIM,
-    #         is_student=True,
-    #         is_real=False,
-    #         random_runs=5
-    #     )
-    # except Exception as e:
-    #     print(f"SIM prob: {e}")
-    #
-    
-    # real_ibvs_path = "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/real/real-world-ibvs-results-merged"
-    # real_ibvs_path = Path(real_ibvs_path)
-    # try:
-    #     run_plot_analysis_on_scenes(
-    #         base_path=real_ibvs_path,
-    #         save_path_name="plots-real-ibvs",
-    #         scenes_names=ConfigsDirName.REAL,
-    #         is_student=False,
-    #         is_real=True,
-    #         random_runs=5
-    #     )
-    # except Exception as e:
-    #     print(f"SIM prob: {e}")
-    
-    #
-    real_student_path = "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/real-student-21-06"
+    sim_student_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student-with-teacher-output/sim-student-with-teacher-output-merged"
+    sim_student_path = Path(sim_student_path)
+    try:
+        run_plot_analysis_on_scenes(
+            base_path=sim_student_path,
+            save_path_name="plots-sim-student",
+            scenes_names=ConfigsDirName.SIM,
+            is_student=True,
+            is_real=False,
+            random_runs=5
+        )
+    except Exception as e:
+        print(f"SIM prob: {e}")
+
+    real_ibvs_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged"
+    real_ibvs_path = Path(real_ibvs_path)
+    try:
+        run_plot_analysis_on_scenes(
+            base_path=real_ibvs_path,
+            save_path_name="plots-real-ibvs",
+            scenes_names=ConfigsDirName.REAL,
+            is_student=False,
+            is_real=True,
+            random_runs=5
+        )
+    except Exception as e:
+        print(f"SIM prob: {e}")
+
+    real_student_path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/real-student-with-teacher-output-new/results-real-student-21-06"
     real_student_path = Path(real_student_path)
     try:
         run_plot_analysis_on_scenes(
             base_path=real_student_path,
-            save_path_name="plots-real-student-01",
+            save_path_name="plots-real-student",
             scenes_names=ConfigsDirName.REAL,
             is_student=True,
             is_real=True,

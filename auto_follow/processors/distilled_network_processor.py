@@ -17,8 +17,8 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
 
     def __init__(
             self,
-            model_path: str | Path = Paths.REAL_CAR_IBVS_YOLO_PATH,
-            student_model_path: str | Path = Paths.REAL_STUNDENT_NET_PRETRAINED_REAL_WORLD_DISTRIBUTION,
+            model_path: str | Path = Paths.SIM_CAR_IBVS_YOLO_PATH,
+            student_model_path: str | Path = Paths.SIM_STUDENT_NEW_PATH_REAL_WORLD_DISTRIBUTION,
             logs_parquet_path: str | Path | None = Paths.LOG_PARQUET_DIR,
             error_window_size: int = 5,
             **kwargs

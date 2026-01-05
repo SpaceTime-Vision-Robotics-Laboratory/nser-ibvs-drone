@@ -840,24 +840,24 @@ if __name__ == "__main__":
         # --------------------------------------------------
 
         "Teacher front-right": {
-            "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-ibvs-results-merged/bunker-online-4k-config-test-front-small-offset-right",
+            "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-front-small-offset-right",
             "color": "blue",
             "carpet_start": (2 + 1.5, 2.5 - 0.3)
         },
         "Student front-right": {
-            "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-student-results-merged/bunker-online-4k-config-test-front-small-offset-right-student",
+            "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-front-small-offset-right-student",
             "color": "orange",
             "dotted": True,
             "carpet_start": (2 + 1.5, 2.5 - 0.3)
         },
 
         "Teacher front-left": {
-            "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-ibvs-results-merged/bunker-online-4k-config-test-front-small-offset-left",
+            "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-front-small-offset-left",
             "color": "green",
             "carpet_start": (2 + 1.5, 2.5 + 0.3)
         },
         "Student front-left": {
-            "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-student-results-merged/bunker-online-4k-config-test-front-small-offset-left-student",
+            "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-front-small-offset-left-student",
             "color": "red",
             "dotted": True,
             "carpet_start": (2 + 1.5, 2.5 + 0.3)
@@ -866,24 +866,24 @@ if __name__ == "__main__":
         # ------------------------------------
 
         # "ibvs-left": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-ibvs-results-merged/bunker-online-4k-config-test-left",
+        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-left",
         #     "color": (250, 128, 114, 0),
         #     "carpet_start": (2 + 0, 2.5 + 1)
         # },
         # "student-left": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-student-results-merged/bunker-online-4k-config-test-left-student",
+        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-left-student",
         #     "color": (100, 149, 237, 0),
         #     "dotted": True,
         #     "carpet_start": (2 + 0, 2.5 + 1)
         # },
-
+        #
         # "ibvs-right": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-ibvs-results-merged/bunker-online-4k-config-test-right",
+        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-right",
         #     "color": (255, 215, 0, 0),
         #     "carpet_start": (2 + 0, 2.5 - 1)
         # },
         # "student-right": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-student-results-merged/bunker-online-4k-config-test-right-student",
+        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-right-student",
         #     "color": (32, 178, 170, 0),
         #     "dotted": True,
         #     "carpet_start": (2 + 0, 2.5 - 1)
@@ -892,24 +892,24 @@ if __name__ == "__main__":
         # ------------------------------------
 
         # "ibvs-up-left": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-ibvs-results-merged/bunker-online-4k-config-test-up-left",
+        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-up-left",
         #     "color": (250, 128, 114, 0),
         #     "carpet_start": (2 + 1, 2.5 + 1)
         # },
         # "student-up-left": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-student-results-merged/bunker-online-4k-config-test-up-left-student",
+        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-up-left-student",
         #     "color": (100, 149, 237, 0),
         #     "dotted": True,
         #     "carpet_start": (2 + 1, 2.5 + 1)
         # },
-
+        #
         # "ibvs-up-right": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-ibvs-results-merged/bunker-online-4k-config-test-up-right",
+        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-up-right",
         #     "color": (255, 215, 0, 0),
         #     "carpet_start": (2 + 1, 2.5 - 1)
         # },
         # "student-up-right": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-student-results-merged/bunker-online-4k-config-test-up-right-student",
+        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-up-right-student",
         #     "color": (32, 178, 170, 0),
         #     "dotted": True,
         #     "carpet_start": (2 + 1, 2.5 - 1)
@@ -918,24 +918,24 @@ if __name__ == "__main__":
         # ----------------------------------------
 
         # "ibvs-down-left": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-ibvs-results-merged/bunker-online-4k-config-test-down-left",
+        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-down-left",
         #     "color": (250, 128, 114, 0),
         #     "carpet_start": (2 - 1, 2.5 + 1)
         # },
         # "student-down-left": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-student-results-merged/bunker-online-4k-config-test-down-left-student",
+        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-down-left-student",
         #     "color": (100, 149, 237, 0),
         #     "dotted": True,
         #     "carpet_start": (2 - 1, 2.5 + 1)
         # },
-
+        #
         # "ibvs-down-right": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-ibvs-results-merged/bunker-online-4k-config-test-down-right",
+        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-down-right",
         #     "color": (255, 215, 0, 0),
         #     "carpet_start": (2 - 1, 2.5 - 1)
         # },
         # "student-down-right": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/sim/sim-student-results-merged/bunker-online-4k-config-test-down-right-student",
+        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-down-right-student",
         #     "color": (32, 178, 170, 0),
         #     "dotted": True,
         #     "carpet_start": (2 - 1, 2.5 - 1)

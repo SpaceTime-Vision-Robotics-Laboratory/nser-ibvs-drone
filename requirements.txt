@@ -10,3 +10,4 @@ pyyaml
 torchinfo
 python-dotenv
 pyarrow
+thop

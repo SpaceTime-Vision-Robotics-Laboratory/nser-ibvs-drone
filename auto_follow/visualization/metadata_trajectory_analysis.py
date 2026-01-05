@@ -300,12 +300,12 @@ if __name__ == "__main__":
     # x_carpet = 3.5
     # y_carpet = 4.5
     x_carpet = 2 + 1.5
-    y_carpet = 2.5 - 0.3
+    y_carpet = 2.5 + 0.3
     # main(path, carpet_start=(x_carpet, y_carpet), goal=goal)
 
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-front-small-offset-right/results/2025-06-14_22-32-17/metadata.json"
-    # path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-front-small-offset-right-student/results/2025-06-16_10-04-58/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged/real-ibvs-front-small-offset-right/results/2025-06-15_18-26-17/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/results-real-student-all/real-student-front-small-offset-right/results/2025-06-15_17-02-15/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/results-real-student-all/real-student-front-small-offset-right/results/2025-06-15_17-02-15/metadata.json"
+    # path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-front-small-offset-right/results/2025-06-14_22-32-17/metadata.json"
+    # # path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-front-small-offset-right-student/results/2025-06-16_10-04-58/metadata.json"
+    # path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged/real-ibvs-front-small-offset-right/results/2025-06-15_18-26-17/metadata.json"
+    # path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/results-real-student-all/real-student-front-small-offset-right/results/2025-06-15_17-02-15/metadata.json"
+    # path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/results-real-student-all/real-student-front-small-offset-right/results/2025-06-15_17-02-15/metadata.json"
     main(path, carpet_start=(x_carpet, y_carpet), goal=goal)

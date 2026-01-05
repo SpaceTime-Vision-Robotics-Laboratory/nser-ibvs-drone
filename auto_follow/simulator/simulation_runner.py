@@ -2,6 +2,7 @@ import shlex
 import time
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Any, Generator
 
 from auto_follow.simulator.process_management import ProcessManager, SphinxCommandManager
 from auto_follow.simulator.sim_config import SimulationConfig, ScriptConfig
@@ -55,7 +56,7 @@ class SimulationRunner:
         self.processes[process_type] = process
 
     @contextmanager
-    def simulation_session(self, script_config: ScriptConfig | None = None) -> None:
+    def simulation_session(self, script_config: ScriptConfig | None = None) -> Generator[None, Any, None]:
         """Context manager for a simulation session."""
         try:
             self.cleanup()
@@ -192,8 +193,8 @@ def run_simulation_loop(
 
 if __name__ == '__main__':
     target_r = 1
-    sphinx_bunker_base_dir = "/home/sebnae/shared_drive/ws/drone_ws/simulator_env"
-    is_student = True
+    sphinx_bunker_base_dir = "/home/brittle/Games/MyGames/DroneSimulation"
+    is_student = False
     scenes = [
         "bunker-online-4k-config-test-down-left.yaml",
         "bunker-online-4k-config-test-down-right.yaml",
