@@ -1,11 +1,12 @@
 import shlex
 import time
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
-from collections.abc import Generator
 
 from auto_follow.simulator.process_management import ProcessManager, SphinxCommandManager
+from auto_follow.simulator.sim_config import PathConfig
 from auto_follow.simulator.sim_config import SimulationConfig, ScriptConfig
 from auto_follow.simulator.simulation_process import SimulationProcess, ProcessType
 from auto_follow.utils.load_env_file import get_auth_from_vault
@@ -147,8 +148,6 @@ def main_simulation_runner(
         config_path: str | Path = Paths.BUNKER_ANAFI_4K_CONFIG_PATH
 ) -> bool:
     """Runs a simulation cycle and returns if it was executed successfully."""
-    from auto_follow.simulator.sim_config import PathConfig
-
     paths = PathConfig.from_yaml(sphinx_base_dir, config_path)
     sim_config = SimulationConfig(
         sphinx_command=paths.sphinx_command,

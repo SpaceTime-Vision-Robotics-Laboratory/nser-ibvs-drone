@@ -5,6 +5,7 @@ from pathlib import Path
 
 import cv2
 import pandas as pd
+import torch
 
 from auto_follow.evaluation.evaluation_methods import StudentEvaluator, IBVSEvaluator
 from auto_follow.utils.path_manager import Paths
@@ -105,7 +106,6 @@ def benchmark_evaluators(input_directory: str, trials: int = 10, output_csv: str
     print(f"Platform: {platform.system()} {platform.release()} ({platform.machine()})")
     print(f"Processor: {platform.processor()}")
     try:
-        import torch
         if torch.cuda.is_available():
             print(f"GPU: {torch.cuda.get_device_name(0)}")
     except ImportError:

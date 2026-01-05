@@ -73,10 +73,13 @@ ignore = [
     "N812",
     "PLR0913",
     "PLR0915",
+    "RUF059",
+    "PLC0415"
 ]
 "auto_follow/evaluation/*" = [
     "PLR0911",
     "PLR0915",
+    "RUF059"
 ]
 
 [tool.pytest.ini_options]
