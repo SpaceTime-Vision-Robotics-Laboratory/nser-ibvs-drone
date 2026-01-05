@@ -118,7 +118,7 @@ def compute_error_statistics_for_time_criteria(
         stable_period_end_time = stable_period_data["timestamp"].iloc[0]
         run_start_time = run_group["timestamp"].min()
         adjusted_flight_duration = stable_period_end_time - run_start_time + 3
-        
+
         mask = updated_duration_df["run"] == run_id
         updated_duration_df.loc[mask, "flight_duration"] = adjusted_flight_duration
 

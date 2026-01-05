@@ -373,8 +373,8 @@ def plot_velocity_distributions(
             x = config_stats["time_percent"].values
             y_mean = config_stats[f"{cmd}_mean"].values
             y_std = config_stats[f"{cmd}_std"].values
-            y_25 = config_stats[f"{cmd}_25"].values
-            y_75 = config_stats[f"{cmd}_75"].values
+            # y_25 = config_stats[f"{cmd}_25"].values
+            # y_75 = config_stats[f"{cmd}_75"].values
 
             plt.plot(x, y_mean, color=color, linewidth=2.5, label=config_label, alpha=0.9)
             # Plot confidence interval using standard deviation
@@ -441,7 +441,7 @@ def plot_velocity_distributions(
         ax.spines["left"].set_linewidth(1)
         ax.spines["bottom"].set_linewidth(1)
 
-        if i == 3:  # Only show legend on first subplot
+        if i == 3:  # noqa: PLR2004 Only show legend on first subplot
             ax.legend(loc="best", fontsize='xx-large')
 
     # plt.suptitle("Command and Error Evolution", fontsize=16, fontweight="bold")

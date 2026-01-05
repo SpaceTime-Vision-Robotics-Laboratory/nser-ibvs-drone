@@ -6,7 +6,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
-import torch.nn as nn
+from torch import nn
 
 try:
     from thop import profile
@@ -209,7 +209,7 @@ def benchmark_evaluators(input_directory: str):
             print(f"  TFLOPs:  {tflops:.6f}")
             print(f"  Params:  {params / 1e6:.2f} M")
         else:
-            print(f"  TFLOPs:  N/A (Model not found or error in profiling)")
+            print("  TFLOPs:  N/A (Model not found or error in profiling)")
 
     print_stats("StudentEvaluator (Policy Only)", student_times, st_flops, st_params)
     print_stats("StudentEvaluator + Segmentation", student_times_seg, seg_flops, seg_params)

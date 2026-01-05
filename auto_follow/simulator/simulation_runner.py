@@ -2,7 +2,8 @@ import shlex
 import time
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any
+from collections.abc import Generator
 
 from auto_follow.simulator.process_management import ProcessManager, SphinxCommandManager
 from auto_follow.simulator.sim_config import SimulationConfig, ScriptConfig

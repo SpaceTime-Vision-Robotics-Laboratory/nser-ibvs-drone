@@ -281,9 +281,9 @@ def plot_trajectory(trajectory, goal: tuple[float, float], use_carpet_coords=Fal
 
 def plot_trajectory_only(trajectory, goal: tuple[float, float], use_carpet_coords=False):
     """Plot trajectory data"""
-    times = [p['time'] for p in trajectory]
-    altitudes = [p['alt'] for p in trajectory]
-    speeds = [p['speed'] for p in trajectory]
+    # times = [p['time'] for p in trajectory]
+    # altitudes = [p['alt'] for p in trajectory]
+    # speeds = [p['speed'] for p in trajectory]
 
     if use_carpet_coords:
         xs = [p['carpet_x'] for p in trajectory]
@@ -339,14 +339,14 @@ def main(file_path, goal: tuple[float, float], carpet_start: tuple[float, float]
 
 def plot_multiple_trajectories(trajectories, goal: tuple[float, float], use_carpet_coords=False, labels=None):
     """Plot multiple trajectory data on the same plot"""
-    
+
     # Set up labels if not provided
     if labels is None:
         labels = [f'Trajectory {i+1}' for i in range(len(trajectories))]
-    
+
     # Color cycle for different trajectories
     colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
-    
+
     # Determine coordinate system
     if use_carpet_coords:
         x_label, y_label = 'X (m)', 'Y (m)'
@@ -354,9 +354,9 @@ def plot_multiple_trajectories(trajectories, goal: tuple[float, float], use_carp
     else:
         x_label, y_label = 'Longitude', 'Latitude'
         traj_title = 'Multiple GPS Trajectories'
-    
+
     fig, ax1 = plt.subplots(1, 1, figsize=(12, 10))
-    
+
     # Plot each trajectory
     for i, trajectory in enumerate(trajectories):
         if use_carpet_coords:
@@ -365,79 +365,79 @@ def plot_multiple_trajectories(trajectories, goal: tuple[float, float], use_carp
         else:
             xs = [p['lon'] for p in trajectory]
             ys = [p['lat'] for p in trajectory]
-        
+
         color = colors[i % len(colors)]
-        
+
         # Plot trajectory line
         ax1.plot(xs, ys, color=color, linewidth=2, label=labels[i])
-        
+
         # Plot start and end points
         ax1.scatter(xs[0], ys[0], color=color, s=100, marker='o', edgecolors='black', linewidth=1)
         ax1.scatter(xs[-1], ys[-1], color=color, s=100, marker='s', edgecolors='black', linewidth=1)
-        
+
         print(f"Trajectory {i+1} end: {xs[-1], ys[-1]} vs goal: {goal[0] - 0.95, goal[1]}")
-    
+
     # Plot goal points
     ax1.scatter(goal[0], goal[1], color='darkgreen', s=150, marker='*', label='Car', edgecolors='black', linewidth=1)
     ax1.scatter(goal[0] - 0.95, goal[1], color='magenta', s=150, marker='*', label='Goal', edgecolors='black', linewidth=1)
-    
+
     # Add legend entries for start/end markers
     ax1.scatter([], [], color='gray', s=100, marker='o', edgecolors='black', linewidth=1, label='Start points')
     ax1.scatter([], [], color='gray', s=100, marker='s', edgecolors='black', linewidth=1, label='End points')
-    
+
     ax1.set_title(traj_title)
     ax1.set_xlabel(x_label)
     ax1.set_ylabel(y_label)
     ax1.legend()
     ax1.grid(True)
-    
+
     # Add carpet boundaries if using carpet coordinates
     if use_carpet_coords:
         ax1.add_patch(plt.Rectangle((0, 0), 4, 5, fill=False, edgecolor='black', linewidth=2, linestyle='--'))
         ax1.set_xlim(-0.5, 5.5)
         ax1.set_ylim(-0.5, 6.5)
         ax1.set_aspect('equal')
-    
+
     plt.tight_layout()
     plt.show()
 
 def get_mean_std_from_trajectories(trajectories, coord_keys, interpolation_points):
     # Extract and normalize trajectories to same length for averaging
     normalized_trajectories = []
-    
+
     for trajectory in trajectories:
         xs = np.array([p[coord_keys[0]] for p in trajectory])
         ys = np.array([p[coord_keys[1]] for p in trajectory])
-        
+
         if len(xs) < 2:  # Skip trajectories that are too short
             continue
-            
+
         # Create parameter t from 0 to 1
         t_original = np.linspace(0, 1, len(xs))
         t_new = np.linspace(0, 1, interpolation_points)
-        
+
         # Interpolate trajectory to fixed number of points
         try:
             interp_x = interp1d(t_original, xs, kind='linear', bounds_error=False, fill_value='extrapolate')
             interp_y = interp1d(t_original, ys, kind='linear', bounds_error=False, fill_value='extrapolate')
-            
+
             xs_interp = interp_x(t_new)
             ys_interp = interp_y(t_new)
-            
+
             normalized_trajectories.append((xs_interp, ys_interp))
-            
+
         except Exception as e:
             print(f"Skipping trajectory due to interpolation error: {e}")
             continue
-    
+
     if not normalized_trajectories:
         print("No valid trajectories to plot")
         return
-    
+
     # Convert to numpy arrays for easier computation
     all_xs = np.array([traj[0] for traj in normalized_trajectories])
     all_ys = np.array([traj[1] for traj in normalized_trajectories])
-    
+
     # Calculate mean and standard deviation
     mean_xs = np.mean(all_xs, axis=0)
     mean_ys = np.mean(all_ys, axis=0)
@@ -446,11 +446,11 @@ def get_mean_std_from_trajectories(trajectories, coord_keys, interpolation_point
 
     return normalized_trajectories, mean_xs, mean_ys, std_xs, std_ys
 
-def plot_trajectories_rl_style(trajectories, goal: tuple[float, float], use_carpet_coords=False, 
+def plot_trajectories_rl_style(trajectories, goal: tuple[float, float], use_carpet_coords=False,
                               show_individual=True, confidence_alpha=0.3, interpolation_points=100, color="green"):
     """
     Plot multiple trajectories in RL style with mean trajectory and confidence bands
-    
+
     Args:
         trajectories: List of trajectory dictionaries
         goal: Goal coordinates (x, y)
@@ -466,7 +466,7 @@ def plot_trajectories_rl_style(trajectories, goal: tuple[float, float], use_carp
         "green": "darkgreen",
         "red": "darkred"
     }
-    
+
     # Determine coordinate system
     if use_carpet_coords:
         x_label, y_label = 'X (m)', 'Y (m)'
@@ -476,65 +476,65 @@ def plot_trajectories_rl_style(trajectories, goal: tuple[float, float], use_carp
         x_label, y_label = 'Longitude', 'Latitude'
         traj_title = 'RL Training Trajectories - GPS Coordinates'
         coord_keys = ('lon', 'lat')
-    
+
     fig, ax = plt.subplots(1, 1, figsize=(12, 10))
-    
+
     normalized_trajectories, mean_xs, mean_ys, std_xs, std_ys = get_mean_std_from_trajectories(trajectories, coord_keys, interpolation_points)
-    
+
     # Plot individual trajectories (faded)
     if show_individual:
         for xs, ys in normalized_trajectories:
             ax.plot(xs, ys, color='lightblue', alpha=0.3, linewidth=1)
-    
+
     # Plot confidence bands (±1 std)
-    ax.fill_between(mean_xs, 
-                    mean_ys - std_ys, 
-                    mean_ys + std_ys, 
-                    alpha=confidence_alpha, 
-                    color=color, 
+    ax.fill_between(mean_xs,
+                    mean_ys - std_ys,
+                    mean_ys + std_ys,
+                    alpha=confidence_alpha,
+                    color=color,
                     # label=f'±1σ confidence band (n={len(normalized_trajectories)})'
                     )
-    
+
     # Plot mean trajectory
     ax.plot(mean_xs, mean_ys, color=mean_colors[color], linewidth=3, label='Mean trajectory')
     # ax.plot(mean_xs, mean_ys, color=mean_colors[color], linewidth=3, label='Mean trajectory', linestyle='--')
-    
+
     # Plot start and end points of mean trajectory
-    ax.scatter(mean_xs[0], mean_ys[0], color='darkgreen', s=150, marker='o', 
+    ax.scatter(mean_xs[0], mean_ys[0], color='darkgreen', s=150, marker='o',
                edgecolors='black', linewidth=2, label='Start', zorder=5)
-    ax.scatter(mean_xs[-1], mean_ys[-1], color='darkred', s=150, marker='s', 
+    ax.scatter(mean_xs[-1], mean_ys[-1], color='darkred', s=150, marker='s',
                edgecolors='black', linewidth=2, label='Mean end', zorder=5)
-    
+
     # Plot goal points
-    ax.scatter(goal[0], goal[1], color='gold', s=200, marker='x', 
+    ax.scatter(goal[0], goal[1], color='gold', s=200, marker='x',
                label='Car', edgecolors='black', linewidth=2, zorder=5)
-    ax.scatter(goal[0] - 0.95, goal[1], color='magenta', s=200, marker='*', 
+    ax.scatter(goal[0] - 0.95, goal[1], color='magenta', s=200, marker='*',
                label='Goal', edgecolors='black', linewidth=2, zorder=5)
-    
+
     # Calculate and display statistics
-    final_distances = [np.sqrt((xs[-1] - (goal[0] - 0.95))**2 + (ys[-1] - goal[1])**2) 
-                      for xs, ys in normalized_trajectories]
-    mean_final_distance = np.mean(final_distances)
-    std_final_distance = np.std(final_distances)
-    
+    # final_distances = [np.sqrt((xs[-1] - (goal[0] - 0.95))**2 + (ys[-1] - goal[1])**2)
+    #                   for xs, ys in normalized_trajectories]
+    # mean_final_distance = np.mean(final_distances)
+    # std_final_distance = np.std(final_distances)
+
     # stats_text = f'Final distance to goal:\nMean: {mean_final_distance:.3f}\nStd: {std_final_distance:.3f}'
     # ax.text(0.02, 0.98, stats_text, transform=ax.transAxes, fontsize=10,
     #         verticalalignment='top', bbox=dict(boxstyle="round,pad=0.3", facecolor='wheat', alpha=0.8))
-    
+
     ax.set_title(traj_title)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.legend(loc='upper right')
     ax.grid(True, alpha=0.3)
-    
+
     # Add carpet boundaries if using carpet coordinates
     if use_carpet_coords:
-        ax.add_patch(plt.Rectangle((0, 0), 4, 5, fill=False, edgecolor='black', 
+        ax.add_patch(plt.Rectangle((0, 0), 4, 5, fill=False, edgecolor='black',
                                   linewidth=2, linestyle='--', label='Carpet boundary'))
         ax.set_xlim(-0.5, 5.5)
         ax.set_ylim(-0.5, 6.5)
         ax.set_aspect('equal')
-    
+
     plt.tight_layout()
     plt.show()
 
@@ -542,15 +542,15 @@ def process_multiple_metadata_files(path_runs, goal, carpet_start):
     base_path = Path(path_runs)
 
     results_path = base_path / "results"
-    
+
     if not results_path.exists():
         print(f"Results directory not found: {results_path}")
         return
-    
+
     use_carpet_coords = carpet_start is not None
 
     trajectories = []
-    
+
     # Iterate through each folder in results
     for folder in tqdm(list(results_path.iterdir())):
         if folder.is_dir():
@@ -560,7 +560,7 @@ def process_multiple_metadata_files(path_runs, goal, carpet_start):
 
             trajectory, _ = analyze_trajectory(data, carpet_start)
             trajectories.append(trajectory)
-    
+
     # plot_multiple_trajectories(trajectories, goal, use_carpet_coords)
     plot_trajectories_rl_style(trajectories, goal, use_carpet_coords, show_individual=False)
 
@@ -570,13 +570,13 @@ def process_multiple_metadata_files(path_runs, goal, carpet_start):
 ## Trajectories for multiple runs
 ## --------------------------------------------
 
-def plot_multiple_trajectories_rl_style(config_dicts, goal: tuple[float, float], use_carpet_coords=False, 
+def plot_multiple_trajectories_rl_style(config_dicts, goal: tuple[float, float], use_carpet_coords=False,
                               show_individual=True, confidence_alpha=0.3, interpolation_points=100,
                               goal_image_path=Paths.CAR_GOAL_PLOT,
                               goal_image_size=0.8):
     """
     Plot multiple trajectories in RL style with mean trajectory and confidence bands
-    
+
     Args:
         trajectories: List of trajectory dictionaries
         goal: Goal coordinates (x, y)
@@ -599,22 +599,22 @@ def plot_multiple_trajectories_rl_style(config_dicts, goal: tuple[float, float],
         (255, 215, 0, 0): (179, 151, 0, 0), # gold
         (100, 149, 237, 0): (70, 104, 166, 0) # cornflower blue
     }
-    
+
     # Determine coordinate system
     if use_carpet_coords:
         x_label, y_label = 'X (m)', 'Y (m)'
-        traj_title = 'Sim Trajectories'
+        # traj_title = 'Sim Trajectories'
         coord_keys = ('carpet_x', 'carpet_y')
     else:
         x_label, y_label = 'Longitude', 'Latitude'
-        traj_title = 'Sim Trajectories'
+        # traj_title = 'Sim Trajectories'
         coord_keys = ('lon', 'lat')
-    
+
     fig, ax = plt.subplots(1, 1, figsize=(12, 10))
 
     for config in config_dicts:
         trajectories = config["trajectories"]
-        
+
         color = config["color"]
         if color in mean_colors:
             mean_color = mean_colors[color]
@@ -625,103 +625,103 @@ def plot_multiple_trajectories_rl_style(config_dicts, goal: tuple[float, float],
 
             color = (color[0]/255, color[1]/255, color[2]/255)
             mean_color = (mean_color[0]/255, mean_color[1]/255, mean_color[2]/255)
-        
+
         name = config["name"]
 
         normalized_trajectories, mean_xs, mean_ys, std_xs, std_ys = get_mean_std_from_trajectories(trajectories, coord_keys, interpolation_points)
-        
+
         # Plot individual trajectories (faded)
         if show_individual:
             for xs, ys in normalized_trajectories:
                 ax.plot(xs, ys, color='lightblue', alpha=0.3, linewidth=1)
-        
+
         # Plot confidence bands (±1 std)
-        ax.fill_between(mean_xs, 
-                        mean_ys - std_ys, 
-                        mean_ys + std_ys, 
-                        alpha=confidence_alpha, 
-                        color=color, 
+        ax.fill_between(mean_xs,
+                        mean_ys - std_ys,
+                        mean_ys + std_ys,
+                        alpha=confidence_alpha,
+                        color=color,
                         # label=f'±1σ confidence band (n={len(normalized_trajectories)})'
                         )
-        
+
         # Plot mean trajectory
         if ("dotted" in config):
             ax.plot(mean_xs, mean_ys, color=mean_color, linewidth=3, label=f'Mean trajectory - {name}', linestyle='--')
         else:
             ax.plot(mean_xs, mean_ys, color=mean_color, linewidth=3, label=f'Mean trajectory - {name}')
-        
+
         # Plot start point
-        # ax.scatter(mean_xs[0], mean_ys[0], color='darkgreen', s=150, marker='o', 
+        # ax.scatter(mean_xs[0], mean_ys[0], color='darkgreen', s=150, marker='o',
         #             edgecolors='black', linewidth=2, label='Start', zorder=5)
-        ax.scatter(mean_xs[0], mean_ys[0], color='darkgreen', s=150, marker='o', 
+        ax.scatter(mean_xs[0], mean_ys[0], color='darkgreen', s=150, marker='o',
                     edgecolors='black', linewidth=2, zorder=5)
-        
+
         # Plot end points of mean trajectory
         # if ("dotted" in config):
-        #     ax.scatter(mean_xs[-1], mean_ys[-1], color='darkred', s=150, marker='s', 
+        #     ax.scatter(mean_xs[-1], mean_ys[-1], color='darkred', s=150, marker='s',
         #         edgecolors='black', linewidth=2, label=f'Mean end - {name}', linestyle='--', zorder=5)
         # else:
-        #     ax.scatter(mean_xs[-1], mean_ys[-1], color='darkred', s=150, marker='s', 
+        #     ax.scatter(mean_xs[-1], mean_ys[-1], color='darkred', s=150, marker='s',
         #         edgecolors='black', linewidth=2, label=f'Mean end - {name}', zorder=5)
-        
+
         # Calculate and display statistics
-        final_distances = [np.sqrt((xs[-1] - (goal[0] - 0.95))**2 + (ys[-1] - goal[1])**2) 
-                        for xs, ys in normalized_trajectories]
-        mean_final_distance = np.mean(final_distances)
-        std_final_distance = np.std(final_distances)
-        
+        # final_distances = [np.sqrt((xs[-1] - (goal[0] - 0.95))**2 + (ys[-1] - goal[1])**2)
+        #                 for xs, ys in normalized_trajectories]
+        # mean_final_distance = np.mean(final_distances)
+        # std_final_distance = np.std(final_distances)
+
     # stats_text = f'Final distance to goal:\nMean: {mean_final_distance:.3f}\nStd: {std_final_distance:.3f}'
     # ax.text(0.02, 0.98, stats_text, transform=ax.transAxes, fontsize=10,
     #         verticalalignment='top', bbox=dict(boxstyle="round,pad=0.3", facecolor='wheat', alpha=0.8))
 
     # Plot goal points
-    ax.scatter(goal[0] - 0.95, goal[1], color='magenta', s=200, marker='*', 
-                label=f'Goal', edgecolors='black', linewidth=2, zorder=5)
+    ax.scatter(goal[0] - 0.95, goal[1], color='magenta', s=200, marker='*',
+                label='Goal', edgecolors='black', linewidth=2, zorder=5)
 
-    
-    # ax.scatter(goal[0], goal[1], color='gold', s=200, marker='x', 
+
+    # ax.scatter(goal[0], goal[1], color='gold', s=200, marker='x',
     #             label='Car', edgecolors='black', linewidth=2, zorder=5)
     # Plot goal with image or default marker
     if goal_image_path:
         try:
             img = mpimg.imread(goal_image_path)
-            
+
             # Calculate zoom to make image width = 0.3 meters
             # Get current axis limits to calculate pixels per data unit
             xlim = ax.get_xlim()
-            ylim = ax.get_ylim()
+            # ylim = ax.get_ylim()
             fig_width, fig_height = fig.get_size_inches()
-            
+
             # Calculate data units per inch
             data_width = xlim[1] - xlim[0]
-            data_height = ylim[1] - ylim[0]
-            
+            # data_height = ylim[1] - ylim[0]
+
             # Calculate pixels per data unit (approximate)
             dpi = fig.dpi
             pixels_per_inch_x = (fig_width * dpi) / data_width
-            
+
             # Calculate zoom factor to make image width = 0.3 meters
             desired_width_meters = 0.25
             desired_width_pixels = desired_width_meters * pixels_per_inch_x
             current_width_pixels = img.shape[1]  # Image width in pixels
             zoom_factor = desired_width_pixels / current_width_pixels
-            
+
             imagebox = OffsetImage(img, zoom=zoom_factor)
             ab = AnnotationBbox(imagebox, (goal[0], goal[1]), frameon=False, zorder=10)
             ax.add_artist(ab)
-            
+
             # Add invisible scatter point for legend
-            # ax.scatter(goal[0], goal[1], color='gold', s=200, marker='s', 
+            # ax.scatter(goal[0], goal[1], color='gold', s=200, marker='s',
             #           label='Car', edgecolors='black', linewidth=2, zorder=100)
         except Exception as e:
             print(f"Could not load image '{goal_image_path}': {e}")
             print("Using default marker instead.")
             # Fallback to default marker
-            ax.scatter(goal[0], goal[1], color='gold', s=200, marker='x', 
+            ax.scatter(goal[0], goal[1], color='gold', s=200, marker='x',
                       label='Car', edgecolors='black', linewidth=2, zorder=5)
     else:
         # Use default marker
-        ax.scatter(goal[0], goal[1], color='gold', s=200, marker='x', 
+        ax.scatter(goal[0], goal[1], color='gold', s=200, marker='x',
                   label='Car', edgecolors='black', linewidth=2, zorder=5)
 
     # ax.set_title(traj_title)
@@ -730,15 +730,15 @@ def plot_multiple_trajectories_rl_style(config_dicts, goal: tuple[float, float],
     # ax.legend(loc='upper right')
     ax.legend(loc='upper right', fontsize='x-large')
     ax.grid(True, alpha=0.3)
-    
+
     # Add carpet boundaries if using carpet coordinates
     if use_carpet_coords:
-        ax.add_patch(plt.Rectangle((0, 0), 4, 5, fill=False, edgecolor='black', 
+        ax.add_patch(plt.Rectangle((0, 0), 4, 5, fill=False, edgecolor='black',
                                   linewidth=2, linestyle='--', label='Carpet boundary'))
         ax.set_xlim(-0.5, 4.5)
         ax.set_ylim(-0.5, 5.5)
         ax.set_aspect('equal')
-    
+
     plt.tight_layout()
     plt.show()
 
@@ -755,16 +755,16 @@ def process_comparison_multiple_metadata_files(paths_runs_configs, goal):
         config_dict["name"] = path_runs_config_name
 
         results_path = base_path / "results"
-        
+
         if not results_path.exists():
             print(f"Results directory not found: {results_path}")
             return
-        
+
         carpet_start = path_runs_config["carpet_start"]
         use_carpet_coords = carpet_start is not None
 
         trajectories = []
-        
+
         # Iterate through each folder in results
         for folder in tqdm(list(results_path.iterdir())):
             if folder.is_dir():
@@ -776,11 +776,11 @@ def process_comparison_multiple_metadata_files(paths_runs_configs, goal):
 
                 trajectory, _ = analyze_trajectory(data, carpet_start)
                 trajectories.append(trajectory)
-        
+
         config_dict["trajectories"] = trajectories
         config_dicts.append(config_dict)
-        
-    
+
+
     plot_multiple_trajectories_rl_style(config_dicts, goal, use_carpet_coords, show_individual=False)
 
 

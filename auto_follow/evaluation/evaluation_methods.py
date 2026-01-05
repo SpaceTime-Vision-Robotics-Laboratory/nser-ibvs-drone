@@ -3,7 +3,6 @@ import time
 from pathlib import Path
 
 import numpy as np
-import torch
 
 from auto_follow.detection.mask_splitter_ibvs import MaskSplitterEngineIBVS
 from auto_follow.detection.target_tracker import TargetTrackerIBVS, CommandInfo

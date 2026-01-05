@@ -14,7 +14,7 @@ try:
 
     pynvml.nvmlInit()
     GPU_AVAILABLE = True
-except:
+except Exception as _:
     GPU_AVAILABLE = False
 
 
@@ -33,7 +33,7 @@ def get_gpu_memory():
         handle = pynvml.nvmlDeviceGetHandleByIndex(0)
         info = pynvml.nvmlDeviceGetMemoryInfo(handle)
         return info.used / 1024 / 1024
-    except:
+    except Exception as _:
         return None
 
 
@@ -65,7 +65,7 @@ def benchmark_evaluators(input_directory: str):
 
     for frame in frames:
         start = time.perf_counter()
-        result = student_evaluator.predict_command_on_frame(frame)
+        _ = student_evaluator.predict_command_on_frame(frame)
         end = time.perf_counter()
         student_times.append((end - start) * 1000)
 
@@ -96,7 +96,7 @@ def benchmark_evaluators(input_directory: str):
 
     for frame in frames:
         start = time.perf_counter()
-        result = ibvs_evaluator.predict_command_on_frame(frame)
+        _ = ibvs_evaluator.predict_command_on_frame(frame)
         end = time.perf_counter()
         ibvs_times.append((end - start) * 1000)
 
@@ -114,27 +114,27 @@ def benchmark_evaluators(input_directory: str):
     gc.collect()
 
     print("\n=== TIMING RESULTS ===")
-    print(f"StudentEvaluator:")
+    print("StudentEvaluator:")
     print(f"  Average: {np.mean(student_times):.2f} ms")
     print(f"  Min: {np.min(student_times):.2f} ms")
     print(f"  Max: {np.max(student_times):.2f} ms")
     print(f"  FPS: {1000 / np.mean(student_times):.1f}")
 
-    print(f"\nIBVSEvaluator:")
+    print("\nIBVSEvaluator:")
     print(f"  Average: {np.mean(ibvs_times):.2f} ms")
     print(f"  Min: {np.min(ibvs_times):.2f} ms")
     print(f"  Max: {np.max(ibvs_times):.2f} ms")
     print(f"  FPS: {1000 / np.mean(ibvs_times):.1f}")
 
     print("\n=== MEMORY RESULTS ===")
-    print(f"StudentEvaluator:")
+    print("StudentEvaluator:")
     print(f"  Model Load: {student_memory_usage['model_load']:.1f} MB RAM")
     print(f"  Peak Usage: {student_memory_usage['peak_usage']:.1f} MB RAM")
     if student_memory_usage['gpu_model']:
         print(f"  Model Load: {student_memory_usage['gpu_model']:.1f} MB GPU")
         print(f"  Peak Usage: {student_memory_usage['gpu_peak']:.1f} MB GPU")
 
-    print(f"\nIBVSEvaluator:")
+    print("\nIBVSEvaluator:")
     print(f"  Model Load: {ibvs_memory_usage['model_load']:.1f} MB RAM")
     print(f"  Peak Usage: {ibvs_memory_usage['peak_usage']:.1f} MB RAM")
     if ibvs_memory_usage['gpu_model']:

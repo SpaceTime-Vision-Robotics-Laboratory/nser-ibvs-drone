@@ -33,7 +33,7 @@ def benchmark_evaluators(input_directory: str):
 
     for frame in frames:
         start = time.perf_counter()
-        result = student_evaluator.predict_command_on_frame(frame)
+        _ = student_evaluator.predict_command_on_frame(frame)
         end = time.perf_counter()
         student_times.append((end - start) * 1000)  # ms
 
@@ -48,7 +48,7 @@ def benchmark_evaluators(input_directory: str):
 
     for frame in frames:
         start = time.perf_counter()
-        result = student_evaluator_seg.predict_with_segmentation(frame)
+        _ = student_evaluator_seg.predict_with_segmentation(frame)
         end = time.perf_counter()
         student_times_seg.append((end - start) * 1000)  # ms
 
@@ -62,7 +62,7 @@ def benchmark_evaluators(input_directory: str):
 
     for frame in frames:
         start = time.perf_counter()
-        result = ibvs_evaluator.predict_command_on_frame(frame)
+        _ = ibvs_evaluator.predict_command_on_frame(frame)
         end = time.perf_counter()
         ibvs_times.append((end - start) * 1000)  # ms
 
@@ -70,21 +70,21 @@ def benchmark_evaluators(input_directory: str):
     gc.collect()
 
     print("\n=== RESULTS ===")
-    print(f"StudentEvaluator:")
+    print("StudentEvaluator:")
     print(f"  Average: {np.mean(student_times):.2f} ms")
     print(f"  Median: {np.median(student_times):.2f} ms")
     print(f"  Min: {np.min(student_times):.2f} ms")
     print(f"  Max: {np.max(student_times):.2f} ms")
     print(f"  FPS: {1000 / np.mean(student_times):.1f}")
 
-    print(f"StudentEvaluator Segmentation:")
+    print("StudentEvaluator Segmentation:")
     print(f"  Average: {np.mean(student_times_seg):.2f} ms")
     print(f"  Median: {np.median(student_times_seg):.2f} ms")
     print(f"  Min: {np.min(student_times_seg):.2f} ms")
     print(f"  Max: {np.max(student_times_seg):.2f} ms")
     print(f"  FPS: {1000 / np.mean(student_times_seg):.1f}")
 
-    print(f"\nIBVSEvaluator:")
+    print("\nIBVSEvaluator:")
     print(f"  Average: {np.mean(ibvs_times):.2f} ms")
     print(f"  Median: {np.median(ibvs_times):.2f} ms")
     print(f"  Min: {np.min(ibvs_times):.2f} ms")
@@ -209,7 +209,7 @@ def save_results(all_results, output_dir="benchmark_results"):
                 f"{ibvs_stats['min']:.2f}", f"{ibvs_stats['max']:.2f}", f"{ibvs_stats['fps']:.1f}"
             ])
 
-    print(f"\n=== SAVED RESULTS ===")
+    print("\n=== SAVED RESULTS ===")
     print(f"Detailed results: {json_path}")
     print(f"Summary CSV: {csv_path}")
     print(f"Per-run CSV: {per_run_csv_path}")
@@ -228,7 +228,7 @@ def save_results(all_results, output_dir="benchmark_results"):
         print(f"  FPS: {stats['fps']:.1f}")
         print()
 
-    print(f"Speedups:")
+    print("Speedups:")
     print(
         f"  {aggregate_stats['speedups']['faster_method_student_vs_ibvs']} is {aggregate_stats['speedups']['student_vs_ibvs']:.2f}x faster than the other")
     print(

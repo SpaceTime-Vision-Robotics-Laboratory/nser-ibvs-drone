@@ -53,7 +53,7 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
         self.error_window_size = error_window_size
         self.results_path = self.frame_saver.output_dir.parent / "flight_duration.json"
         self.recent_commands = np.ones((self.error_window_size, 3))
-        
+
         self.last_command_info = None
 
     def _process_frame(self, frame: np.ndarray) -> np.ndarray:
@@ -70,19 +70,19 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
             "timestamp": timestamp,
             "frame_idx": self._frame_count,
         }
-        
+
 
         if self._frame_count % 2 != 0:
             self._add_cmd_visualization(frame, self.last_command_info)
             return frame
-        
+
         results = self.detector.detect(frame)
         target_data = self.detector.find_best_target(frame, results)
         if target_data.confidence == -1:
             self._command_zero_time = None
-            
+
             self.check_timout_landing(timestamp)
-            
+
             return frame
 
         command = self.student_engine.predict(frame)

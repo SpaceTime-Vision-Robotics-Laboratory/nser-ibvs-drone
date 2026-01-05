@@ -2,10 +2,8 @@ import json
 import os
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import math
 
 # sns.set(style="whitegrid")
@@ -118,12 +116,12 @@ def extract_vector_norms(df):
     """Extract norms from vector columns"""
     if 'err_uv' in df.columns:
         df['err_norm'] = df['err_uv'].apply(
-            lambda x: np.linalg.norm(x) if isinstance(x, (list, np.ndarray)) else np.nan
+            lambda x: np.linalg.norm(x) if isinstance(x, list | np.ndarray) else np.nan
         )
 
     if 'velocity' in df.columns:
         df['velocity_norm'] = df['velocity'].apply(
-            lambda x: np.linalg.norm(x) if isinstance(x, (list, np.ndarray)) else np.nan
+            lambda x: np.linalg.norm(x) if isinstance(x, list | np.ndarray) else np.nan
         )
 
     command_cols = ['x_cmd', 'y_cmd', 'z_cmd', 'rot_cmd']
