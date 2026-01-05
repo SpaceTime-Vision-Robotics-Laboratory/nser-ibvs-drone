@@ -58,7 +58,13 @@ class PathConfig:
     script_args: list[str] | None = None
 
     @classmethod
-    def from_yaml(cls, config_path: str | Path) -> 'PathConfig':
+    def from_yaml(cls, sphinx_base_dir: str | Path, config_path: str | Path) -> 'PathConfig':
+        """
+        Simulator arguments configuration from a YAML file.
+
+        :param sphinx_base_dir: Must be the path to where the bunker simulator exists.
+        :param config_path: The path to a YAML configuration file.
+        """
         with open(config_path, "r") as f:
             config = yaml.safe_load(f)
 
@@ -73,9 +79,10 @@ class PathConfig:
             firmware_command += f'::pose={pose}'
         firmware_command += f'::firmware={firmware["firmware_url"]}"'
 
+        sphinx_full_path = str(Path(sphinx_base_dir) / sphinx["command"])
         quality = sphinx.get('quality')
         config_file = sphinx.get('config_file') or None
-        sphinx_cmd = [str(sphinx["command"]), f'-level={sphinx["level"]}']
+        sphinx_cmd = [sphinx_full_path, f'-level={sphinx["level"]}']
         if quality is not None:
             sphinx_cmd.append(f'-quality={quality}')
         if config_file is not None:
@@ -127,7 +134,8 @@ class PathConfig:
 
 if __name__ == '__main__':
     config = PathConfig.from_yaml(
-        Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-front-small-offset-left.yaml"
+        "/home/brittle/Games/MyGames/DroneSimulation",
+        Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-down-left.yaml"
     )
 
     print(config)

@@ -1,9 +1,12 @@
 import shlex
 import time
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Any
 
 from auto_follow.simulator.process_management import ProcessManager, SphinxCommandManager
+from auto_follow.simulator.sim_config import PathConfig
 from auto_follow.simulator.sim_config import SimulationConfig, ScriptConfig
 from auto_follow.simulator.simulation_process import SimulationProcess, ProcessType
 from auto_follow.utils.load_env_file import get_auth_from_vault
@@ -55,7 +58,7 @@ class SimulationRunner:
         self.processes[process_type] = process
 
     @contextmanager
-    def simulation_session(self, script_config: ScriptConfig | None = None) -> None:
+    def simulation_session(self, script_config: ScriptConfig | None = None) -> Generator[None, Any, None]:
         """Context manager for a simulation session."""
         try:
             self.cleanup()
@@ -140,11 +143,12 @@ class SimulationRunner:
         return False
 
 
-def main_simulation_runner(config_path: str | Path = Paths.BUNKER_ANAFI_4K_CONFIG_PATH) -> bool:
+def main_simulation_runner(
+        sphinx_base_dir: str | Path,
+        config_path: str | Path = Paths.BUNKER_ANAFI_4K_CONFIG_PATH
+) -> bool:
     """Runs a simulation cycle and returns if it was executed successfully."""
-    from auto_follow.simulator.sim_config import PathConfig
-
-    paths = PathConfig.from_yaml(config_path)
+    paths = PathConfig.from_yaml(sphinx_base_dir, config_path)
     sim_config = SimulationConfig(
         sphinx_command=paths.sphinx_command,
         firmware_command=paths.firmware_command
@@ -155,7 +159,11 @@ def main_simulation_runner(config_path: str | Path = Paths.BUNKER_ANAFI_4K_CONFI
     return simulation_controller.run_simulation(script_config=script_config)
 
 
-def run_simulation_loop(target_runs: int = 2, config_path: str | Path = Paths.BUNKER_ANAFI_4K_CONFIG_PATH):
+def run_simulation_loop(
+        sphinx_base_dir: str | Path,
+        target_runs: int = 2,
+        config_path: str | Path = Paths.BUNKER_ANAFI_4K_CONFIG_PATH
+):
     total_failures = []
     actual_completed_runs = 0
     run_index = 0
@@ -164,7 +172,7 @@ def run_simulation_loop(target_runs: int = 2, config_path: str | Path = Paths.BU
             run_index += 1
             print(f"Starting simulation {run_index}")
             print(f"Configuration file at: {config_path}")
-            success = main_simulation_runner(config_path=config_path)
+            success = main_simulation_runner(sphinx_base_dir=sphinx_base_dir, config_path=config_path)
             if success:
                 actual_completed_runs += 1
                 print(f"Simulation {run_index} completed successfully. "
@@ -184,30 +192,28 @@ def run_simulation_loop(target_runs: int = 2, config_path: str | Path = Paths.BU
 
 
 if __name__ == '__main__':
-    target_r = 5
-    run_simulation_loop(
-        target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-down-left.yaml"
-    )
-    run_simulation_loop(
-        target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-down-right.yaml"
-    )
-    run_simulation_loop(
-        target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-up-left.yaml"
-    )
-    run_simulation_loop(
-        target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-up-right.yaml"
-    )
-    run_simulation_loop(
-        target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-left.yaml"
-    )
-    run_simulation_loop(
-        target_runs=target_r, config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-right.yaml"
-    )
-    run_simulation_loop(
-        target_runs=target_r,
-        config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-front-small-offset-left.yaml"
-    )
-    run_simulation_loop(
-        target_runs=target_r,
-        config_path=Paths.SIMULATOR_CONFIG_DIR / "bunker-online-4k-config-test-front-small-offset-right.yaml"
-    )
+    target_r = 1
+    sphinx_bunker_base_dir = "/home/brittle/Games/MyGames/DroneSimulation"
+    is_student = False
+    scenes = [
+        "bunker-online-4k-config-test-down-left.yaml",
+        "bunker-online-4k-config-test-down-right.yaml",
+        "bunker-online-4k-config-test-front-small-offset-right.yaml",
+        "bunker-online-4k-config-test-front-small-offset-left.yaml",
+        "bunker-online-4k-config-test-left.yaml",
+        "bunker-online-4k-config-test-right.yaml",
+        "bunker-online-4k-config-test-up-left.yaml",
+        "bunker-online-4k-config-test-up-right.yaml",
+    ]
+
+    if is_student:
+        scenes = [scene.replace('.yaml', '-student.yaml') for scene in scenes]
+
+    print(scenes)
+    for scene in scenes:
+        print(f"Running simulation on scene {scene}")
+        run_simulation_loop(
+            sphinx_base_dir=sphinx_bunker_base_dir,
+            target_runs=target_r,
+            config_path=Paths.SIMULATOR_CONFIG_DIR / scene
+        )

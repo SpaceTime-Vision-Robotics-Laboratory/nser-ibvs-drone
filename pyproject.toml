@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "Following objects with Drones."
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "AFL-3.0"}
+license = { text = "AFL-3.0" }
 authors = [
     { name = "Sebastian Mocanu", email = "sebastian.mocanu31@gmail.com" },
     { name = "Sebastian Ion Nae", email = "naesebi2000@gmail.com" },
@@ -52,7 +52,8 @@ strict = true
 
 [tool.ruff]
 target-version = "py310"
-exclude = ["test", "venv", "env", ".venv", ".env"]
+exclude = ["test", "venv", "env", ".venv", ".env", "auto_follow/visualization", "external"]
+force-exclude = true
 line-length = 120
 
 [tool.ruff.lint]
@@ -62,7 +63,23 @@ ignore = [
     "I001", # PyCharm uses something else to sort imports
     "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
     "UP015", # For open() default "r" parameter
-    "N818", # Exception name should be named with an Error suffix
+    "N818", # Exception name should be named with an Error suffix,
+    "E501"# Line too long
+]
+
+[tool.ruff.lint.per-file-ignores]
+"student_train_pipeline/*" = [
+    "PLW2901",
+    "N812",
+    "PLR0913",
+    "PLR0915",
+    "RUF059",
+    "PLC0415"
+]
+"auto_follow/evaluation/*" = [
+    "PLR0911",
+    "PLR0915",
+    "RUF059"
 ]
 
 [tool.pytest.ini_options]

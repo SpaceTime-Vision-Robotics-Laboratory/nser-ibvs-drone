@@ -10,7 +10,10 @@ class Paths:
     UNTRAINED_YOLO_PATH: Final[Path] = MODELS_DIR / "yolo11n.pt"
     REAL_CAR_YOLO_PATH: Final[Path] = MODELS_DIR / "yolon_car_detector.pt"
     SIM_CAR_POSE_IBVS_YOLO_PATH: Final[Path] = MODELS_DIR / "30_05_best__yolo11n-seg_sim_car_bunker__front_back.pt"
+
     SIM_CAR_IBVS_YOLO_PATH: Final[Path] = MODELS_DIR / "29_05_best__yolo11n-seg_sim_car_bunker__all.pt"
+    REAL_CAR_IBVS_YOLO_PATH: Final[Path] = MODELS_DIR / "real-yolo-car-full-segmentation.pt"
+
     SIM_CAR_YOLO_PATH: Final[Path] = MODELS_DIR / "yolov11n_car_detector_sim.pt"
     SIM_CAR_SIMPLE_YOLO_PATH: Final[Path] = MODELS_DIR / "yolo11n_car_detector_sim_simple.pt"
     SIM_CAR_CARLA_YOLO_PATH: Final[Path] = MODELS_DIR / "yolo11n_car_detector_sim_carla.pt"
@@ -19,6 +22,18 @@ class Paths:
 
     SIM_MASK_SPLITTER_CAR_LOW_PATH: Final[
         Path] = MODELS_DIR / "mask_splitter-epoch_10-dropout_0-low_x2-and-high_x0_quality_early_stop.pt"
+    SIM_STUDENT_NET_TEMPORAL_PATH: Final[Path] = MODELS_DIR / "sim_temporal_student_best_model.pth"
+    SIM_STUDENT_NET_PATH: Final[Path] = MODELS_DIR / "student_best_model.pth"
+    SIM_STUDENT_NEW_PATH_REAL_WORLD_DISTRIBUTION: Final[Path] = MODELS_DIR / "student_model_sim_on_real_world_distribution.pth"
+
+    REAL_MASK_SPLITTER_CAR: Final[
+        Path] = MODELS_DIR / "mask_splitter-epoch_10-dropout_0-_x2_real_early_stop.pt"
+
+    REAL_STUNDENT_NET_PRETRAINED_REAL_WORLD_DISTRIBUTION: Final[Path] = MODELS_DIR / "student_real_pretrained_on_real_distribution.pth"
+
+    # 21/06 - check real student
+    REAL_STUDENT_NET_X3: Final[Path] = MODELS_DIR / "student_real_pretrained_augX3_80_runs.pth"
+    REAL_STUDENT_NET_X5: Final[Path] = MODELS_DIR / "student_real_model_pretrained_x5.pth"
 
     # PID config:
     PID_CONFIG_DIR: Final[Path] = BASE_DIR / "config" / "pid"
@@ -50,6 +65,10 @@ class Paths:
 
     GOAL_FRAME_PATH_45: Final[Path] = REFERENCE_IMAGES_DIR / "frame_001030_26999571__45__takeoff.png"
     GOAL_FRAME_POINTS_PATH_45: Final[Path] = REFERENCE_DATA_DIR / "frame_001030_26999571__45__takeoff.json"
+    GOAL_FRAME_POINTS_PATH_45_SIM: Final[Path] = REFERENCE_DATA_DIR / "frame_001030_26999571__45__takeoff.json"
+    GOAL_FRAME_POINTS_PATH_45_REAL: Final[Path] = REFERENCE_DATA_DIR / "____frame_001160_9928240_real_45_recording.json"
+
+    CAR_GOAL_PLOT: Final[Path] = REFERENCE_IMAGES_DIR / "real_car_90_90.png"
 
 
 if __name__ == '__main__':

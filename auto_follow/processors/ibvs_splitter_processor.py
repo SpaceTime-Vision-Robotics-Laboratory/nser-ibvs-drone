@@ -3,9 +3,11 @@ import time
 from collections import deque
 from pathlib import Path
 
+import cv2
 import numpy as np
 
 from auto_follow.detection.mask_splitter_ibvs import MaskSplitterEngineIBVS
+from auto_follow.detection.target_tracker import CommandInfo
 from auto_follow.processors.ibvs_yolo_processor import IBVSYoloProcessor
 from auto_follow.utils.path_manager import Paths
 
@@ -34,6 +36,10 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
         self.results_path = self.frame_saver.output_dir.parent / "flight_duration.json"
         self.recent_commands = np.ones((self.error_window_size, 3))
 
+        self.last_command_info = None
+        self.font = cv2.FONT_HERSHEY_SIMPLEX
+
+
     def _process_frame(self, frame: np.ndarray) -> np.ndarray:
         if not self._check_start_drone_state():
             return frame
@@ -50,6 +56,7 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
         }
 
         if self._frame_count % 2 == 1:
+            self._add_cmd_visualization(frame, self.last_command_info)
             return frame
 
         target_data = self.detector.find_best_target(frame, None)
@@ -57,6 +64,7 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
         if target_data.confidence == -1:
             self._soft_goal_enter_time = None
             self.recent_errors.clear()
+            self.check_timout_landing(timestamp)
             return frame
 
         self.visualizer.display_frame(frame, target_data, self.ibvs_controller, self.ibvs_controller.goal_points)
@@ -80,7 +88,9 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
         self.check_goal_reached(timestamp)
         self.check_timout_landing(timestamp)
 
+        self.last_command_info = command_info
         self.perform_movement(command_info)
+        self._add_cmd_visualization(frame, command_info)
 
         return frame
 
@@ -171,3 +181,17 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
         median_error = np.median(list(self.recent_errors))
         return (median_error < self.stop_error_hard_threshold,
                 np.all(self.recent_commands == 0) and median_error < self.stop_error_soft_threshold)
+
+    def _add_cmd_visualization(self, frame: np.ndarray, drone_command: CommandInfo) -> None:
+        overlay = np.array(frame)
+        cv2.rectangle(overlay, (5, 10), (105, 100), (0, 0, 0), -1)  # Black rectangle
+        cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)  # 40% overlay opacity
+        cv2.putText(
+            frame, f"X: {drone_command.x_cmd:+4d}", (10, 30), self.font, 0.7, (0, 0, 255), 2
+        )
+        cv2.putText(
+            frame, f"Y: {drone_command.y_cmd:+4d}", (10, 60), self.font, 0.7, (0, 255, 0), 2
+        )
+        cv2.putText(
+            frame, f"R: {drone_command.rot_cmd:+4d}", (10, 90), self.font, 0.7, (255, 255, 0), 2
+        )

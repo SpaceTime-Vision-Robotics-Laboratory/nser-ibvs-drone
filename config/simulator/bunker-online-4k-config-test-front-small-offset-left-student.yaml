@@ -1,0 +1,18 @@
+paths:
+  sphinx:
+    command: "bunker/installed/LinuxNoEditor/UnrealApp.sh"
+    level: "main_details"
+    quality: "low"
+    config_file: "assets/environment/config/add_mc_laren.yaml"
+
+    firmware:
+      base_command: "sphinx"
+      drone_path: "/opt/parrot-sphinx/usr/share/sphinx/drones/anafi.drone"
+      firmware_url: "https://firmware.parrot.com/Versions/anafi/pc/%23latest/images/anafi-pc.ext2.zip"
+      pose: "1.5 0.3 0.3 0 -0 -2.9"
+
+  scripts:
+    controller: "auto_follow/controllers/distilled_network_controller.py"
+    save_dir_name: "bunker-online-4k-config-test-front-small-offset-left-student"
+
+

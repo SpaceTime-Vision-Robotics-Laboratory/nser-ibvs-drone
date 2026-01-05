@@ -1,6 +1,6 @@
 paths:
   sphinx:
-    command: "/home/brittle/Games/MyGames/DroneSimulation/bunker/installed/LinuxNoEditor/UnrealApp.sh"
+    command: "bunker/installed/LinuxNoEditor/UnrealApp.sh"
     level: "main_details"
     quality: "low"
     config_file: "assets/environment/config/add_mc_laren.yaml"
