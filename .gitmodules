@@ -2,3 +2,6 @@
 	path = external/drone_base
 	url = git@github.com:SpaceTime-Vision-Robotics-Laboratory/drone-base.git
 	branch = main
+[submodule "external/mask_splitter"]
+	path = external/mask_splitter
+	url = git@github.com:SpaceTime-Vision-Robotics-Laboratory/mask-splitter.git

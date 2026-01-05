@@ -6,8 +6,8 @@ from ultralytics.engine.results import Results
 
 from auto_follow.detection.targets import TargetIBVS
 from auto_follow.detection.yolo_ibvs import YoloEngineIBVS
-from auto_follow.splitter.infer import MaskSplitterInference
 from auto_follow.utils.path_manager import Paths
+from mask_splitter.nn.infer import MaskSplitterInference
 
 
 class MaskSplitterEngineIBVS(YoloEngineIBVS):
@@ -91,7 +91,7 @@ class MaskSplitterEngineIBVS(YoloEngineIBVS):
 
         ## check that the returned masks_xy is the one containing the points
         ## and not the default_mask
-        if (masks_xy.shape[1] != 2): # noqa: PLR2004
+        if (masks_xy.shape[1] != 2):  # noqa: PLR2004
             return self._default_target
 
         front_mask, back_mask = self.splitter_model.infer(image=frame, mask=mask)
