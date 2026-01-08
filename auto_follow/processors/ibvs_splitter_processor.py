@@ -37,6 +37,7 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
         self.recent_commands = np.ones((self.error_window_size, 3))
 
         self.last_command_info = None
+        self.last_target_data = None
         self.font = cv2.FONT_HERSHEY_SIMPLEX
 
 
@@ -56,10 +57,16 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
         }
 
         if self._frame_count % 2 == 1:
-            self._add_cmd_visualization(frame, self.last_command_info)
+            if self.last_command_info is not None:
+                self._add_cmd_visualization(frame, self.last_command_info)
+            if self.last_target_data is not None:
+                self.visualizer.display_frame(
+                    frame, self.last_target_data, self.ibvs_controller, self.ibvs_controller.goal_points
+                )
             return frame
 
         target_data = self.detector.find_best_target(frame, None)
+        self.last_target_data = target_data
 
         if target_data.confidence == -1:
             self._soft_goal_enter_time = None
@@ -82,7 +89,8 @@ class IBVSSplitterProcessor(IBVSYoloProcessor):
         self.recent_commands[:-1] = self.recent_commands[1:]
         self.recent_commands[-1] = np.array([command_info.x_cmd, command_info.y_cmd, command_info.rot_cmd])
 
-        self._save_parquet_logs(parquet_row, command_info, logs)
+        if self.parquet_path is not None:
+            self._save_parquet_logs(parquet_row, command_info, logs)
         self.recent_errors.append(self.ibvs_controller.err_uv_values[-1])
 
         self.check_goal_reached(timestamp)

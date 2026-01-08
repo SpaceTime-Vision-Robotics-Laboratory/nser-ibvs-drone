@@ -87,7 +87,8 @@ class EvalDistilledNetworkProcessor(IBVSSplitterProcessor):
 
         self.recent_commands[:-1] = self.recent_commands[1:]
         self.recent_commands[-1] = np.array([drone_command.x_cmd, drone_command.y_cmd, drone_command.rot_cmd])
-        self._save_parquet_logs_student(parquet_row, drone_command, splitter_command_info, logs)
+        if self.parquet_path is not None:
+            self._save_parquet_logs_student(parquet_row, drone_command, splitter_command_info, logs)
 
         self.check_goal_reached(timestamp)
         self.check_timout_landing(timestamp)

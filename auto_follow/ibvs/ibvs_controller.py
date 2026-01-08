@@ -94,7 +94,7 @@ class ImageBasedVisualServo:
 
         return jacobian_matrix
 
-    def compute_velocities(self, verbose: bool = False) -> np.ndarray:
+    def compute_velocities(self, verbose: bool = False) -> tuple[np.ndarray, dict]:
         jacobian_matrix = self.compute_interaction_matrix()
 
         jcond = np.linalg.cond(jacobian_matrix)

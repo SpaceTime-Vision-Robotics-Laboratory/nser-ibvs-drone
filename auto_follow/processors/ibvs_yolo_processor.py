@@ -109,7 +109,8 @@ class IBVSYoloProcessor(BaseVideoProcessor):
             np.linalg.norm(logs["err_uv"])
         )
 
-        self._save_parquet_logs(parquet_row, command_info, logs)
+        if self.parquet_path is not None:
+            self._save_parquet_logs(parquet_row, command_info, logs)
 
         self.perform_movement(command_info)
 
