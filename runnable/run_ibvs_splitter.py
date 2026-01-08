@@ -1,31 +1,20 @@
-import argparse
-
-from auto_follow.controllers.ibvs_splitter_controller import IBVSSplitterController
-from auto_follow.processors.ibvs_splitter_processor import IBVSSplitterProcessor
-from auto_follow.utils.path_manager import Paths
-from drone_base.config.drone import DroneIp
+from auto_follow.controllers.ibvs_splitter_controller import main_ibvs_splitter_controller
 
 
-def main(args: argparse.Namespace):
-    controller = IBVSSplitterController(
-        ip=args.ip,
-        processor_class=IBVSSplitterProcessor,
-        speed=args.speed,
-        log_path=Paths.OUTPUT_DIR / "logs",
-        results_path=Paths.OUTPUT_DIR / "results",
-    )
-
-    if True:
-        controller.initialize_position()
-
-    controller.run()
+def main():
+    main_ibvs_splitter_controller()
 
 
 if __name__ == "__main__":
-    args = argparse.ArgumentParser()
-    args.add_argument("--ip", type=str, default=DroneIp.SIMULATED)
-    args.add_argument("--speed", type=int, default=35)
-    args.add_argument("--simulated", action="store_true")
-    args = args.parse_args()
-
-    main(args)
+    """
+    Experiment names:
+        real-ibvs-down-left
+        real-ibvs-down-right
+        real-ibvs-front-small-offset-right
+        real-ibvs-front-small-offset-left
+        real-ibvs-left
+        real-ibvs-right
+        real-ibvs-up-left
+        real-ibvs-up-right
+    """
+    main()
