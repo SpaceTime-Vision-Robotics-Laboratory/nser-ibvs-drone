@@ -16,6 +16,7 @@ from drone_base.config.video import VideoConfig
 
 
 class IBVSSplitterAnnotate:
+    """NSER-IBVS class to generate IBVS logs for a scene (used to compare student network)."""
     def __init__(
             self,
             model_path: str | Path = Paths.SIM_CAR_IBVS_YOLO_PATH,

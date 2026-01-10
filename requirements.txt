@@ -13,3 +13,4 @@ torchinfo
 python-dotenv
 pyarrow
 thop
+tqdm

@@ -5,6 +5,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import pandas as pd
 import torch
 from torch import nn
 
@@ -101,9 +102,11 @@ def measure_complexity(model, input_size: tuple = (1, 3, 224, 224)):
         return 0, 0
 
 
-def benchmark_evaluators(input_directory: str):
+def benchmark_flops_evaluators(input_directory: str, output_dir: str | Path = "./"):
     """Benchmark comparing StudentEvaluator vs IBVSEvaluator with TFLOPs"""
     input_path = Path(input_directory)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
     image_files = list(input_path.glob('*.jpg')) + list(input_path.glob('*.png'))
 
     frames = []
@@ -117,7 +120,8 @@ def benchmark_evaluators(input_directory: str):
         return [], [], []
 
     print(f"Loaded {len(frames)} frames")
-
+    all_timing_results = []
+    complexity_results = []
     # --- StudentEvaluator ---
     print("\n=== Testing StudentEvaluator ===")
     gc.collect()
@@ -131,13 +135,34 @@ def benchmark_evaluators(input_directory: str):
     st_flops, st_params = measure_complexity(student_model, st_input_size)
 
     student_times = []
-    for frame in frames:
+    for i, frame in enumerate(frames):
         start = time.perf_counter()
         _ = student_evaluator.predict_command_on_frame(frame)
         end = time.perf_counter()
-        student_times.append((end - start) * 1000)  # ms
+        t = (end - start) * 1000
+        student_times.append(t)
+        all_timing_results.append({
+            "Evaluator": "Student",
+            "Frame": i,
+            "Time_ms": t
+        })
     del student_evaluator
     gc.collect()
+
+    complexity_results.append({
+        "Evaluator": "Student",
+        "FLOPs": st_flops,
+        "GFLOPs": st_flops / 1e9,
+        "TFLOPs": st_flops / 1e12,
+        "Params": st_params,
+        "Params_M": st_params / 1e6,
+        "Avg_Time_ms": np.mean(student_times),
+        "Std_Time_ms": np.std(student_times),
+        "Median_Time_ms": np.median(student_times),
+        "Min_Time_ms": np.min(student_times),
+        "Max_Time_ms": np.max(student_times),
+        "FPS": 1000 / np.mean(student_times)
+    })
 
     # --- StudentEvaluator with Segmentation ---
     print("\n=== Testing StudentEvaluator with Segmentation ===")
@@ -157,13 +182,34 @@ def benchmark_evaluators(input_directory: str):
     seg_params = pol_params + det_params
 
     student_times_seg = []
-    for frame in frames:
+    for i, frame in enumerate(frames):
         start = time.perf_counter()
         _ = student_evaluator_seg.predict_with_segmentation(frame)
         end = time.perf_counter()
-        student_times_seg.append((end - start) * 1000)  # ms
+        t = (end - start) * 1000
+        student_times_seg.append(t)
+        all_timing_results.append({
+            "Evaluator": "Student+Segmentation",
+            "Frame": i,
+            "Time_ms": t
+        })
     del student_evaluator_seg
     gc.collect()
+
+    complexity_results.append({
+        "Evaluator": "Student+Segmentation",
+        "FLOPs": seg_flops,
+        "GFLOPs": seg_flops / 1e9,
+        "TFLOPs": seg_flops / 1e12,
+        "Params": seg_params,
+        "Params_M": seg_params / 1e6,
+        "Avg_Time_ms": np.mean(student_times_seg),
+        "Std_Time_ms": np.std(student_times_seg),
+        "Median_Time_ms": np.median(student_times_seg),
+        "Min_Time_ms": np.min(student_times_seg),
+        "Max_Time_ms": np.max(student_times_seg),
+        "FPS": 1000 / np.mean(student_times_seg)
+    })
 
     # --- IBVSEvaluator ---
     print("\n=== Testing IBVSEvaluator ===")
@@ -184,36 +230,66 @@ def benchmark_evaluators(input_directory: str):
     ibvs_params = ibvs_params + ibvs_split_params
 
     ibvs_times = []
-    for frame in frames:
+    for i, frame in enumerate(frames):
         start = time.perf_counter()
         _ = ibvs_evaluator.predict_command_on_frame(frame)
         end = time.perf_counter()
-        ibvs_times.append((end - start) * 1000)  # ms
+        t = (end - start) * 1000
+        ibvs_times.append(t)
+        all_timing_results.append({
+            "Evaluator": "IBVS",
+            "Frame": i,
+            "Time_ms": t
+        })
     del ibvs_evaluator
     gc.collect()
 
+    complexity_results.append({
+        "Evaluator": "IBVS",
+        "FLOPs": ibvs_flops,
+        "GFLOPs": ibvs_flops / 1e9,
+        "TFLOPs": ibvs_flops / 1e12,
+        "Params": ibvs_params,
+        "Params_M": ibvs_params / 1e6,
+        "Avg_Time_ms": np.mean(ibvs_times),
+        "Std_Time_ms": np.std(ibvs_times),
+        "Median_Time_ms": np.median(ibvs_times),
+        "Min_Time_ms": np.min(ibvs_times),
+        "Max_Time_ms": np.max(ibvs_times),
+        "FPS": 1000 / np.mean(ibvs_times)
+    })
+
+    timing_df = pd.DataFrame(all_timing_results)
+    timing_csv_path = output_dir / "benchmark_timing_raw.csv"
+    timing_df.to_csv(timing_csv_path, index=False)
+    print(f"\nSaved raw timing data to {timing_csv_path}")
+
+    summary_df = pd.DataFrame(complexity_results)
+    summary_csv_path = output_dir / "benchmark_complexity_summary.csv"
+    summary_df.to_csv(summary_csv_path, index=False)
+    print(f"Saved complexity summary to {summary_csv_path}")
+
     print("\n=== RESULTS ===")
+    print("\n=== RESULTS ===")
+    print(summary_df.to_string(index=False, float_format="%.4f"))
 
-    def print_stats(name, times, flops, params):
-        avg_time = np.mean(times)
-        fps = 1000 / avg_time
+    latex_cols = ["Evaluator", "GFLOPs", "Params_M", "Avg_Time_ms", "FPS"]
+    latex_df = summary_df[latex_cols].copy()
+    latex_df.columns = ["Evaluator", "GFLOPs", "Params (M)", "Avg Time (ms)", "FPS"]
 
-        print(f"{name}:")
-        print(f"  Average: {avg_time:.2f} ms")
-        print(f"  FPS:     {fps:.1f}")
+    print("\n=== LaTeX Table ===")
+    latex_str = latex_df.to_latex(
+        index=False,
+        float_format="%.2f",
+        caption="Model Complexity and Timing Comparison",
+        label="tab:complexity_eval"
+    )
+    print(latex_str)
 
-        if flops > 0:
-            tflops = flops / 1e12
-            gflops = flops / 1e9
-            print(f"  GFLOPs:  {gflops:.4f}")
-            print(f"  TFLOPs:  {tflops:.6f}")
-            print(f"  Params:  {params / 1e6:.2f} M")
-        else:
-            print("  TFLOPs:  N/A (Model not found or error in profiling)")
-
-    print_stats("StudentEvaluator (Policy Only)", student_times, st_flops, st_params)
-    print_stats("StudentEvaluator + Segmentation", student_times_seg, seg_flops, seg_params)
-    print_stats("IBVSEvaluator (Segmentation + Control)", ibvs_times, ibvs_flops, ibvs_params)
+    tex_path = output_dir / "benchmark_complexity_table.tex"
+    with open(tex_path, "w") as f:
+        f.write(latex_str)
+    print(f"Saved LaTeX table to {tex_path}")
 
     return student_times, student_times_seg, ibvs_times
 
@@ -221,4 +297,4 @@ def benchmark_evaluators(input_directory: str):
 if __name__ == '__main__':
     path = "/home/brittle/Desktop/work/space-time-vision-repos/auto-follow/output/bunker-online-4k-config-test-front-small-offset-right/results/2025-11-25_15-33-27/frames"
 
-    benchmark_evaluators(path)
+    benchmark_flops_evaluators(path)

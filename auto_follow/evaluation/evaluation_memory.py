@@ -5,6 +5,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import pandas as pd
 import psutil
 
 from auto_follow.evaluation.evaluation_methods import IBVSEvaluator, StudentEvaluator
@@ -16,7 +17,6 @@ try:
     GPU_AVAILABLE = True
 except Exception as _:
     GPU_AVAILABLE = False
-
 
 
 def get_memory_usage():
@@ -37,10 +37,12 @@ def get_gpu_memory():
         return None
 
 
-def benchmark_evaluators(input_directory: str):
+def benchmark_memory_evaluators(input_directory: str, output_dir: str | Path = "./"):
     """Simple benchmark comparing StudentEvaluator vs IBVSEvaluator"""
 
     input_path = Path(input_directory)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
     image_files = list(input_path.glob('*.jpg')) + list(input_path.glob('*.png'))
     frames = []
 
@@ -50,6 +52,8 @@ def benchmark_evaluators(input_directory: str):
             frames.append(frame)
 
     print(f"Loaded {len(frames)} frames")
+
+    memory_results = []
 
     print("\n=== Testing StudentEvaluator ===")
     gc.collect()
@@ -72,6 +76,14 @@ def benchmark_evaluators(input_directory: str):
     # Measure peak memory
     peak_memory = get_memory_usage()
     peak_gpu_memory = get_gpu_memory()
+
+    memory_results.append({
+        'Evaluator': 'Student',
+        'RAM_Model_Load_MB': model_memory - initial_memory,
+        'RAM_Peak_MB': peak_memory - initial_memory,
+        'GPU_Model_Load_MB': (model_gpu_memory - initial_gpu_memory) if initial_gpu_memory else None,
+        'GPU_Peak_MB': (peak_gpu_memory - initial_gpu_memory) if initial_gpu_memory else None
+    })
 
     student_memory_usage = {
         'model_load': model_memory - initial_memory,
@@ -102,6 +114,14 @@ def benchmark_evaluators(input_directory: str):
 
     peak_memory = get_memory_usage()
     peak_gpu_memory = get_gpu_memory()
+
+    memory_results.append({
+        'Evaluator': 'IBVS',
+        'RAM_Model_Load_MB': model_memory - initial_memory,
+        'RAM_Peak_MB': peak_memory - initial_memory,
+        'GPU_Model_Load_MB': (model_gpu_memory - initial_gpu_memory) if initial_gpu_memory else None,
+        'GPU_Peak_MB': (peak_gpu_memory - initial_gpu_memory) if initial_gpu_memory else None
+    })
 
     ibvs_memory_usage = {
         'model_load': model_memory - initial_memory,
@@ -143,13 +163,17 @@ def benchmark_evaluators(input_directory: str):
 
     faster = "StudentEvaluator" if np.mean(student_times) < np.mean(ibvs_times) else "IBVSEvaluator"
     speedup = max(np.mean(student_times), np.mean(ibvs_times)) / min(np.mean(student_times), np.mean(ibvs_times))
+
+    df = pd.DataFrame(memory_results)
+    csv_path = output_dir / "benchmark_memory.csv"
+    df.to_csv(csv_path, index=False)
+    print(f"\nSaved memory results to {csv_path}")
+
+    print("\n=== MEMORY RESULTS ===")
+    print(df.to_string(index=False, float_format="%.2f"))
     print(f"\n{faster} is {speedup:.2f}x faster")
 
 
-def main():
-    path = "/home/brittle/Desktop/work/space-time-vision-repos/auto-follow/output/bunker-online-4k-config-test-front-small-offset-left-student/results/2025-06-16_02-01-23/frames"
-    benchmark_evaluators(path)
-
-
 if __name__ == '__main__':
-    main()
+    path = "/home/brittle/Desktop/work/space-time-vision-repos/auto-follow/output/bunker-online-4k-config-test-front-small-offset-left-student/results/2025-06-16_02-01-23/frames"
+    benchmark_memory_evaluators(path)

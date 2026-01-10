@@ -37,7 +37,21 @@ def predict_ibvs(evaluator, frame):
     return evaluator.predict_command_on_frame(frame)
 
 
-def benchmark_evaluators(input_directory: str, trials: int = 10, output_csv: str = "benchmark_results.csv"):
+def benchmark_infer_multi_evaluators(input_directory: str, trials: int = 10, output_dir: str | Path = "./"):
+    """
+    Evaluates the inference times on a frames directory with the following models:
+        - NSER-IBVS pipeline
+        - Student pipeline
+        - Student + Segmentation pipeline
+
+    It outputs the following metrics for inference time per frame:
+        - Average
+        - Standard Deviation
+        - Median
+        - Minimum time
+        - Maximum time
+        - FPS based on average
+    """
     input_path = Path(input_directory)
     image_files = sorted(list(input_path.glob('*.jpg')) + list(input_path.glob('*.png')))
     frames = [cv2.imread(str(p)) for p in image_files if cv2.imread(str(p)) is not None]
@@ -75,9 +89,12 @@ def benchmark_evaluators(input_directory: str, trials: int = 10, output_csv: str
             {"Trial": trial + 1, "Evaluator": "IBVS", "Times": t} for t in ibvs_times
         ])
 
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = output_dir / "benchmark_results.csv"
     df = pd.DataFrame(all_results)
-    df.to_csv(output_csv, index=False)
-    print(f"\nSaved raw data to {output_csv}")
+    df.to_csv(csv_path, index=False)
+    print(f"\nSaved raw data to {csv_path}")
 
     # Compute statistics
     summary = df.groupby("Evaluator")["Times"].agg(
@@ -96,11 +113,12 @@ def benchmark_evaluators(input_directory: str, trials: int = 10, output_csv: str
     print(summary.to_latex(index=False, float_format="%.2f", caption="Timing Comparison of Evaluators",
                            label="tab:timing_eval"))
 
-    with open("benchmark_table.tex", "w") as f:
+    tex_path = output_dir / "benchmark_table.tex"
+    with open(tex_path, "w") as f:
         f.write(summary.to_latex(index=False, float_format="%.2f", caption="Timing Comparison of Evaluators",
                                  label="tab:timing_eval"))
 
-    print("\nSaved LaTeX table to benchmark_table.tex")
+    print(f"\nSaved LaTeX table to {tex_path}")
 
     print("\n=== System Info ===")
     print(f"Platform: {platform.system()} {platform.release()} ({platform.machine()})")
@@ -114,4 +132,4 @@ def benchmark_evaluators(input_directory: str, trials: int = 10, output_csv: str
 
 if __name__ == '__main__':
     path = "/home/brittle/Desktop/work/space-time-vision-repos/auto-follow/output/bunker-online-4k-config-test-front-small-offset-left-student/results/2025-06-16_02-01-23/frames"
-    benchmark_evaluators(path, trials=30)
+    benchmark_infer_multi_evaluators(path, trials=30)
