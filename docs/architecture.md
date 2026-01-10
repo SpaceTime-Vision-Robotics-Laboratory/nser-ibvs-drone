@@ -76,6 +76,16 @@ preventing the ambiguity that would destabilize the IBVS control loop.
 The Numerically Stable Efficient Reduced IBVS computes velocity commands by comparing 
 current keypoints to reference (goal) keypoints.
 
+<div align="center">
+<table align="center">
+  <tr>
+    <td align="center"><img src="images/Reference-Real-World.png" width="213" alt="Reference (Goal) Image Real-World"><br>Reference (Goal) Image Real-World</td>
+    <td align="center"><img src="images/Reference-Simulator.png" width="213" alt="Reference (Goal) Image Simulated"><br>Reference (Goal) Image Simulated</td>
+  </tr>
+</table>
+</div>
+
+
 Our Reduced Formulation eliminates unnecessary degrees of freedom for quadrotor control at fixed altitude.
 This reduction from 6-DOF to 3-DOF (vx, vy, ωz) improves numerical stability and computational efficiency.
 
@@ -172,15 +182,15 @@ Implementation: [auto_follow/processors/](../auto_follow/processors)
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              TEACHER PATH                                   │
 │  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌────────┐ │
-│  │  Camera  │───▶│ YOLOv11  │───▶│  Mask    │───▶│ Keypoint │───▶│  IBVS  │ │
+│  │  Camera  │───▶│ YOLOv11  │───▶│   Mask   │───▶│ Keypoint │───▶│  IBVS  │ │
 │  │  Frame   │    │   Seg    │    │ Splitter │    │ Extract  │    │Control │ │
 │  └──────────┘    └──────────┘    └──────────┘    └──────────┘    └────┬───┘ │
 │                                                                       │     │
 │                                                           ┌───────────┘     │
 │                                                           ▼                 │
-│                                                    ┌─────────────┐          │
-│                                                    │ (vx, vy, ωz)│          │
-│                                                    └──────┬──────┘          │
+│                                                    ┌──────────────┐         │
+│                                                    │ (vx, vy, ωz) │         │
+│                                                    └──────┬───────┘         │
 └───────────────────────────────────────────────────────────┼─────────────────┘
                                                             │
                         ┌───────────────────────────────────┤
@@ -192,13 +202,14 @@ Implementation: [auto_follow/processors/](../auto_follow/processors)
                └───────┬────────┘                  └────────────────┘
                        │
 ┌──────────────────────┼──────────────────────────────────────────────────────┐
-│                      ▼                 STUDENT PATH                         │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐                               │
-│  │  Camera  │───▶│  Student │───▶│ (vx, vy, │                               │
-│  │  Frame   │    │    CNN   │    │    ωz)   │                               │
-│  └──────────┘    └──────────┘    └──────────┘                               │
+│                      ▼          STUDENT PATH                                │
+│  ┌──────────┐    ┌──────────┐                      ┌──────────────┐         │
+│  │  Camera  │───▶│ Student  │─────────────────────▶│ (vx, vy, ωz) │         │
+│  │  Frame   │    │   CNN    │                      └──────────────┘         │
+│  └──────────┘    └──────────┘                                               │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+                      
 
 ## Simulation Environment
 The framework uses Parrot Sphinx with custom Unreal Engine 4 environments for training and evaluation.
@@ -233,6 +244,8 @@ The system implements three termination conditions:
 1. **Hard Goal**: Median error < 40px for 3 consecutive seconds
 2. **Soft Goal**: Median error < 80px AND all velocity commands = 0 for 3 seconds
 3. **Timeout**: 75 seconds maximum flight duration
+
+![Mission termination high-level diagram](images/Mission-Termination-Diagram.png)
 
 For the student network (evaluated independently without IBVS):
 - All velocity command absolute values ≤ 1 for 3 consecutive seconds (statistically found from NSER-IBVS method)

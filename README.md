@@ -14,9 +14,10 @@
 [![Website](https://img.shields.io/badge/Project-Website-green)](https://spacetime-vision-robotics-laboratory.github.io/NSER-IBVS/)
 [![arXiv](https://img.shields.io/badge/arXiv-2507.19878-b31b1b)](https://arxiv.org/abs/2507.19878)
 [![Poster](https://img.shields.io/badge/Poster-PDF-orange)](https://spacetime-vision-robotics-laboratory.github.io/NSER-IBVS/assets/poster.pdf)
+[![BibTeX](https://img.shields.io/badge/BibTeX-Citation-teal)](#citation)
+
 [![Data](https://img.shields.io/badge/Data-Google%20Drive-yellow)](https://drive.google.com/drive/u/0/my-drive)
 [![Sim Env](https://img.shields.io/badge/Bunker%20Sphinx%20UE4-Download-00a5e5?logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1vBbyoWVsvmZmz3S5X_1bmunyKrpuHvIb/view?usp=drive_link)
-[![BibTeX](https://img.shields.io/badge/BibTeX-Citation-teal)](#citation)
 </div> 
 
 A self-supervised neuro-analytical framework for vision-based quadrotor control. 
@@ -26,7 +27,7 @@ positioning without fiducial markers or GPS.
 
 <div align="center">
 
-![Demo Teacher vs Student Real-World](docs/images/Demo.gif)
+![Demo Teacher vs Student Real-World](docs/gifs/Demo.gif)
 
 </div>
 
@@ -194,6 +195,12 @@ making it suitable for real-time onboard deployment.
     <td align="center"><img src="docs/images/Sim-Student-Evolution-Errors.png" width="4764" alt="Digital-Twin Flight - Student"><br>Digital-Twin Flight - Student</td>
   </tr>
 </table>
+
+Altitude and speed over time. Trajectory of the drone from the starting point to the goal, and drone flight states data:
+![Altitude and speed over time. Trajectory of the drone from the starting point to the goal, and drone flight states data.](docs/images/Trajectory-IBVS.png)
+
+Real-world vs Digital-twin distribution of commands, linear and angular (yaw) velocities, over all experiments comparison: 
+![Command distributions over all experiments](docs/images/Command-Distributions-Comparison.png)
 
 ## Citation
 If you find this work useful, please consider citing:

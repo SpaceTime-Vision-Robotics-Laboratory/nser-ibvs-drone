@@ -1,6 +1,33 @@
 # Running Experiments
 This guide explains how to run visual servoing experiments using our framework.
 
+<table align="center">
+  <tr>
+    <td align="center"><img src="gifs/Real-IBVS-Front-Left.gif" width="600" alt="NSER-IBVS Front Left"><br>NSER-IBVS Front Left</td>
+    <td align="center"><img src="gifs/Real-Student-Front-Left.gif" width="600" alt="Student Front Left"><br>Student Front Left</td>
+    <td align="center"><img src="gifs/Real-IBVS-Front-Right.gif" width="600" alt="NSER-IBVS Front Right"><br>NSER-IBVS Front Right</td>
+    <td align="center"><img src="gifs/Real-Student-Front-Right.gif" width="600" alt="Student Front Right"><br>Student Front Right</td>
+  </tr>
+</table>
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="gifs/Real-IBVS-Up-Left.gif" width="600" alt="NSER-IBVS Up Left"><br>NSER-IBVS Up Left</td>
+    <td align="center"><img src="gifs/Real-Student-Up-Left.gif" width="600" alt="Student Up Left"><br>Student Up Left</td>
+    <td align="center"><img src="gifs/Real-IBVS-Up-Right.gif" width="600" alt="NSER-IBVS Up Right"><br>NSER-IBVS Up Right</td>
+    <td align="center"><img src="gifs/Real-Student-Up-Right.gif" width="600" alt="Student Up Right"><br>Student Up Right</td>
+  </tr>
+</table>
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="gifs/Real-IBVS-Front-Center.gif" width="600" alt="NSER-IBVS Front Center (Fail)"><br>NSER-IBVS Front Center (Fail)</td>
+    <td align="center"><img src="gifs/Real-Student-Front-Center.gif" width="600" alt="Student Front Center"><br>Student Front Center</td>
+  </tr>
+</table>
+
+
+
 ## Overview
 The framework supports two control methods:
 1. **NSER IBVS Splitter (Teacher):** Classical visual servoing using YOLO detection + mask splitting + IBVS control law
