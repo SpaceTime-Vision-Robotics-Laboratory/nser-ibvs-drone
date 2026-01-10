@@ -24,7 +24,11 @@ This repository implements **NSER-IBVS** (Numerically Stable Efficient Reduced I
 Visual Servoing) with a teacher-student architecture that enables autonomous drone 
 positioning without fiducial markers or GPS.
 
-<video src="https://github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow/blob/brittleru/refactoring/docs/images/Drone-Car-ICCV-EVW-x3-Speed.mp4" controls width="600"></video>
+<div align="center">
+
+![Demo Teacher vs Student Real-World](docs/images/Demo.gif)
+
+</div>
 
 ## Overview
 This framework introduces a cost-efficient approach to visual servoing where a compact **1.7M parameter 
