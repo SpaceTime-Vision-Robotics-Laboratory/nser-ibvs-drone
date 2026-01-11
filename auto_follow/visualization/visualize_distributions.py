@@ -453,7 +453,6 @@ def plot_velocity_distributions(
 def run_plot_analysis_on_scenes(
         base_path: str | Path,
         save_path_name: str,
-        scenes_names: list[str],
         is_student: bool,
         is_real: bool,
         random_runs: int = 1
@@ -461,8 +460,10 @@ def run_plot_analysis_on_scenes(
     reset_matplotlib_state()
 
     base_path = Path(base_path)
-    save_path_dir = Path(f"./{save_path_name}")
+    save_path_dir = Path(save_path_name)
     save_path_dir.mkdir(parents=True, exist_ok=True)
+
+    scenes_names = ConfigsDirName.REAL if is_real else ConfigsDirName.SIM
 
     for index, scene_name in enumerate(scenes_names):
         if is_student:
@@ -510,7 +511,6 @@ if __name__ == "__main__":
         run_plot_analysis_on_scenes(
             base_path=sim_ibvs_path,
             save_path_name="plots-sim-ibvs",
-            scenes_names=ConfigsDirName.SIM,
             is_student=False,
             is_real=False,
             random_runs=5
@@ -524,7 +524,6 @@ if __name__ == "__main__":
         run_plot_analysis_on_scenes(
             base_path=sim_student_path,
             save_path_name="plots-sim-student",
-            scenes_names=ConfigsDirName.SIM,
             is_student=True,
             is_real=False,
             random_runs=5
@@ -538,7 +537,6 @@ if __name__ == "__main__":
         run_plot_analysis_on_scenes(
             base_path=real_ibvs_path,
             save_path_name="plots-real-ibvs",
-            scenes_names=ConfigsDirName.REAL,
             is_student=False,
             is_real=True,
             random_runs=5
@@ -552,7 +550,6 @@ if __name__ == "__main__":
         run_plot_analysis_on_scenes(
             base_path=real_student_path,
             save_path_name="plots-real-student",
-            scenes_names=ConfigsDirName.REAL,
             is_student=True,
             is_real=True,
             random_runs=5

@@ -1,53 +1,18 @@
 import json
+import math
 import os
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import math
 
-# sns.set(style="whitegrid")
-
-BASE_DIR = "/home/brittle/Desktop/work/code/space-time-lab-org/auto-follow/output/results_without_frames_poli_pc"
-BASE_DIR = "/home/brittle/Desktop/work/Data/car-ibvs-data/real_world_results"
-BASE_DIR = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real-world-ibvs-results"
-# BASE_DIR = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/car-ibvs-sim-results-good"
-
-SAVE_PATH = Path("./plot-output")
-SAVE_PATH.mkdir(parents=True, exist_ok=True)
-CONFIG_DIRS = [
-    "bunker-online-4k-config-test-down-left",
-    "bunker-online-4k-config-test-down-right",
-
-    "bunker-online-4k-config-test-left",
-    "bunker-online-4k-config-test-right",
-
-    "bunker-online-4k-config-test-up-left",
-    "bunker-online-4k-config-test-up-right",
-
-    "bunker-online-4k-config-test-front-small-offset-right",
-    "bunker-online-4k-config-test-front-small-offset-left"
-]
-
-CONFIG_DIRS = [
-    "real-ibvs-down-left",
-    "real-ibvs-front-small-offset-left",
-    "real-ibvs-left",
-    "real-ibvs-up-left",
-    "real-ibvs-down-right",
-    "real-ibvs-front-small-offset-right",
-    "real-ibvs-right",
-    "real-ibvs-up-right",
-]
-is_student = False
-if is_student:
-    CONFIG_DIRS = [f"{directory_name}-student" for directory_name in CONFIG_DIRS]
+from auto_follow.visualization.load_data import ConfigsDirName
 
 
-def load_flight_durations():
+def load_flight_durations(base_scenes_dir: str | Path, config_dirs: list[str]):
     all_data = []
-    for config in CONFIG_DIRS:
-        folder = os.path.join(BASE_DIR, config, "results")
+    for config in config_dirs:
+        folder = os.path.join(base_scenes_dir, config, "results")
         if not os.path.exists(folder):
             continue
 
@@ -78,11 +43,11 @@ def load_flight_durations():
     return pd.DataFrame(all_data)
 
 
-def load_parquet_logs():
+def load_parquet_logs(base_scenes_dir: str | Path, config_dirs: list[str]):
     all_logs = []
-    for config in CONFIG_DIRS:
+    for config in config_dirs:
         print(config)
-        folder = os.path.join(BASE_DIR, config, "parquet-logs")
+        folder = os.path.join(base_scenes_dir, config, "parquet-logs")
         if not os.path.exists(folder):
             continue
 
@@ -132,9 +97,13 @@ def extract_vector_norms(df):
     return df
 
 
-def main():
+def compute_rotation(values):
+    return math.ceil(100 * values[2] / np.deg2rad(60))
+
+
+def main(base_scenes_dir: str | Path, config_dirs: list[str]):
     print("Loading parquet logs...")
-    logs_df = load_parquet_logs()
+    logs_df = load_parquet_logs(base_scenes_dir=base_scenes_dir, config_dirs=config_dirs)
     print(logs_df.head())
 
     # Error vector norm (err_uv) - normalized between 0 and 1
@@ -172,9 +141,7 @@ def main():
     print(len(logs_df["err_norm"]))
 
 
-def compute_rotation(values):
-    return math.ceil(100 * values[2] / np.deg2rad(60))
-
-
 if __name__ == "__main__":
-    main()
+    BASE_DIR = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/car-ibvs-sim-results-good"
+
+    main(base_scenes_dir=BASE_DIR, config_dirs=ConfigsDirName.SIM)

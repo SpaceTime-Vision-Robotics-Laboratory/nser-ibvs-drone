@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -354,14 +355,22 @@ def plot_statistics_summary(err_stats: pd.DataFrame, iou_stats: pd.DataFrame, sa
 
 def run_stats(
         base_path: str | Path,
-        save_path_name: str,
-        scenes_names: list[str],
+        save_path_dir: str | Path,
         is_student: bool,
         is_real: bool,
 ):
+    """
+    Runs all the statistics evaluations for a given series of experiments.
+    Will output per scene statistics and a mean per all scenes variants of files.
+    The files generated are about command, distance, duration, errors and IoU statistics.
+    Will also output the mean and median errors plots for the last 3 seconds of the mission.
+    """
     base_path = Path(base_path)
-    save_path_dir = Path(f"./{save_path_name}")
+    save_path_dir = Path(save_path_dir)
+    save_path_name = os.path.basename(f"{save_path_dir}")
     save_path_dir.mkdir(parents=True, exist_ok=True)
+
+    scenes_names = ConfigsDirName.REAL if is_real else ConfigsDirName.SIM
 
     print(f"Processing {base_path} - student: {is_student} - real: {is_real}")
     for index, scene_name in enumerate(scenes_names):
@@ -443,13 +452,16 @@ def run_stats(
 
 
 if __name__ == '__main__':
+    from auto_follow.utils.path_manager import Paths
+
     pd.set_option('display.max_columns', None)
+
+    save_path = Paths.BASE_DIR / "results" / "statistics"
 
     sim_ibvs_path = Path("/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged")
     run_stats(
         base_path=sim_ibvs_path,
-        save_path_name="sim-ibvs-results",
-        scenes_names=ConfigsDirName.SIM,
+        save_path_dir=save_path / "sim-ibvs-results",
         is_student=False,
         is_real=False,
     )
@@ -457,8 +469,7 @@ if __name__ == '__main__':
     sim_student_path = Path("/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student-with-teacher-output/sim-student-with-teacher-output-merged")
     run_stats(
         base_path=sim_student_path,
-        save_path_name="sim-student-results-v2",
-        scenes_names=ConfigsDirName.SIM,
+        save_path_dir=save_path / "sim-student-results",
         is_student=True,
         is_real=False,
     )
@@ -467,8 +478,7 @@ if __name__ == '__main__':
         "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged")
     run_stats(
         base_path=real_ibvs_path,
-        save_path_name="real-ibvs-results",
-        scenes_names=ConfigsDirName.REAL,
+        save_path_dir=save_path / "real-ibvs-results",
         is_student=False,
         is_real=True,
     )
@@ -477,8 +487,7 @@ if __name__ == '__main__':
         "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/real-student-with-teacher-output-new/results-real-student-21-06")
     run_stats(
         base_path=real_student_path,
-        save_path_name="real-student-results",
-        scenes_names=ConfigsDirName.REAL,
+        save_path_dir=save_path / "real-student-results",
         is_student=True,
         is_real=True,
     )

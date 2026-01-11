@@ -30,6 +30,9 @@ class ConfigsDirName:
         "real-ibvs-up-right",
     ]
 
+    SIM_STUDENT = [f"{directory_name}-student" for directory_name in SIM]
+    REAL_STUDENT = [f"{directory_name}-student" for directory_name in REAL]
+
 
 def extract_direction(config_name: str) -> str:
     direction_keywords = [
@@ -155,45 +158,17 @@ if __name__ == '__main__':
     BASE_DIR = Path("/home/brittle/Desktop/work/data/car-ibvs-data-tests/real-world-ibvs-results")
     BASE_DIR = Path("/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged")
 
-    SAVE_PATH = Path("./plot-output")
-    SAVE_PATH.mkdir(parents=True, exist_ok=True)
     pd.set_option('display.max_columns', None)
 
-    BASE_CONFIGS = [
-        "bunker-online-4k-config-test-down-left",
-        "bunker-online-4k-config-test-down-right",
-        "bunker-online-4k-config-test-left",
-        "bunker-online-4k-config-test-right",
-        "bunker-online-4k-config-test-up-left",
-        "bunker-online-4k-config-test-up-right",
-        "bunker-online-4k-config-test-front-small-offset-right",
-        "bunker-online-4k-config-test-front-small-offset-left"
-    ]
-    BASE_CONFIGS = [
-        "real-ibvs-down-left",
-        "real-ibvs-front-small-offset-left",
-        "real-ibvs-left",
-        "real-ibvs-up-left",
-        "real-ibvs-down-right",
-        "real-ibvs-front-small-offset-right",
-        "real-ibvs-right",
-        "real-ibvs-up-right",
-    ]
-
-    IS_STUDENT = False
-    BASE_CONFIGS = [
-        f"{name}-student" if IS_STUDENT else name
-        for name in BASE_CONFIGS
-    ]
-    data = load_json_flight_data(BASE_DIR, BASE_CONFIGS)
+    data = load_json_flight_data(BASE_DIR, ConfigsDirName.REAL)
     print(data.head)
     print(data.columns)
     print(data['direction'].value_counts())
 
-    data_parquet = load_parquet_data(BASE_DIR, BASE_CONFIGS)
+    data_parquet = load_parquet_data(BASE_DIR, ConfigsDirName.REAL)
     print(data_parquet.head)
     print(data_parquet.columns)
 
-    metadata_df = load_json_metadata(BASE_DIR, BASE_CONFIGS)
+    metadata_df = load_json_metadata(BASE_DIR, ConfigsDirName.REAL)
     print(metadata_df.head())
     print(metadata_df.columns)

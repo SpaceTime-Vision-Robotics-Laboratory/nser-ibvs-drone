@@ -14,3 +14,4 @@ python-dotenv
 pyarrow
 thop
 tqdm
+seaborn

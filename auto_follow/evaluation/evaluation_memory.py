@@ -18,7 +18,6 @@ try:
 except Exception as _:
     GPU_AVAILABLE = False
 
-
 def get_memory_usage():
     """Get current memory usage in MB"""
     process = psutil.Process(os.getpid())

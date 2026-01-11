@@ -1,5 +1,6 @@
 import json
 import math
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 
@@ -196,7 +197,12 @@ def print_results(trajectory, total_distance, use_carpet_coords=False):
                   f"State: {point['state']}")
 
 
-def plot_trajectory(trajectory, goal: tuple[float, float], use_carpet_coords=False):
+def plot_trajectory(
+        trajectory,
+        goal: tuple[float, float],
+        use_carpet_coords=False,
+        save_path: str | Path = "./trajectories/single-trajectory.png"
+):
     """Plot trajectory data"""
     times = [p['time'] for p in trajectory]
     altitudes = [p['alt'] for p in trajectory]
@@ -235,7 +241,7 @@ def plot_trajectory(trajectory, goal: tuple[float, float], use_carpet_coords=Fal
     ax3.scatter(xs[-1], ys[-1], color='red', s=100, label='End')
     print(f"At: {xs[-1], ys[-1]} vs {goal[0] - 0.95, goal[1]}")
     ax3.scatter(goal[0], goal[1], color='green', s=100, label='Car')
-    ax3.scatter(goal[0] - 0.95, goal[1], color='magenta', s=100, label='Goal')
+    ax3.scatter(goal[0] - 0.95, goal[1], color='orange', s=100, label='Goal')
     ax3.set_title(traj_title)
     ax3.set_xlabel(x_label)
     ax3.set_ylabel(y_label)
@@ -263,10 +269,19 @@ def plot_trajectory(trajectory, goal: tuple[float, float], use_carpet_coords=Fal
     ax4.grid(True)
 
     plt.tight_layout()
+    save_path = Path(save_path)
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(save_path)
     plt.show()
 
 
-def main(file_path, goal: tuple[float, float], carpet_start: tuple[float, float] | None = None, plot=True, ):
+def trajectory_analysis_single_run(
+        file_path,
+        goal: tuple[float, float],
+        carpet_start: tuple[float, float] | None = None,
+        plot=True,
+        save_path: str | Path = "./trajectories/single-trajectory.png"
+):
     data = load_drone_data(file_path)
     print(f"Distance: {calculate_drone_distance(data)}")
     trajectory, total_distance = analyze_trajectory(data, carpet_start)
@@ -275,37 +290,45 @@ def main(file_path, goal: tuple[float, float], carpet_start: tuple[float, float]
     print_results(trajectory, total_distance, use_carpet_coords)
 
     if plot:
-        plot_trajectory(trajectory, goal, use_carpet_coords)
+        plot_trajectory(trajectory, goal, use_carpet_coords, save_path=save_path)
+
+
+def get_carpet_start(goal: tuple[float, float], direction: str) -> tuple[float, float] | None:
+    """
+    Get carpet start coordinates based on direction relative to goal.
+
+    :param goal: X, Y coordinates of the goal position
+    :param direction: Direction of the starting position relative to goal:
+        - "front-right", "front-left"
+        - "left", "right"
+        - "up-left", "up-right"
+        - "down-left", "down-right"
+    :returns: Tuple of (carpet_x, carpet_y) start coordinates
+    """
+    goal_x, goal_y = goal
+
+    direction_offsets = {
+        "front-right": (1.5, -0.3),
+        "front-left": (1.5, 0.3),
+        "left": (0, 1),
+        "right": (0, -1),
+        "up-left": (1, 1),
+        "up-right": (1, -1),
+        "down-left": (-1, 1),
+        "down-right": (-1, -1),
+    }
+
+    if direction not in direction_offsets:
+        print(f"Invalid direction '{direction}'. Choose from: {list(direction_offsets.keys())}")
+        return None
+
+    x_off, y_off = direction_offsets[direction]
+    return goal_x + x_off, goal_y + y_off
 
 
 if __name__ == "__main__":
-    path = "/home/brittle/Desktop/work/code/space-time-lab-org/auto-follow/output/results_without_frames_poli_pc/bunker-online-4k-config-test-down-left/results/2025-06-11_23-45-17/metadata.json"
-    path = "/home/brittle/Desktop/work/code/space-time-lab-org/auto-follow/output/results_without_frames_poli_pc/bunker-online-4k-config-test-front-small-offset-left/results/2025-06-12_06-15-25/metadata.json"
-    path = "/home/brittle/Desktop/work/code/space-time-lab-org/drone-base/examples/results/2025-06-12_18-07-21/metadata.json"
-    path = "/home/brittle/Desktop/work/code/space-time-lab-org/drone-base/examples/results/2025-06-12_18-21-51/metadata.json"
-    path = "/home/brittle/Downloads/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/results-real-ibvs-all/real-ibvs-down-left/results/2025-06-15_19-22-10/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged/real-ibvs-up-left/results/2025-06-13_20-36-19/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-car-ibvs-results-poli-pc/bunker-online-4k-config-test-front-small-offset-right/results/2025-06-15_05-39-12/metadata.json"
-    path = "/home/brittle/Desktop/work/space-time-vision-repos/auto-follow/output/bunker-online-4k-config-test-front-small-offset-left-student/results/2025-06-16_02-23-36/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged/real-ibvs-front-small-offset-left/results/2025-06-15_18-39-47/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-pc-sebnae/bunker-online-4k-config-test-front-small-offset-right-student/results/2025-06-15_18-19-01/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-car-student-results-poli-pc/bunker-online-4k-config-test-front-small-offset-left-student/results/2025-06-16_04-00-25/metadata.json"
     path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-pc-sebi/bunker-online-4k-config-test-front-small-offset-left-student/results/2025-06-16_02-01-23/metadata.json"
 
-    # FRONT RIGHT ON STUDENT
-    # path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-pc-sebi/bunker-online-4k-config-test-front-small-offset-right-student/results/2025-06-16_01-44-34/metadata.json"
-
     goal = (2, 2.5)
-    # x_carpet = 3.5
-    # y_carpet = 4.5
-    x_carpet = 2 + 1.5
-    y_carpet = 2.5 + 0.3
-    # main(path, carpet_start=(x_carpet, y_carpet), goal=goal)
-
-    # path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-front-small-offset-right/results/2025-06-14_22-32-17/metadata.json"
-    # # path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-front-small-offset-right-student/results/2025-06-16_10-04-58/metadata.json"
-    # path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged/real-ibvs-front-small-offset-right/results/2025-06-15_18-26-17/metadata.json"
-    # path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/results-real-student-all/real-student-front-small-offset-right/results/2025-06-15_17-02-15/metadata.json"
-    # path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/student/results-real-student-all/real-student-front-small-offset-right/results/2025-06-15_17-02-15/metadata.json"
-    main(path, carpet_start=(x_carpet, y_carpet), goal=goal)
+    carpet_start_coords = get_carpet_start(goal, "front-left")
+    trajectory_analysis_single_run(path, carpet_start=carpet_start_coords, goal=goal)

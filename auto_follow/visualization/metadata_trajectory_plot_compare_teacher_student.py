@@ -1,19 +1,14 @@
 import json
 import math
-
-import matplotlib.pyplot as plt
-
+from copy import deepcopy
 from pathlib import Path
 
-from tqdm import tqdm
-
-import numpy as np
-from scipy.interpolate import interp1d
-
-from copy import deepcopy
-
 import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from scipy.interpolate import interp1d
+from tqdm import tqdm
 
 from auto_follow.utils.path_manager import Paths
 
@@ -279,6 +274,7 @@ def plot_trajectory(trajectory, goal: tuple[float, float], use_carpet_coords=Fal
     plt.tight_layout()
     plt.show()
 
+
 def plot_trajectory_only(trajectory, goal: tuple[float, float], use_carpet_coords=False):
     """Plot trajectory data"""
     # times = [p['time'] for p in trajectory]
@@ -334,6 +330,7 @@ def main(file_path, goal: tuple[float, float], carpet_start: tuple[float, float]
         # plot_trajectory(trajectory, goal, use_carpet_coords)
         plot_trajectory_only(trajectory, goal, use_carpet_coords)
 
+
 ## -------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------
 
@@ -342,7 +339,7 @@ def plot_multiple_trajectories(trajectories, goal: tuple[float, float], use_carp
 
     # Set up labels if not provided
     if labels is None:
-        labels = [f'Trajectory {i+1}' for i in range(len(trajectories))]
+        labels = [f'Trajectory {i + 1}' for i in range(len(trajectories))]
 
     # Color cycle for different trajectories
     colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
@@ -375,11 +372,12 @@ def plot_multiple_trajectories(trajectories, goal: tuple[float, float], use_carp
         ax1.scatter(xs[0], ys[0], color=color, s=100, marker='o', edgecolors='black', linewidth=1)
         ax1.scatter(xs[-1], ys[-1], color=color, s=100, marker='s', edgecolors='black', linewidth=1)
 
-        print(f"Trajectory {i+1} end: {xs[-1], ys[-1]} vs goal: {goal[0] - 0.95, goal[1]}")
+        print(f"Trajectory {i + 1} end: {xs[-1], ys[-1]} vs goal: {goal[0] - 0.95, goal[1]}")
 
     # Plot goal points
     ax1.scatter(goal[0], goal[1], color='darkgreen', s=150, marker='*', label='Car', edgecolors='black', linewidth=1)
-    ax1.scatter(goal[0] - 0.95, goal[1], color='magenta', s=150, marker='*', label='Goal', edgecolors='black', linewidth=1)
+    ax1.scatter(goal[0] - 0.95, goal[1], color='magenta', s=150, marker='*', label='Goal', edgecolors='black',
+                linewidth=1)
 
     # Add legend entries for start/end markers
     ax1.scatter([], [], color='gray', s=100, marker='o', edgecolors='black', linewidth=1, label='Start points')
@@ -400,6 +398,7 @@ def plot_multiple_trajectories(trajectories, goal: tuple[float, float], use_carp
 
     plt.tight_layout()
     plt.show()
+
 
 def get_mean_std_from_trajectories(trajectories, coord_keys, interpolation_points):
     # Extract and normalize trajectories to same length for averaging
@@ -446,8 +445,9 @@ def get_mean_std_from_trajectories(trajectories, coord_keys, interpolation_point
 
     return normalized_trajectories, mean_xs, mean_ys, std_xs, std_ys
 
+
 def plot_trajectories_rl_style(trajectories, goal: tuple[float, float], use_carpet_coords=False,
-                              show_individual=True, confidence_alpha=0.3, interpolation_points=100, color="green"):
+                               show_individual=True, confidence_alpha=0.3, interpolation_points=100, color="green"):
     """
     Plot multiple trajectories in RL style with mean trajectory and confidence bands
 
@@ -479,7 +479,8 @@ def plot_trajectories_rl_style(trajectories, goal: tuple[float, float], use_carp
 
     fig, ax = plt.subplots(1, 1, figsize=(12, 10))
 
-    normalized_trajectories, mean_xs, mean_ys, std_xs, std_ys = get_mean_std_from_trajectories(trajectories, coord_keys, interpolation_points)
+    normalized_trajectories, mean_xs, mean_ys, std_xs, std_ys = get_mean_std_from_trajectories(trajectories, coord_keys,
+                                                                                               interpolation_points)
 
     # Plot individual trajectories (faded)
     if show_individual:
@@ -530,13 +531,14 @@ def plot_trajectories_rl_style(trajectories, goal: tuple[float, float], use_carp
     # Add carpet boundaries if using carpet coordinates
     if use_carpet_coords:
         ax.add_patch(plt.Rectangle((0, 0), 4, 5, fill=False, edgecolor='black',
-                                  linewidth=2, linestyle='--', label='Carpet boundary'))
+                                   linewidth=2, linestyle='--', label='Carpet boundary'))
         ax.set_xlim(-0.5, 5.5)
         ax.set_ylim(-0.5, 6.5)
         ax.set_aspect('equal')
 
     plt.tight_layout()
     plt.show()
+
 
 def process_multiple_metadata_files(path_runs, goal, carpet_start):
     base_path = Path(path_runs)
@@ -564,26 +566,31 @@ def process_multiple_metadata_files(path_runs, goal, carpet_start):
     # plot_multiple_trajectories(trajectories, goal, use_carpet_coords)
     plot_trajectories_rl_style(trajectories, goal, use_carpet_coords, show_individual=False)
 
+
 ## ----------------------------------------------------------------------------------------------------------------------
 
 ## --------------------------------------------
 ## Trajectories for multiple runs
 ## --------------------------------------------
 
-def plot_multiple_trajectories_rl_style(config_dicts, goal: tuple[float, float], use_carpet_coords=False,
-                              show_individual=True, confidence_alpha=0.3, interpolation_points=100,
-                              goal_image_path=Paths.CAR_GOAL_PLOT,
-                              goal_image_size=0.8):
+def plot_multiple_trajectories_rl_style(
+        config_dicts, goal: tuple[float, float], use_carpet_coords=False,
+        show_individual=True, confidence_alpha=0.3, interpolation_points=100,
+        goal_image_path=Paths.CAR_GOAL_PLOT, goal_image_size=0.8,
+        save_path: str | Path = "./trajectories-teacher-student/trajectory-teacher-student.png"
+):
     """
     Plot multiple trajectories in RL style with mean trajectory and confidence bands
 
-    Args:
-        trajectories: List of trajectory dictionaries
-        goal: Goal coordinates (x, y)
-        use_carpet_coords: Whether to use carpet coordinates or GPS
-        show_individual: Whether to show individual trajectories (faded)
-        confidence_alpha: Alpha for confidence band fill
-        interpolation_points: Number of points for trajectory interpolation
+    :param config_dicts: Configuration dictionary containing starting positions, paths and additional metadata from @generate_experiments_paths
+    :param goal: Goal coordinates (x, y)
+    :param use_carpet_coords: Whether to use carpet coordinates or GPS
+    :param show_individual:  Whether to show individual trajectories (faded)
+    :param confidence_alpha: Alpha for confidence band fill
+    :param interpolation_points: Number of points for trajectory interpolation
+    :param goal_image_path: Path to the car transparent png (to display for the obstacle)
+    :param goal_image_size: How much to resize the image to fit in plot
+    :param save_path: Where to save the plot
     """
 
     mean_colors = {
@@ -594,10 +601,10 @@ def plot_multiple_trajectories_rl_style(config_dicts, goal: tuple[float, float],
     }
 
     mean_colors_rgb = {
-        (250, 128, 114, 0): (175, 90, 80, 0), # Medium purple
-        (32, 178, 170, 0): (22, 125, 119, 0), # Light sea green
-        (255, 215, 0, 0): (179, 151, 0, 0), # gold
-        (100, 149, 237, 0): (70, 104, 166, 0) # cornflower blue
+        (250, 128, 114, 0): (175, 90, 80, 0),  # Medium purple
+        (32, 178, 170, 0): (22, 125, 119, 0),  # Light sea green
+        (255, 215, 0, 0): (179, 151, 0, 0),  # gold
+        (100, 149, 237, 0): (70, 104, 166, 0)  # cornflower blue
     }
 
     # Determine coordinate system
@@ -623,12 +630,14 @@ def plot_multiple_trajectories_rl_style(config_dicts, goal: tuple[float, float],
 
             print(f"{color=}")
 
-            color = (color[0]/255, color[1]/255, color[2]/255)
-            mean_color = (mean_color[0]/255, mean_color[1]/255, mean_color[2]/255)
+            color = (color[0] / 255, color[1] / 255, color[2] / 255)
+            mean_color = (mean_color[0] / 255, mean_color[1] / 255, mean_color[2] / 255)
 
         name = config["name"]
 
-        normalized_trajectories, mean_xs, mean_ys, std_xs, std_ys = get_mean_std_from_trajectories(trajectories, coord_keys, interpolation_points)
+        normalized_trajectories, mean_xs, mean_ys, std_xs, std_ys = get_mean_std_from_trajectories(trajectories,
+                                                                                                   coord_keys,
+                                                                                                   interpolation_points)
 
         # Plot individual trajectories (faded)
         if show_individual:
@@ -651,78 +660,30 @@ def plot_multiple_trajectories_rl_style(config_dicts, goal: tuple[float, float],
             ax.plot(mean_xs, mean_ys, color=mean_color, linewidth=3, label=f'Mean trajectory - {name}')
 
         # Plot start point
-        # ax.scatter(mean_xs[0], mean_ys[0], color='darkgreen', s=150, marker='o',
-        #             edgecolors='black', linewidth=2, label='Start', zorder=5)
         ax.scatter(mean_xs[0], mean_ys[0], color='darkgreen', s=150, marker='o',
-                    edgecolors='black', linewidth=2, zorder=5)
-
-        # Plot end points of mean trajectory
-        # if ("dotted" in config):
-        #     ax.scatter(mean_xs[-1], mean_ys[-1], color='darkred', s=150, marker='s',
-        #         edgecolors='black', linewidth=2, label=f'Mean end - {name}', linestyle='--', zorder=5)
-        # else:
-        #     ax.scatter(mean_xs[-1], mean_ys[-1], color='darkred', s=150, marker='s',
-        #         edgecolors='black', linewidth=2, label=f'Mean end - {name}', zorder=5)
-
-        # Calculate and display statistics
-        # final_distances = [np.sqrt((xs[-1] - (goal[0] - 0.95))**2 + (ys[-1] - goal[1])**2)
-        #                 for xs, ys in normalized_trajectories]
-        # mean_final_distance = np.mean(final_distances)
-        # std_final_distance = np.std(final_distances)
-
-    # stats_text = f'Final distance to goal:\nMean: {mean_final_distance:.3f}\nStd: {std_final_distance:.3f}'
-    # ax.text(0.02, 0.98, stats_text, transform=ax.transAxes, fontsize=10,
-    #         verticalalignment='top', bbox=dict(boxstyle="round,pad=0.3", facecolor='wheat', alpha=0.8))
+                   edgecolors='black', linewidth=2, zorder=5)
 
     # Plot goal points
     ax.scatter(goal[0] - 0.95, goal[1], color='magenta', s=200, marker='*',
-                label='Goal', edgecolors='black', linewidth=2, zorder=5)
+               label='Goal', edgecolors='black', linewidth=2, zorder=5)
 
-
-    # ax.scatter(goal[0], goal[1], color='gold', s=200, marker='x',
-    #             label='Car', edgecolors='black', linewidth=2, zorder=5)
     # Plot goal with image or default marker
     if goal_image_path:
         try:
             img = mpimg.imread(goal_image_path)
 
-            # Calculate zoom to make image width = 0.3 meters
-            # Get current axis limits to calculate pixels per data unit
-            xlim = ax.get_xlim()
-            # ylim = ax.get_ylim()
-            fig_width, fig_height = fig.get_size_inches()
-
-            # Calculate data units per inch
-            data_width = xlim[1] - xlim[0]
-            # data_height = ylim[1] - ylim[0]
-
-            # Calculate pixels per data unit (approximate)
-            dpi = fig.dpi
-            pixels_per_inch_x = (fig_width * dpi) / data_width
-
-            # Calculate zoom factor to make image width = 0.3 meters
-            desired_width_meters = 0.25
-            desired_width_pixels = desired_width_meters * pixels_per_inch_x
-            current_width_pixels = img.shape[1]  # Image width in pixels
-            zoom_factor = desired_width_pixels / current_width_pixels
-
-            imagebox = OffsetImage(img, zoom=zoom_factor)
+            imagebox = OffsetImage(img, zoom=goal_image_size)
             ab = AnnotationBbox(imagebox, (goal[0], goal[1]), frameon=False, zorder=10)
             ax.add_artist(ab)
 
-            # Add invisible scatter point for legend
-            # ax.scatter(goal[0], goal[1], color='gold', s=200, marker='s',
-            #           label='Car', edgecolors='black', linewidth=2, zorder=100)
         except Exception as e:
             print(f"Could not load image '{goal_image_path}': {e}")
             print("Using default marker instead.")
-            # Fallback to default marker
             ax.scatter(goal[0], goal[1], color='gold', s=200, marker='x',
-                      label='Car', edgecolors='black', linewidth=2, zorder=5)
+                       label='Car', edgecolors='black', linewidth=2, zorder=5)
     else:
-        # Use default marker
         ax.scatter(goal[0], goal[1], color='gold', s=200, marker='x',
-                  label='Car', edgecolors='black', linewidth=2, zorder=5)
+                   label='Car', edgecolors='black', linewidth=2, zorder=5)
 
     # ax.set_title(traj_title)
     ax.set_xlabel(x_label)
@@ -731,18 +692,23 @@ def plot_multiple_trajectories_rl_style(config_dicts, goal: tuple[float, float],
     ax.legend(loc='upper right', fontsize='x-large')
     ax.grid(True, alpha=0.3)
 
-    # Add carpet boundaries if using carpet coordinates
     if use_carpet_coords:
         ax.add_patch(plt.Rectangle((0, 0), 4, 5, fill=False, edgecolor='black',
-                                  linewidth=2, linestyle='--', label='Carpet boundary'))
+                                   linewidth=2, linestyle='--', label='Carpet boundary'))
         ax.set_xlim(-0.5, 4.5)
         ax.set_ylim(-0.5, 5.5)
         ax.set_aspect('equal')
 
     plt.tight_layout()
+    save_path = Path(save_path)
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(save_path)
     plt.show()
 
-def process_comparison_multiple_metadata_files(paths_runs_configs, goal):
+
+def process_comparison_multiple_metadata_files(
+        paths_runs_configs, goal, direction_pair: str, save_dir: str | Path = "./trajectories/"
+):
     config_dicts = []
 
     use_carpet_coords = True
@@ -769,7 +735,7 @@ def process_comparison_multiple_metadata_files(paths_runs_configs, goal):
         for folder in tqdm(list(results_path.iterdir())):
             if folder.is_dir():
                 metadata_path = folder / "metadata.json"
-                if (not metadata_path.exists()):
+                if not metadata_path.exists():
                     continue
 
                 data = load_drone_data(metadata_path)
@@ -780,166 +746,112 @@ def process_comparison_multiple_metadata_files(paths_runs_configs, goal):
         config_dict["trajectories"] = trajectories
         config_dicts.append(config_dict)
 
+    save_path = Path(save_dir) / f"trajectories-comparison-teacher-student-{direction_pair}.png"
+    plot_multiple_trajectories_rl_style(
+        config_dicts, goal, use_carpet_coords, show_individual=False, save_path=save_path
+    )
 
-    plot_multiple_trajectories_rl_style(config_dicts, goal, use_carpet_coords, show_individual=False)
 
+def generate_experiments_paths(
+        base_path_teacher: str | Path,
+        base_path_student: str | Path,
+        goal: tuple[float, float],
+        direction_pair: str = "front",
+        teacher_prefix: str = "bunker-online-4k-config-test-",
+        student_prefix: str = "bunker-online-4k-config-test-",
+        student_suffix: str = "-student"
+) -> dict:
+    """
+    Generate experiment paths configuration dictionary.
 
-## --------------------------------------------
-## --------------------------------------------
-
-if __name__ == "__main__":
-    path = "/home/brittle/Desktop/work/code/space-time-lab-org/auto-follow/output/results_without_frames_poli_pc/bunker-online-4k-config-test-down-left/results/2025-06-11_23-45-17/metadata.json"
-    path = "/home/brittle/Desktop/work/code/space-time-lab-org/auto-follow/output/results_without_frames_poli_pc/bunker-online-4k-config-test-front-small-offset-left/results/2025-06-12_06-15-25/metadata.json"
-    path = "/home/brittle/Desktop/work/code/space-time-lab-org/drone-base/examples/results/2025-06-12_18-07-21/metadata.json"
-    path = "/home/brittle/Desktop/work/code/space-time-lab-org/drone-base/examples/results/2025-06-12_18-21-51/metadata.json"
-    path = "/home/brittle/Downloads/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/results-real-ibvs-all/real-ibvs-down-left/results/2025-06-15_19-22-10/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged/real-ibvs-up-left/results/2025-06-13_20-36-19/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-car-ibvs-results-poli-pc/bunker-online-4k-config-test-front-small-offset-right/results/2025-06-15_05-39-12/metadata.json"
-    path = "/home/brittle/Desktop/work/space-time-vision-repos/auto-follow/output/bunker-online-4k-config-test-front-small-offset-left-student/results/2025-06-16_02-23-36/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/real/ibvs/real-world-ibvs-results-merged/real-ibvs-front-small-offset-left/results/2025-06-15_18-39-47/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-pc-sebnae/bunker-online-4k-config-test-front-small-offset-right-student/results/2025-06-15_18-19-01/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-car-student-results-poli-pc/bunker-online-4k-config-test-front-small-offset-left-student/results/2025-06-16_04-00-25/metadata.json"
-    path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-pc-sebi/bunker-online-4k-config-test-front-small-offset-left-student/results/2025-06-16_02-01-23/metadata.json"
-
-    # FRONT RIGHT ON STUDENT
-    # path = "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-pc-sebi/bunker-online-4k-config-test-front-small-offset-right-student/results/2025-06-16_01-44-34/metadata.json"
-
-    ## TODO
-    ## - plot the jerk (second derivative of speed (?))
-    ## - plot trajectory
-    ## - plot speed vs time
-
-    '''
-    TODO paper
-    - mention yaw clipping (due to segmentation) for IBVS // experiments / method
-    TLDR
-    keywords - in abstract
-    '''
-
-    goal = (2, 2.5)
-
-    ## -------------------------------------------------
-
-    ## teacher; student
-
-    ## front-small-offset-right
-    paths = {
-        # "ibvs-front-right": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/droid-data/real/real-world-ibvs-results-merged/real-ibvs-front-small-offset-right",
-        #     "color": "blue",
-        #     "carpet_start": (2 + 1.5, 2.5 - 0.3)
-        # },
-        # "student-front-right": {
-        #     "path": "/media/mihaib08/0AC68039C68026D3/models/_research_drone/output/real-student-21-06/real-student-front-small-offset-right",
-        #     "color": "orange",
-        #     "dotted": True,
-        #     "carpet_start": (2 + 1.5, 2.5 - 0.3)
-        # },
-
-        # --------------------------------------------------
-
-        "Teacher front-right": {
-            "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-front-small-offset-right",
-            "color": "blue",
-            "carpet_start": (2 + 1.5, 2.5 - 0.3)
-        },
-        "Student front-right": {
-            "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-front-small-offset-right-student",
-            "color": "orange",
-            "dotted": True,
-            "carpet_start": (2 + 1.5, 2.5 - 0.3)
-        },
-
-        "Teacher front-left": {
-            "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-front-small-offset-left",
-            "color": "green",
-            "carpet_start": (2 + 1.5, 2.5 + 0.3)
-        },
-        "Student front-left": {
-            "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-front-small-offset-left-student",
-            "color": "red",
-            "dotted": True,
-            "carpet_start": (2 + 1.5, 2.5 + 0.3)
-        },
-
-        # ------------------------------------
-
-        # "ibvs-left": {
-        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-left",
-        #     "color": (250, 128, 114, 0),
-        #     "carpet_start": (2 + 0, 2.5 + 1)
-        # },
-        # "student-left": {
-        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-left-student",
-        #     "color": (100, 149, 237, 0),
-        #     "dotted": True,
-        #     "carpet_start": (2 + 0, 2.5 + 1)
-        # },
-        #
-        # "ibvs-right": {
-        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-right",
-        #     "color": (255, 215, 0, 0),
-        #     "carpet_start": (2 + 0, 2.5 - 1)
-        # },
-        # "student-right": {
-        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-right-student",
-        #     "color": (32, 178, 170, 0),
-        #     "dotted": True,
-        #     "carpet_start": (2 + 0, 2.5 - 1)
-        # },
-
-        # ------------------------------------
-
-        # "ibvs-up-left": {
-        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-up-left",
-        #     "color": (250, 128, 114, 0),
-        #     "carpet_start": (2 + 1, 2.5 + 1)
-        # },
-        # "student-up-left": {
-        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-up-left-student",
-        #     "color": (100, 149, 237, 0),
-        #     "dotted": True,
-        #     "carpet_start": (2 + 1, 2.5 + 1)
-        # },
-        #
-        # "ibvs-up-right": {
-        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-up-right",
-        #     "color": (255, 215, 0, 0),
-        #     "carpet_start": (2 + 1, 2.5 - 1)
-        # },
-        # "student-up-right": {
-        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-up-right-student",
-        #     "color": (32, 178, 170, 0),
-        #     "dotted": True,
-        #     "carpet_start": (2 + 1, 2.5 - 1)
-        # },
-
-        # ----------------------------------------
-
-        # "ibvs-down-left": {
-        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-down-left",
-        #     "color": (250, 128, 114, 0),
-        #     "carpet_start": (2 - 1, 2.5 + 1)
-        # },
-        # "student-down-left": {
-        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-down-left-student",
-        #     "color": (100, 149, 237, 0),
-        #     "dotted": True,
-        #     "carpet_start": (2 - 1, 2.5 + 1)
-        # },
-        #
-        # "ibvs-down-right": {
-        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged/bunker-online-4k-config-test-down-right",
-        #     "color": (255, 215, 0, 0),
-        #     "carpet_start": (2 - 1, 2.5 - 1)
-        # },
-        # "student-down-right": {
-        #     "path": "/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged/bunker-online-4k-config-test-down-right-student",
-        #     "color": (32, 178, 170, 0),
-        #     "dotted": True,
-        #     "carpet_start": (2 - 1, 2.5 - 1)
-        # },
+    :param base_path_teacher:  Base path to the Teacher NSER-IBVS simulation data
+    :param base_path_student: Base path to the Student simulation data
+    :param goal: X, Y coordinates of the goal position
+    :param direction_pair: Which pair of directions to consider:
+        - "front": front-left and front-right
+        - "left-right": left and right
+        - "up": up-left and up-right
+        - "down": down-left and down-right
+    :param teacher_prefix: Prefix for teacher folder names
+    :param student_prefix: Prefix for student folder names
+    :param student_suffix: Suffix appended to student folder names
+    :returns: Dictionary with all experiment configurations for the selected pair.
+    """
+    direction_pairs = {
+        "front": [
+            ("front-right", "front-small-offset-right", 1.5, -0.3, "blue", "orange"),
+            ("front-left", "front-small-offset-left", 1.5, 0.3, "green", "red"),
+        ],
+        "left-right": [
+            ("left", "left", 0, 1, (250, 128, 114, 0), (100, 149, 237, 0)),
+            ("right", "right", 0, -1, (255, 215, 0, 0), (32, 178, 170, 0)),
+        ],
+        "up": [
+            ("up-left", "up-left", 1, 1, (250, 128, 114, 0), (100, 149, 237, 0)),
+            ("up-right", "up-right", 1, -1, (255, 215, 0, 0), (32, 178, 170, 0)),
+        ],
+        "down": [
+            ("down-left", "down-left", -1, 1, (250, 128, 114, 0), (100, 149, 237, 0)),
+            ("down-right", "down-right", -1, -1, (255, 215, 0, 0), (32, 178, 170, 0)),
+        ],
     }
 
-    process_comparison_multiple_metadata_files(paths, goal=goal)
+    if direction_pair not in direction_pairs:
+        raise ValueError(f"Invalid direction_pair. Choose from: {list(direction_pairs.keys())}")
+
+    paths = {}
+    goal_x, goal_y = goal
+
+    for exp_name, folder_suffix, x_off, y_off, teacher_color, student_color in direction_pairs[direction_pair]:
+        carpet_start = (goal_x + x_off, goal_y + y_off)
+
+        paths[f"Teacher {exp_name}"] = {
+            "path": f"{base_path_teacher}/{teacher_prefix}{folder_suffix}",
+            "color": teacher_color,
+            "carpet_start": carpet_start
+        }
+
+        paths[f"Student {exp_name}"] = {
+            "path": f"{base_path_student}/{student_prefix}{folder_suffix}{student_suffix}",
+            "color": student_color,
+            "dotted": True,
+            "carpet_start": carpet_start
+        }
+
+    return paths
+
+
+if __name__ == "__main__":
+    goal = (2, 2.5)
+
+    front_paths = generate_experiments_paths(
+        base_path_teacher="/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged",
+        base_path_student="/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged",
+        goal=goal,
+        direction_pair="front"
+    )
+    process_comparison_multiple_metadata_files(front_paths, goal=goal, direction_pair="front")
+
+    up_paths = generate_experiments_paths(
+        base_path_teacher="/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged",
+        base_path_student="/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged",
+        goal=goal,
+        direction_pair="up"
+    )
+    process_comparison_multiple_metadata_files(up_paths, goal=goal, direction_pair="up")
+
+    left_right_paths = generate_experiments_paths(
+        base_path_teacher="/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged",
+        base_path_student="/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged",
+        goal=goal,
+        direction_pair="left-right"
+    )
+    process_comparison_multiple_metadata_files(left_right_paths, goal=goal, direction_pair="left-right")
+
+    down_paths = generate_experiments_paths(
+        base_path_teacher="/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/ibvs/sim-ibvs-results-merged",
+        base_path_student="/home/brittle/Desktop/work/data/car-ibvs-data-tests/sim/student/sim-student-results-merged",
+        goal=goal,
+        direction_pair="down"
+    )
+    process_comparison_multiple_metadata_files(down_paths, goal=goal, direction_pair="down")

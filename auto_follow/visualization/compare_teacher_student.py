@@ -5,12 +5,14 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 
+from auto_follow.evaluation.statistics_evaluation import compute_error_statistics, \
+    compute_error_statistics_for_time_criteria
 from auto_follow.visualization.load_data import load_json_flight_data, load_parquet_data, load_json_metadata, \
     ConfigsDirName
-from auto_follow.visualization.statistics_evaluation import compute_error_statistics, \
-    compute_error_statistics_for_time_criteria
 
-PALETTE = {"Teacher": "#2E86AB", "Student": "#A23B72"}
+
+class ExpColor:
+    PALETTE = {"Teacher": "#2E86AB", "Student": "#A23B72"}
 
 
 def plot_flight_durations_comparison(teacher_durations_df, student_durations_df,
@@ -25,7 +27,8 @@ def plot_flight_durations_comparison(teacher_durations_df, student_durations_df,
     combined_df = pd.concat([teacher_durations_df, student_durations_df], ignore_index=True)
 
     plt.figure(figsize=(12, 6))
-    ax = sns.barplot(data=combined_df, x="direction", y="flight_duration", hue="method", palette=PALETTE, alpha=0.8)
+    ax = sns.barplot(data=combined_df, x="direction", y="flight_duration", hue="method", palette=ExpColor.PALETTE,
+                     alpha=0.8)
 
     for i, patch in enumerate(ax.patches):
         if i >= len(ax.patches) // 2 - 1:
@@ -45,10 +48,12 @@ def plot_flight_durations_comparison(teacher_durations_df, student_durations_df,
 
     plt.figure(figsize=(10, 6))
     sns.kdeplot(
-        data=teacher_durations_df, x="flight_duration", label="Teacher", color=PALETTE["Teacher"], linewidth=2.5
+        data=teacher_durations_df, x="flight_duration", label="Teacher", color=ExpColor.PALETTE["Teacher"],
+        linewidth=2.5
     )
     sns.kdeplot(
-        data=student_durations_df, x="flight_duration", label="Student", color=PALETTE["Student"], linewidth=2.5,
+        data=student_durations_df, x="flight_duration", label="Student", color=ExpColor.PALETTE["Student"],
+        linewidth=2.5,
         linestyle='--'
     )
     plt.title("Flight Duration Distribution: Teacher vs Student")
@@ -73,7 +78,7 @@ def plot_distances_comparison(teacher_distances_df, student_distances_df,
     combined_df = pd.concat([teacher_distances_df, student_distances_df], ignore_index=True)
 
     plt.figure(figsize=(12, 6))
-    ax = sns.barplot(data=combined_df, x="direction", y="distance", hue="method", palette=PALETTE, alpha=0.8)
+    ax = sns.barplot(data=combined_df, x="direction", y="distance", hue="method", palette=ExpColor.PALETTE, alpha=0.8)
 
     for i, patch in enumerate(ax.patches):
         if i >= len(ax.patches) // 2 - 1:
@@ -93,11 +98,10 @@ def plot_distances_comparison(teacher_distances_df, student_distances_df,
 
     plt.figure(figsize=(10, 6))
     sns.kdeplot(
-        data=teacher_distances_df, x="distance", label="Teacher", color=PALETTE["Teacher"], linewidth=2.5
+        data=teacher_distances_df, x="distance", label="Teacher", color=ExpColor.PALETTE["Teacher"], linewidth=2.5
     )
     sns.kdeplot(
-        data=student_distances_df, x="distance", label="Student", color=PALETTE["Student"], linewidth=2.5,
-        linestyle='--'
+        data=student_distances_df, x="distance", label="Student", color=ExpColor.PALETTE["Student"], linewidth=2.5, linestyle='--'
     )
     plt.title("Distance Distribution: Teacher vs Student")
     plt.xlabel("Distance [meters]")
@@ -125,7 +129,7 @@ def plot_error_norms_comparison(
     combined_df = pd.concat([teacher_error_stats_df, student_error_stats_df], ignore_index=True)
 
     plt.figure(figsize=(12, 6))
-    ax = sns.barplot(data=combined_df, x="direction", y="err_norm_mean", hue="method", palette=PALETTE, alpha=0.8)
+    ax = sns.barplot(data=combined_df, x="direction", y="err_norm_mean", hue="method", palette=ExpColor.PALETTE, alpha=0.8)
 
     for i, patch in enumerate(ax.patches):
         if i >= len(ax.patches) // 2 - 1:
@@ -145,11 +149,10 @@ def plot_error_norms_comparison(
 
     plt.figure(figsize=(10, 6))
     sns.kdeplot(
-        data=teacher_error_stats_df, x="err_norm_mean", label="Teacher", color=PALETTE["Teacher"], linewidth=2.5
+        data=teacher_error_stats_df, x="err_norm_mean", label="Teacher", color=ExpColor.PALETTE["Teacher"], linewidth=2.5
     )
     sns.kdeplot(
-        data=student_error_stats_df, x="err_norm_mean", label="Student", color=PALETTE["Student"], linewidth=2.5,
-        linestyle='--'
+        data=student_error_stats_df, x="err_norm_mean", label="Student", color=ExpColor.PALETTE["Student"], linewidth=2.5, linestyle='--'
     )
     plt.title("Error Norm Distribution: Teacher vs Student (Last 3 Seconds)")
     plt.xlabel("Mean Error Norm [pixels]")
@@ -182,7 +185,7 @@ def plot_iou_comparison(teacher_iou_stats_df, student_iou_stats_df,
     combined_df = pd.concat([teacher_iou_stats_df, student_iou_stats_df], ignore_index=True)
 
     plt.figure(figsize=(12, 6))
-    ax = sns.barplot(data=combined_df, x="direction", y="iou_mean", hue="method", palette=PALETTE, alpha=0.8)
+    ax = sns.barplot(data=combined_df, x="direction", y="iou_mean", hue="method", palette=ExpColor.PALETTE, alpha=0.8)
 
     for i, patch in enumerate(ax.patches):
         if i >= len(ax.patches) // 2 - 1:
@@ -202,10 +205,10 @@ def plot_iou_comparison(teacher_iou_stats_df, student_iou_stats_df,
 
     plt.figure(figsize=(10, 6))
     sns.kdeplot(
-        data=teacher_iou_stats_df, x="iou_mean", label="Teacher", color=PALETTE["Teacher"], linewidth=2.5
+        data=teacher_iou_stats_df, x="iou_mean", label="Teacher", color=ExpColor.PALETTE["Teacher"], linewidth=2.5
     )
     sns.kdeplot(
-        data=student_iou_stats_df, x="iou_mean", label="Student", color=PALETTE["Student"], linewidth=2.5,
+        data=student_iou_stats_df, x="iou_mean", label="Student", color=ExpColor.PALETTE["Student"], linewidth=2.5,
         linestyle='--'
     )
     plt.title("IoU Distribution: Teacher vs Student (Last 3 Seconds)")
@@ -243,30 +246,24 @@ def plot_command_distribution_magnitude_comparison(
     plt.figure(figsize=(15, 5))
 
     plt.subplot(1, 3, 1)
-    sns.histplot(data=teacher_parquet_df, x="x_cmd", kde=True, bins=x_bins,
-                 alpha=0.7, label="Teacher", color=PALETTE["Teacher"])
-    sns.histplot(data=student_parquet_df, x="x_cmd", kde=True, bins=x_bins,
-                 alpha=0.5, label="Student", color=PALETTE["Student"])
+    sns.histplot(data=teacher_parquet_df, x="x_cmd", kde=True, bins=x_bins, alpha=0.7, label="Teacher", color=ExpColor.PALETTE["Teacher"])
+    sns.histplot(data=student_parquet_df, x="x_cmd", kde=True, bins=x_bins, alpha=0.5, label="Student", color=ExpColor.PALETTE["Student"])
     plt.title("Distribution of x_cmd: Teacher vs Student")
     plt.xlabel("x_cmd")
     plt.ylabel("Density")
     plt.legend()
 
     plt.subplot(1, 3, 2)
-    sns.histplot(data=teacher_parquet_df, x="y_cmd", kde=True, bins=y_bins,
-                 alpha=0.7, label="Teacher", color=PALETTE["Teacher"])
-    sns.histplot(data=student_parquet_df, x="y_cmd", kde=True, bins=y_bins,
-                 alpha=0.5, label="Student", color=PALETTE["Student"])
+    sns.histplot(data=teacher_parquet_df, x="y_cmd", kde=True, bins=y_bins, alpha=0.7, label="Teacher", color=ExpColor.PALETTE["Teacher"])
+    sns.histplot(data=student_parquet_df, x="y_cmd", kde=True, bins=y_bins, alpha=0.5, label="Student", color=ExpColor.PALETTE["Student"])
     plt.title("Distribution of y_cmd: Teacher vs Student")
     plt.xlabel("y_cmd")
     plt.ylabel("Density")
     plt.legend()
 
     plt.subplot(1, 3, 3)
-    sns.histplot(data=teacher_parquet_df, x="rot_cmd", kde=True, bins=rot_bins,
-                 alpha=0.7, label="Teacher", color=PALETTE["Teacher"])
-    sns.histplot(data=student_parquet_df, x="rot_cmd", kde=True, bins=rot_bins,
-                 alpha=0.5, label="Student", color=PALETTE["Student"])
+    sns.histplot(data=teacher_parquet_df, x="rot_cmd", kde=True, bins=rot_bins, alpha=0.7, label="Teacher", color=ExpColor.PALETTE["Teacher"])
+    sns.histplot(data=student_parquet_df, x="rot_cmd", kde=True, bins=rot_bins, alpha=0.5, label="Student", color=ExpColor.PALETTE["Student"])
     plt.title("Distribution of rot_cmd: Teacher vs Student")
     plt.xlabel("rot_cmd")
     plt.ylabel("Density")
@@ -289,10 +286,8 @@ def plot_command_distribution_comparison(teacher_parquet_df: pd.DataFrame, stude
     plt.figure(figsize=(15, 5))
 
     plt.subplot(1, 3, 1)
-    sns.kdeplot(data=teacher_parquet_df, x="x_cmd",
-                label="Teacher", color=PALETTE["Teacher"], linewidth=2.5)
-    sns.kdeplot(data=student_parquet_df, x="x_cmd",
-                label="Student", color=PALETTE["Student"], linewidth=2.5, linestyle='--')
+    sns.kdeplot(data=teacher_parquet_df, x="x_cmd", label="Teacher", color=ExpColor.PALETTE["Teacher"], linewidth=2.5)
+    sns.kdeplot(data=student_parquet_df, x="x_cmd", label="Student", color=ExpColor.PALETTE["Student"], linewidth=2.5, linestyle='--')
     plt.title("Distribution of x_cmd: Teacher vs Student")
     plt.xlabel("x_cmd")
     plt.ylabel("Density")
@@ -300,10 +295,8 @@ def plot_command_distribution_comparison(teacher_parquet_df: pd.DataFrame, stude
     plt.grid(True, alpha=0.3)
 
     plt.subplot(1, 3, 2)
-    sns.kdeplot(data=teacher_parquet_df, x="y_cmd",
-                label="Teacher", color=PALETTE["Teacher"], linewidth=2.5)
-    sns.kdeplot(data=student_parquet_df, x="y_cmd",
-                label="Student", color=PALETTE["Student"], linewidth=2.5, linestyle='--')
+    sns.kdeplot(data=teacher_parquet_df, x="y_cmd", label="Teacher", color=ExpColor.PALETTE["Teacher"], linewidth=2.5)
+    sns.kdeplot(data=student_parquet_df, x="y_cmd", label="Student", color=ExpColor.PALETTE["Student"], linewidth=2.5, linestyle='--')
     plt.title("Distribution of y_cmd: Teacher vs Student")
     plt.xlabel("y_cmd")
     plt.ylabel("Density")
@@ -311,10 +304,8 @@ def plot_command_distribution_comparison(teacher_parquet_df: pd.DataFrame, stude
     plt.grid(True, alpha=0.3)
 
     plt.subplot(1, 3, 3)
-    sns.kdeplot(data=teacher_parquet_df, x="rot_cmd",
-                label="Teacher", color=PALETTE["Teacher"], linewidth=2.5)
-    sns.kdeplot(data=student_parquet_df, x="rot_cmd",
-                label="Student", color=PALETTE["Student"], linewidth=2.5, linestyle='--')
+    sns.kdeplot(data=teacher_parquet_df, x="rot_cmd", label="Teacher", color=ExpColor.PALETTE["Teacher"], linewidth=2.5)
+    sns.kdeplot(data=student_parquet_df, x="rot_cmd", label="Student", color=ExpColor.PALETTE["Student"], linewidth=2.5, linestyle='--')
     plt.title("Distribution of rot_cmd: Teacher vs Student")
     plt.xlabel("rot_cmd")
     plt.ylabel("Density")
@@ -334,8 +325,7 @@ def plot_command_distribution_comparison(teacher_parquet_df: pd.DataFrame, stude
 def run_comparison_analysis(
         teacher_base_path: str | Path,
         student_base_path: str | Path,
-        save_path_name: str,
-        scenes_names: list[str],
+        save_path_name: str | Path,
         is_real: bool = False
 ):
     """
@@ -345,8 +335,10 @@ def run_comparison_analysis(
 
     teacher_base_path = Path(teacher_base_path)
     student_base_path = Path(student_base_path)
-    save_path_dir = Path(f"./{save_path_name}")
+    save_path_dir = Path(save_path_name)
     save_path_dir.mkdir(parents=True, exist_ok=True)
+
+    scenes_names = ConfigsDirName.REAL if is_real else ConfigsDirName.SIM
 
     student_scenes_names = scenes_names.copy()
     for index, scene_name in enumerate(student_scenes_names):
@@ -368,7 +360,8 @@ def run_comparison_analysis(
     print("Computing error statistics...")
     teacher_error_stats, teacher_iou_stats = compute_error_statistics(teacher_parquet_data, teacher_json_flight_data)
     if is_real:
-        student_error_stats, student_iou_stats = compute_error_statistics(student_parquet_data, student_json_flight_data)
+        student_error_stats, student_iou_stats = compute_error_statistics(student_parquet_data,
+                                                                          student_json_flight_data)
         plot_flight_durations_comparison(teacher_json_flight_data, student_json_flight_data, save_path=save_path_dir)
     else:
         student_error_stats, student_iou_stats, updated_student_time_data = compute_error_statistics_for_time_criteria(
@@ -416,7 +409,6 @@ if __name__ == "__main__":
             teacher_base_path=Path(teacher_path),
             student_base_path=Path(student_path),
             save_path_name="teacher_student_comparison-sim_v2",
-            scenes_names=ConfigsDirName.SIM,
             is_real=False,
         )
         print("Comparison analysis completed successfully!")
@@ -432,7 +424,6 @@ if __name__ == "__main__":
             teacher_base_path=Path(teacher_path),
             student_base_path=Path(student_path),
             save_path_name="teacher_student_comparison-real",
-            scenes_names=ConfigsDirName.REAL,
             is_real=True,
         )
         print("Comparison analysis completed successfully!")
