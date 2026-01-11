@@ -14,9 +14,10 @@
 [![Website](https://img.shields.io/badge/Project-Website-green)](https://spacetime-vision-robotics-laboratory.github.io/NSER-IBVS/)
 [![arXiv](https://img.shields.io/badge/arXiv-2507.19878-b31b1b)](https://arxiv.org/abs/2507.19878)
 [![Poster](https://img.shields.io/badge/Poster-PDF-orange)](https://spacetime-vision-robotics-laboratory.github.io/NSER-IBVS/assets/poster.pdf)
+[![Slides](https://img.shields.io/badge/Slides-ICCV%20Oral-purple)](https://ctipub-my.sharepoint.com/:p:/g/personal/sebastian_mocanu_upb_ro/EXa1_aq5YNJFjFeWjGTOOLMBD5zixvMi5Z_oI_EpdRlV9g)
 [![BibTeX](https://img.shields.io/badge/BibTeX-Citation-teal)](#citation)
 
-[![Data](https://img.shields.io/badge/Data-Google%20Drive-yellow)](https://drive.google.com/drive/u/0/my-drive)
+[![Data](https://img.shields.io/badge/Data-Google%20Drive-yellow)](https://drive.google.com/drive/folders/1T2Uq8nPQoy_QNiI87xBUoXlPAk7k-9Cq?usp=sharing)
 [![Sim Env](https://img.shields.io/badge/Bunker%20Sphinx%20UE4-Download-00a5e5?logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1vBbyoWVsvmZmz3S5X_1bmunyKrpuHvIb/view?usp=drive_link)
 </div> 
 
