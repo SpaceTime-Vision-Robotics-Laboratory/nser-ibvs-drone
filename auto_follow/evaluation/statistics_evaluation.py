@@ -180,7 +180,8 @@ def get_first_stable_period(run_data: pd.DataFrame, threshold: float = 1.0, dura
     :param duration: Minimum duration in seconds for a stability period
     :return: DataFrame subset of the first stable period, or None if no stable period found
     """
-    if len(run_data) < 2:
+    minimum_runs = 2
+    if len(run_data) < minimum_runs:
         return None
 
     run_data = run_data.sort_values('timestamp').reset_index(drop=True)
@@ -297,7 +298,7 @@ def compute_command_statistics(data_parquet: pd.DataFrame, duration_df: pd.DataF
 
 
 def plot_statistics_summary(err_stats: pd.DataFrame, iou_stats: pd.DataFrame, save_path_dir: Path, threshold: int = 0):
-    def plot_metric(df, value_col, group_col, title, ylabel, filename):
+    def plot_metric(df, value_col, group_col, title, ylabel, filename): # noqa: PLR0913
         plt.figure(figsize=(10, 6))
         ax = sns.barplot(
             data=df,
