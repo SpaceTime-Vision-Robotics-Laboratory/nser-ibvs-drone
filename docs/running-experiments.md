@@ -40,7 +40,8 @@ Before running experiments, ensure you have:
 - Completed the [Installation Guide](installation-guide.md)
 - Parrot Sphinx simulator installed
 - Pre-trained models in the [models/](../models) directory
-- Downloaded the bunker custom-built UE4 environment
+- Downloaded the [bunker custom-built UE4 environment](https://drive.google.com/file/d/1vBbyoWVsvmZmz3S5X_1bmunyKrpuHvIb/view?usp=drive_link)
+- Enough disk space if desired to run automated experiments (~150GB per 100 runs)
 
 ## Simulator Experiments
 
@@ -66,6 +67,7 @@ Each run is real-time, unfortunately they cannot be parallelized.
 | `--target_runs`            | Number of runs per scenario         | 1        |
 | `--is_student`             | Run student network instead of IBVS | False    |
 
+> **Note:** This will generate quite a few logs and frames ~150GB per 100 runs. Make sure you have enough space.
 
 ![Scenarios starting points with goal pose.](./images/Drone-Starting-Point.png)
 

@@ -25,6 +25,9 @@ config/
     └── *-student.yaml      # Student variants of each scenario
 ```
 
+> **Note:** Check [drone-sim-runner](https://github.com/SpaceTime-Vision-Robotics-Laboratory/drone-sim-runner) 
+> repository for more details about the simulator `.yaml` files.
+
 ### Simulator Configuration
 Simulator configs define experiment scenarios for the Parrot Sphinx simulator.
 
