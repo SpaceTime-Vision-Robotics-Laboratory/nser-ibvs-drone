@@ -18,7 +18,7 @@
 [![BibTeX](https://img.shields.io/badge/BibTeX-Citation-teal)](#citation)
 
 [![Data](https://img.shields.io/badge/Data-Google%20Drive-yellow)](https://drive.google.com/drive/folders/1T2Uq8nPQoy_QNiI87xBUoXlPAk7k-9Cq?usp=sharing)
-[![Sim Env](https://img.shields.io/badge/Bunker%20Sphinx%20UE4-Download-00a5e5?logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1vBbyoWVsvmZmz3S5X_1bmunyKrpuHvIb/view?usp=drive_link)
+[![Sim Env](https://img.shields.io/badge/Bunker%20Sphinx%20UE4-Download-00a5e5?logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1kHqJtTq7CGoazUUn8tPFnijV3lYY4toO/view?usp=drive_link)
 </div> 
 
 A self-supervised neuro-analytical framework for vision-based quadrotor control. 

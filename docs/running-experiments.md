@@ -40,7 +40,7 @@ Before running experiments, ensure you have:
 - Completed the [Installation Guide](installation-guide.md)
 - Parrot Sphinx simulator installed
 - Pre-trained models in the [models/](../models) directory
-- Downloaded the [bunker custom-built UE4 environment](https://drive.google.com/file/d/1vBbyoWVsvmZmz3S5X_1bmunyKrpuHvIb/view?usp=drive_link)
+- Downloaded the [bunker custom-built UE4 environment](https://drive.google.com/file/d/1kHqJtTq7CGoazUUn8tPFnijV3lYY4toO/view?usp=drive_link)
 - Enough disk space if desired to run automated experiments (~150GB per 100 runs)
 
 ## Simulator Experiments

@@ -59,7 +59,7 @@ sudo systemctl restart firmwared.service
 For experiments using the detailed bunker environment, you need the custom UE4 build.
 
 #### Option A: Use Pre-built Environment
-Contact the authors for access to the pre-built [bunker environment](https://drive.google.com/file/d/1vBbyoWVsvmZmz3S5X_1bmunyKrpuHvIb/view?usp=drive_link).
+Contact the authors for access to the pre-built [bunker environment](https://drive.google.com/file/d/1kHqJtTq7CGoazUUn8tPFnijV3lYY4toO/view?usp=drive_link).
 
 #### Option B: Use Empty Environment with Injection
 The `parrot-ue4-empty` environment can be populated dynamically:

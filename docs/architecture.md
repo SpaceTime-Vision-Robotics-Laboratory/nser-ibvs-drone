@@ -217,8 +217,8 @@ The framework uses Parrot Sphinx with custom Unreal Engine 4 environments for tr
 ![Teacher model in simulated environment with both drone and third party actor perspectives](images/Teacher-Simulated-Env.png)
 
 ### Digital Twin Setup
-- **Simulator**: Parrot Sphinx with Anafi 4K firmware
-- **Environment**: Custom UE4 bunker with detailed assets made in [Blender](https://www.blender.org/)
+- **Simulator**: [Parrot Sphinx](https://developer.parrot.com/docs/sphinx/index.html) with Anafi 4K firmware
+- **Environment**: [Custom UE4 bunker](https://drive.google.com/file/d/1kHqJtTq7CGoazUUn8tPFnijV3lYY4toO/view?usp=drive_link) with detailed assets made in [Blender](https://www.blender.org/)
 - **Target**: Toy car model (digitized using [Hunyuan3D-2](https://github.com/Tencent-Hunyuan/Hunyuan3D-2))
 - **Test Area**: 10x10x5 bunker-like environment with 5x4 meter carpet
 
