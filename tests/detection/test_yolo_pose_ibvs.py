@@ -4,17 +4,17 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import torch
 
-from auto_follow.detection.yolo_pose_ibvs import YoloEngineIBVSPose
+from nser_ibvs_drone.detection.yolo_pose_ibvs import YoloEngineIBVSPose
 
 
 class TestYoloEngineIBVSPose(unittest.TestCase):
     def setUp(self):
-        with patch('auto_follow.detection.yolo_ibvs.YoloEngineIBVS.__init__', return_value=None):
+        with patch('nser_ibvs_drone.detection.yolo_ibvs.YoloEngineIBVS.__init__', return_value=None):
             self.engine = YoloEngineIBVSPose(model_path_pose="mock_path.pt")
             self.engine.model = MagicMock()
             self.engine.mask_confidence = 0.5
 
-    @patch('auto_follow.detection.yolo_ibvs.YoloEngineIBVS._reorder_bbox_oriented')
+    @patch('nser_ibvs_drone.detection.yolo_ibvs.YoloEngineIBVS._reorder_bbox_oriented')
     def test_reorder_fallback_on_empty_masks(self, mock_super_reorder):
         """Should call super() if front or back masks are missing."""
         mock_super_reorder.return_value = [(0, 0), (10, 0), (10, 10), (0, 10)]
@@ -55,7 +55,7 @@ class TestYoloEngineIBVSPose(unittest.TestCase):
         self.assertEqual(len(result), 4)
         self.assertIsInstance(result[0], tuple)
 
-    @patch('auto_follow.detection.yolo_ibvs.YoloEngineIBVS._compute_bbox_oriented')
+    @patch('nser_ibvs_drone.detection.yolo_ibvs.YoloEngineIBVS._compute_bbox_oriented')
     def test_find_best_target_integration(self, mock_compute_bbox):
         """Test the full pipeline from YOLO results to TargetIBVS."""
         frame = np.zeros((100, 100, 3), dtype=np.uint8)

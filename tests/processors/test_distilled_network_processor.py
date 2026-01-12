@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-from auto_follow.processors.distilled_network_processor import DistilledNetworkProcessor
-from auto_follow.detection.target_tracker import CommandInfo
+from nser_ibvs_drone.processors.distilled_network_processor import DistilledNetworkProcessor
+from nser_ibvs_drone.detection.target_tracker import CommandInfo
 
 
 class TestDistilledNetworkProcessor(unittest.TestCase):
@@ -20,9 +20,9 @@ class TestDistilledNetworkProcessor(unittest.TestCase):
             self.config = kwargs.get('video_config')
             self.frame_saver.output_dir = Path("/tmp/test/frames")
 
-        self.patcher_init = patch('auto_follow.processors.ibvs_yolo_processor.IBVSYoloProcessor.__init__', autospec=True, side_effect=mocked_parent_init)
-        self.patcher_engine = patch('auto_follow.processors.distilled_network_processor.StudentEngine')
-        self.patcher_intrinsic = patch('auto_follow.processors.ibvs_yolo_processor.infer_intrinsic_matrix', return_value=np.eye(3))
+        self.patcher_init = patch('nser_ibvs_drone.processors.ibvs_yolo_processor.IBVSYoloProcessor.__init__', autospec=True, side_effect=mocked_parent_init)
+        self.patcher_engine = patch('nser_ibvs_drone.processors.distilled_network_processor.StudentEngine')
+        self.patcher_intrinsic = patch('nser_ibvs_drone.processors.ibvs_yolo_processor.infer_intrinsic_matrix', return_value=np.eye(3))
         self.patcher_parquet = patch.object(pd.DataFrame, 'to_parquet')
 
         self.patcher_init.start()

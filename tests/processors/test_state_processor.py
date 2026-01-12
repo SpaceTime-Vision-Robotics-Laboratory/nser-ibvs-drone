@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from auto_follow.processors.state_processor import StateYoloProcessor, SearchState
+from nser_ibvs_drone.processors.state_processor import StateYoloProcessor, SearchState
 from drone_base.control.operations import MovementByCommand
 from drone_base.control.states import FlightState, GimbalOrientation
 
@@ -12,10 +12,10 @@ from drone_base.control.states import FlightState, GimbalOrientation
 class TestStateYoloProcessor(unittest.TestCase):
 
     def setUp(self):
-        with patch('auto_follow.processors.state_processor.YoloEngine'), \
-                patch('auto_follow.processors.state_processor.TargetTracker'), \
-                patch('auto_follow.processors.state_processor.FrameVisualizer'), \
-                patch('auto_follow.processors.state_processor.Paths') as mock_paths:
+        with patch('nser_ibvs_drone.processors.state_processor.YoloEngine'), \
+                patch('nser_ibvs_drone.processors.state_processor.TargetTracker'), \
+                patch('nser_ibvs_drone.processors.state_processor.FrameVisualizer'), \
+                patch('nser_ibvs_drone.processors.state_processor.Paths') as mock_paths:
             mock_paths.SIM_CAR_YOLO_PATH = "dummy_model.pt"
             mock_paths.DETECTOR_LOG_DIR = None
 

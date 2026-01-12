@@ -1,7 +1,7 @@
 import argparse
 
-from auto_follow.evaluation.statistics_evaluation import run_stats
-from auto_follow.utils.path_manager import Paths
+from nser_ibvs_drone.evaluation.statistics_evaluation import run_stats
+from nser_ibvs_drone.utils.path_manager import Paths
 
 
 def main():

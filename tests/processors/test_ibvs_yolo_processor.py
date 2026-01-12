@@ -6,7 +6,7 @@ import json
 import queue
 from pathlib import Path
 
-from auto_follow.processors.ibvs_yolo_processor import IBVSYoloProcessor
+from nser_ibvs_drone.processors.ibvs_yolo_processor import IBVSYoloProcessor
 from drone_base.control.operations import PilotingCommand
 
 
@@ -18,12 +18,12 @@ class TestIBVSYoloProcessor(unittest.TestCase):
         }
         self.mock_json_content = json.dumps(self.dummy_goal_points)
 
-        with patch('auto_follow.processors.ibvs_yolo_processor.infer_intrinsic_matrix') as mock_infer, \
-                patch('auto_follow.processors.ibvs_yolo_processor.YoloEngineIBVS'), \
-                patch('auto_follow.processors.ibvs_yolo_processor.TargetTrackerIBVS'), \
-                patch('auto_follow.processors.ibvs_yolo_processor.FrameVisualizerIBVS'), \
-                patch('auto_follow.processors.ibvs_yolo_processor.ImageBasedVisualServo'), \
-                patch('auto_follow.processors.ibvs_yolo_processor.Paths') as mock_paths, \
+        with patch('nser_ibvs_drone.processors.ibvs_yolo_processor.infer_intrinsic_matrix') as mock_infer, \
+                patch('nser_ibvs_drone.processors.ibvs_yolo_processor.YoloEngineIBVS'), \
+                patch('nser_ibvs_drone.processors.ibvs_yolo_processor.TargetTrackerIBVS'), \
+                patch('nser_ibvs_drone.processors.ibvs_yolo_processor.FrameVisualizerIBVS'), \
+                patch('nser_ibvs_drone.processors.ibvs_yolo_processor.ImageBasedVisualServo'), \
+                patch('nser_ibvs_drone.processors.ibvs_yolo_processor.Paths') as mock_paths, \
                 patch('builtins.open', mock_open(read_data=self.mock_json_content)):
             mock_infer.return_value = np.eye(3)
 

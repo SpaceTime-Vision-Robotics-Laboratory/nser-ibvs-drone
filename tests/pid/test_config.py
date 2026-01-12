@@ -2,7 +2,7 @@ import os
 import tempfile
 import unittest
 
-from auto_follow.pid.config import PIDConfig, FilterConfig
+from nser_ibvs_drone.pid.config import PIDConfig, FilterConfig
 
 
 class TestPIDConfig(unittest.TestCase):

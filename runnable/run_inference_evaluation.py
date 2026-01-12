@@ -1,10 +1,10 @@
 import argparse
 
-from auto_follow.evaluation.eval_inference_multi_trials import benchmark_infer_multi_evaluators
-from auto_follow.evaluation.eval_inference_multi_trials_detailed import run_detailed_benchmark_multi_eval
-from auto_follow.evaluation.evaluate_flops import benchmark_flops_evaluators
-from auto_follow.evaluation import evaluation_memory
-from auto_follow.utils.path_manager import Paths
+from nser_ibvs_drone.evaluation.eval_inference_multi_trials import benchmark_infer_multi_evaluators
+from nser_ibvs_drone.evaluation.eval_inference_multi_trials_detailed import run_detailed_benchmark_multi_eval
+from nser_ibvs_drone.evaluation.evaluate_flops import benchmark_flops_evaluators
+from nser_ibvs_drone.evaluation import evaluation_memory
+from nser_ibvs_drone.utils.path_manager import Paths
 
 
 def main():

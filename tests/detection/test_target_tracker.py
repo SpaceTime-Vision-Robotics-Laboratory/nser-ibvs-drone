@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from auto_follow.detection.target_tracker import TargetTracker, TargetTrackerIBVS
+from nser_ibvs_drone.detection.target_tracker import TargetTracker, TargetTrackerIBVS
 from drone_base.config.video import VideoConfig
 
 

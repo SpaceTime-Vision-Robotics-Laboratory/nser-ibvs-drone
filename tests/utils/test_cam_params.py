@@ -3,7 +3,7 @@ from unittest.mock import patch, mock_open
 
 import numpy as np
 
-from auto_follow.utils.cam_params import (
+from nser_ibvs_drone.utils.cam_params import (
     read_pkl_file,
     scale_intrinsic_matrix_by_factor,
     scale_intrinsic_matrix_by_size,
@@ -52,7 +52,7 @@ class TestCameraUtils(unittest.TestCase):
         mock_file.assert_called_once_with("fake_path.pkl", 'rb')
         self.assertEqual(result, {"data": 123})
 
-    @patch("auto_follow.utils.cam_params.read_pkl_file")
+    @patch("nser_ibvs_drone.utils.cam_params.read_pkl_file")
     def test_infer_intrinsic_matrix_real(self, mock_read):
         mock_read.return_value = self.sample_k
 
@@ -61,7 +61,7 @@ class TestCameraUtils(unittest.TestCase):
         self.assertTrue(np.array_equal(result, self.sample_k))
         self.assertEqual(mock_read.call_count, 1)
 
-    @patch("auto_follow.utils.cam_params.read_pkl_file")
+    @patch("nser_ibvs_drone.utils.cam_params.read_pkl_file")
     def test_infer_intrinsic_matrix_sim(self, mock_read):
         mock_read.side_effect = [self.sample_k, self.sample_k * 0.5]
 

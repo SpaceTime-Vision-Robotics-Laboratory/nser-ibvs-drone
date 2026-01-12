@@ -5,17 +5,17 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from auto_follow.processors.simple_yolo_processor import SimpleYoloProcessor
+from nser_ibvs_drone.processors.simple_yolo_processor import SimpleYoloProcessor
 from drone_base.control.operations import PilotingCommand
 
 
 class TestSimpleYoloProcessor(unittest.TestCase):
 
     def setUp(self):
-        with patch('auto_follow.processors.simple_yolo_processor.YoloEngine'), \
-                patch('auto_follow.processors.simple_yolo_processor.TargetTracker'), \
-                patch('auto_follow.processors.simple_yolo_processor.FrameVisualizer'), \
-                patch('auto_follow.processors.simple_yolo_processor.Paths') as mock_paths:
+        with patch('nser_ibvs_drone.processors.simple_yolo_processor.YoloEngine'), \
+                patch('nser_ibvs_drone.processors.simple_yolo_processor.TargetTracker'), \
+                patch('nser_ibvs_drone.processors.simple_yolo_processor.FrameVisualizer'), \
+                patch('nser_ibvs_drone.processors.simple_yolo_processor.Paths') as mock_paths:
             mock_paths.SIM_CAR_YOLO_PATH = "dummy.pt"
             mock_paths.DETECTOR_LOG_DIR = None
 
@@ -76,8 +76,8 @@ class TestSimpleYoloProcessor(unittest.TestCase):
         self.assertEqual(command.rotation, 0.5)
         self.assertFalse(called_args.kwargs['is_blocking'])
 
-    @patch('auto_follow.processors.simple_yolo_processor.pd.DataFrame.to_csv')
-    @patch('auto_follow.processors.simple_yolo_processor.os.path.exists')
+    @patch('nser_ibvs_drone.processors.simple_yolo_processor.pd.DataFrame.to_csv')
+    @patch('nser_ibvs_drone.processors.simple_yolo_processor.os.path.exists')
     def test_csv_logging(self, mock_exists, mock_to_csv):
         """Tests that the processor attempts to log to CSV when a log directory is provided."""
         self.processor.detector_log_dir = Path("test_log.csv")

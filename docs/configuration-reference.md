@@ -1,5 +1,5 @@
 # Configuration Reference
-This document describes all configuration options available in the Auto-Follow framework.
+This document describes all configuration options available in the `NSER-IBVS-Drone` framework.
 
 ## Configuration Files
 Configuration files are organized in the [config/](../config) directory:

@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch, mock_open
 
 import numpy as np
 
-from auto_follow.detection.target_tracker import CommandInfo
-from auto_follow.processors.ibvs_splitter_processor import IBVSSplitterProcessor
+from nser_ibvs_drone.detection.target_tracker import CommandInfo
+from nser_ibvs_drone.processors.ibvs_splitter_processor import IBVSSplitterProcessor
 
 
 class TestIBVSSplitterProcessor(unittest.TestCase):
@@ -23,11 +23,11 @@ class TestIBVSSplitterProcessor(unittest.TestCase):
             self.drone_commander = kwargs.get('drone_commander')
             self.logger = MagicMock()
 
-        with patch('auto_follow.processors.ibvs_yolo_processor.IBVSYoloProcessor.__init__', autospec=True,
+        with patch('nser_ibvs_drone.processors.ibvs_yolo_processor.IBVSYoloProcessor.__init__', autospec=True,
                    side_effect=mocked_parent_init), \
-                patch('auto_follow.processors.ibvs_yolo_processor.infer_intrinsic_matrix', return_value=np.eye(3)), \
-                patch('auto_follow.processors.ibvs_splitter_processor.MaskSplitterEngineIBVS'), \
-                patch('auto_follow.processors.ibvs_yolo_processor.Paths'), \
+                patch('nser_ibvs_drone.processors.ibvs_yolo_processor.infer_intrinsic_matrix', return_value=np.eye(3)), \
+                patch('nser_ibvs_drone.processors.ibvs_splitter_processor.MaskSplitterEngineIBVS'), \
+                patch('nser_ibvs_drone.processors.ibvs_yolo_processor.Paths'), \
                 patch('builtins.open', mock_open(read_data='{"bbox_oriented_points": [[0,0], [1,1], [2,2], [3,3]]}')):
             self.mock_config = MagicMock()
             self.mock_commander = MagicMock()

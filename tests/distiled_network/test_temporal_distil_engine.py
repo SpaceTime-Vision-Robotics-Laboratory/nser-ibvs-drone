@@ -4,10 +4,10 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import torch
 
-from auto_follow.distiled_network.temporal_distil_engine import TemporalStudentEngine
+from nser_ibvs_drone.distiled_network.temporal_distil_engine import TemporalStudentEngine
 
 
-@patch("auto_follow.distiled_network.temporal_distil_engine.TemporalDroneRegressor")
+@patch("nser_ibvs_drone.distiled_network.temporal_distil_engine.TemporalDroneRegressor")
 @patch("torch.load")
 class TestTemporalStudentEngine(unittest.TestCase):
 
@@ -17,7 +17,7 @@ class TestTemporalStudentEngine(unittest.TestCase):
         self.model_path = "dummy_temporal.pth"
 
         with patch("torch.load") as mock_load, \
-                patch("auto_follow.distiled_network.temporal_distil_engine.TemporalDroneRegressor") as mock_reg:
+                patch("nser_ibvs_drone.distiled_network.temporal_distil_engine.TemporalDroneRegressor") as mock_reg:
             mock_load.return_value = {"model_state_dict": {}}
             self.mock_model = MagicMock()
             mock_reg.return_value = self.mock_model

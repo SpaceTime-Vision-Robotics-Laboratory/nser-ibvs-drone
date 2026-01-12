@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-from auto_follow.processors.distilled_temporal_network_processor import DistilledTemporalNetworkProcessor
-from auto_follow.detection.target_tracker import CommandInfo
+from nser_ibvs_drone.processors.distilled_temporal_network_processor import DistilledTemporalNetworkProcessor
+from nser_ibvs_drone.detection.target_tracker import CommandInfo
 
 
 class TestDistilledTemporalNetworkProcessor(unittest.TestCase):
@@ -20,9 +20,9 @@ class TestDistilledTemporalNetworkProcessor(unittest.TestCase):
             self.logger = MagicMock()
             self.config = kwargs.get('video_config')
 
-        self.patcher_init = patch('auto_follow.processors.ibvs_yolo_processor.IBVSYoloProcessor.__init__',
+        self.patcher_init = patch('nser_ibvs_drone.processors.ibvs_yolo_processor.IBVSYoloProcessor.__init__',
                                   autospec=True, side_effect=mocked_parent_init)
-        self.patcher_engine = patch('auto_follow.processors.distilled_temporal_network_processor.TemporalStudentEngine')
+        self.patcher_engine = patch('nser_ibvs_drone.processors.distilled_temporal_network_processor.TemporalStudentEngine')
         self.patcher_parquet = patch.object(pd.DataFrame, 'to_parquet')
 
         self.patcher_init.start()

@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from auto_follow.ibvs.ibvs_controller import ImageBasedVisualServo
+from nser_ibvs_drone.ibvs.ibvs_controller import ImageBasedVisualServo
 
 
 class TestImageBasedVisualServo(unittest.TestCase):

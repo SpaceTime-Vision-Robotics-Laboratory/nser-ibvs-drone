@@ -1,4 +1,4 @@
-from auto_follow.controllers.distilled_network_controller import main_distilled_student_controller
+from nser_ibvs_drone.controllers.distilled_network_controller import main_distilled_student_controller
 
 
 def main():

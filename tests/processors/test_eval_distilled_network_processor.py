@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pandas as pd
 
-from auto_follow.detection.target_tracker import CommandInfo
-from auto_follow.processors.eval_distilled_network_processor import EvalDistilledNetworkProcessor
+from nser_ibvs_drone.detection.target_tracker import CommandInfo
+from nser_ibvs_drone.processors.eval_distilled_network_processor import EvalDistilledNetworkProcessor
 
 
 class TestEvalDistilledNetworkProcessor(unittest.TestCase):
@@ -28,9 +28,9 @@ class TestEvalDistilledNetworkProcessor(unittest.TestCase):
             self.frame_saver = MagicMock()
             self.frame_saver.output_dir = Path("/tmp/frames/dummy.jpg")
 
-        self.patcher_init = patch('auto_follow.processors.ibvs_splitter_processor.IBVSSplitterProcessor.__init__',
+        self.patcher_init = patch('nser_ibvs_drone.processors.ibvs_splitter_processor.IBVSSplitterProcessor.__init__',
                                   autospec=True, side_effect=mocked_parent_init)
-        self.patcher_engine = patch('auto_follow.processors.eval_distilled_network_processor.StudentEngine')
+        self.patcher_engine = patch('nser_ibvs_drone.processors.eval_distilled_network_processor.StudentEngine')
         self.patcher_parquet = patch.object(pd.DataFrame, 'to_parquet')
 
         self.patcher_init.start()

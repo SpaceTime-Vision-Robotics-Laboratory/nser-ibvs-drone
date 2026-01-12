@@ -2,8 +2,8 @@
 
 # NSER-IBVS: Efficient Self-Supervised Neuro-Analytic Visual Servoing for Real-time Quadrotor Control
 
-[![Ubuntu](https://github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow/actions/workflows/ubuntu.yml)
-[![Ruff Linter](https://github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow/actions/workflows/ruff_linter.yml/badge.svg)](https://github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow/actions/workflows/ruff_linter.yml)
+[![Ubuntu](https://github.com/SpaceTime-Vision-Robotics-Laboratory/nser-ibvs-drone/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/SpaceTime-Vision-Robotics-Laboratory/nser-ibvs-drone/actions/workflows/ubuntu.yml)
+[![Ruff Linter](https://github.com/SpaceTime-Vision-Robotics-Laboratory/nser-ibvs-drone/actions/workflows/ruff_linter.yml/badge.svg)](https://github.com/SpaceTime-Vision-Robotics-Laboratory/nser-ibvs-drone/actions/workflows/ruff_linter.yml)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![License: AFL-3.0](https://img.shields.io/badge/License-AFL3.0-yellow.svg)](https://opensource.org/license/afl-3-0-php)
 
@@ -53,8 +53,8 @@ distillation, the student learns to directly output velocity commands from RGB i
 
 ## Repository Structure
 ```bash
-auto-follow/
-├── auto_follow/              # Main package
+nser-ibvs-drone/
+├── nser_ibvs_drone/          # Main package
 │   ├── controllers/          # Drone control implementations
 │   ├── detection/            # YOLO and mask splitter engines
 │   ├── distiled_network/     # Student network architecture and engines
@@ -88,8 +88,8 @@ auto-follow/
 ### Installation
 ```bash
 # Clone with submodules
-git clone --recursive https://github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow.git
-cd auto-follow
+git clone --recursive https://github.com/SpaceTime-Vision-Robotics-Laboratory/nser-ibvs-drone.git
+cd nser-ibvs-drone
 
 # Create virtual environment
 python3 -m venv ./venv

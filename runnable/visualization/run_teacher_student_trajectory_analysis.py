@@ -1,7 +1,7 @@
 import argparse
 
-from auto_follow.utils.path_manager import Paths
-from auto_follow.visualization.metadata_trajectory_plot_compare_teacher_student import generate_experiments_paths, \
+from nser_ibvs_drone.utils.path_manager import Paths
+from nser_ibvs_drone.visualization.metadata_trajectory_plot_compare_teacher_student import generate_experiments_paths, \
     process_comparison_multiple_metadata_files
 
 

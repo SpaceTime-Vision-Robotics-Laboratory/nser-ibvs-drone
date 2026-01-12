@@ -1,5 +1,5 @@
 [project]
-name = "auto_follow"
+name = "nser_ibvs_drone"
 dynamic = ["version"]
 description = "Following objects with Drones."
 readme = "README.md"
@@ -21,9 +21,9 @@ keywords = ["drone", "uav", "control", "tracking", "follow", "car", "parrot", "a
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow"
-"Source" = "https://github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow"
-"Tracker" = "https://github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow/issues"
+Homepage = "https://github.com/SpaceTime-Vision-Robotics-Laboratory/nser-ibvs-drone"
+"Source" = "https://github.com/SpaceTime-Vision-Robotics-Laboratory/nser-ibvs-drone"
+"Tracker" = "https://github.com/SpaceTime-Vision-Robotics-Laboratory/nser-ibvs-drone/issues"
 
 [build-system]
 requires = ["setuptools>=61.0"]
@@ -37,11 +37,11 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["auto_follow"]
+packages = ["nser_ibvs_drone"]
 include-package-data = true # For non-Python files
 
 [tool.setuptools.dynamic]
-version = { attr = "auto_follow._version.__version__" }
+version = { attr = "nser_ibvs_drone._version.__version__" }
 
 [tool.mypy]
 python_version = "3.10"
@@ -52,7 +52,7 @@ strict = true
 
 [tool.ruff]
 target-version = "py310"
-exclude = ["tests", "venv", "env", ".venv", ".env", "auto_follow/visualization", "external"]
+exclude = ["tests", "venv", "env", ".venv", ".env", "nser_ibvs_drone/visualization", "external"]
 force-exclude = true
 line-length = 120
 
@@ -76,7 +76,7 @@ ignore = [
     "RUF059",
     "PLC0415"
 ]
-"auto_follow/evaluation/*" = [
+"nser_ibvs_drone/evaluation/*" = [
     "PLR0911",
     "PLR0915",
     "RUF059"
@@ -88,5 +88,5 @@ python_files = "test_*.py"
 python_functions = "test_*"
 
 [tool.coverage.run]
-source = ["auto_follow"]
+source = ["nser_ibvs_drone"]
 omit = ["tests/*", "runnable/*", "external/*"]

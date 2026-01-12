@@ -1,5 +1,5 @@
 # Architecture Overview
-This document describes the system architecture of the Auto-Follow visual servoing framework, 
+This document describes the system architecture of the `NSER-IBVS-Drone` visual servoing framework, 
 implementing the NSER-IBVS (Numerically Stable Efficient Reduced Image-Based Visual Servoing) 
 teacher-student paradigm.
 
@@ -27,7 +27,7 @@ RGB Frame -> YOLOv11 Segmentation -> Mask Splitter -> Keypoint Extraction -> IBV
 - **Model:** YOLOv11 Nano instance segmentation (~2.84M parameters)
 - **Purpose:** Detect and segment the target vehicle in the camera frame
 - **Output:** Binary segmentation mask and bounding box
-- **Implementation:** [auto_follow/detection/yolo_engine.py](../auto_follow/detection/yolo_engine.py)
+- **Implementation:** [nser_ibvs_drone/detection/yolo_engine.py](../nser_ibvs_drone/detection/yolo_engine.py)
 
 The segmentation model is trained on synthetic data from the digital-twin and on real-world images.
 
@@ -70,7 +70,7 @@ From the split masks, we extract an oriented bounding box with consistently orde
 This preprocessing ensures stable feature correspondence across frames, 
 preventing the ambiguity that would destabilize the IBVS control loop.
 
-**Implementation:** [auto_follow/detection/mask_splitter_ibvs.py](../auto_follow/detection/mask_splitter_ibvs.py)
+**Implementation:** [nser_ibvs_drone/detection/mask_splitter_ibvs.py](../nser_ibvs_drone/detection/mask_splitter_ibvs.py)
 
 #### 4. NSER-IBVS Control Law:
 The Numerically Stable Efficient Reduced IBVS computes velocity commands by comparing 
@@ -89,8 +89,8 @@ current keypoints to reference (goal) keypoints.
 Our Reduced Formulation eliminates unnecessary degrees of freedom for quadrotor control at fixed altitude.
 This reduction from 6-DOF to 3-DOF (vx, vy, ωz) improves numerical stability and computational efficiency.
 
-**Implementation:** [auto_follow/ibvs/ibvs_controller.py](../auto_follow/ibvs/ibvs_controller.py), 
-[auto_follow/ibvs/ibvs_math_fcn.py](../auto_follow/ibvs/ibvs_math_fcn.py)
+**Implementation:** [nser_ibvs_drone/ibvs/ibvs_controller.py](../nser_ibvs_drone/ibvs/ibvs_controller.py), 
+[nser_ibvs_drone/ibvs/ibvs_math_fcn.py](../nser_ibvs_drone/ibvs/ibvs_math_fcn.py)
 
 
 ### Student Path: Distilled Network
@@ -119,7 +119,7 @@ RGB Frame (224x224) -> CNN Feature Extractor -> FC Layers -> (vx, vy, ωz)
 - FC layers: 512 → 256 → 3
 - Tanh activation on output (bounded velocity commands which are between -100 and 100)
 
-**Implementation:** [auto_follow/distiled_network/drone_command_regressor.py](../auto_follow/distiled_network/drone_command_regressor.py)
+**Implementation:** [nser_ibvs_drone/distiled_network/drone_command_regressor.py](../nser_ibvs_drone/distiled_network/drone_command_regressor.py)
 
 #### Training Process
 The student is trained via knowledge distillation using MSE loss:
@@ -154,9 +154,9 @@ Processors orchestrate the interaction between controllers, detection engines, a
 ### Important Processors
 | Processor                                                                             | Description                               |
 |---------------------------------------------------------------------------------------|-------------------------------------------|
-| [IBVSSplitterProcessor](../auto_follow/processors/ibvs_splitter_processor.py)         | Full NSER-IBVS teacher processor pipeline |
-| [DistilledNetworkProcessor](../auto_follow/processors/distilled_network_processor.py) | Student network processor pipeline        |
-| [IBVSYoloProcessor](../auto_follow/processors/ibvs_yolo_processor.py)                 | Base class with common functionality      |
+| [IBVSSplitterProcessor](../nser_ibvs_drone/processors/ibvs_splitter_processor.py)         | Full NSER-IBVS teacher processor pipeline |
+| [DistilledNetworkProcessor](../nser_ibvs_drone/processors/distilled_network_processor.py) | Student network processor pipeline        |
+| [IBVSYoloProcessor](../nser_ibvs_drone/processors/ibvs_yolo_processor.py)                 | Base class with common functionality      |
 
 **Example Flow (IBVSSplitterProcessor):**
 ```python
@@ -175,7 +175,7 @@ def _process_frame(self, frame):
     self.perform_movement(command_info)
 ```
 
-Implementation: [auto_follow/processors/](../auto_follow/processors)
+Implementation: [nser_ibvs_drone/processors/](../nser_ibvs_drone/processors)
 
 ## Data Flow Diagram
 ```bash
@@ -277,8 +277,8 @@ The framework relies on three git submodules:
 5. Update model paths in configuration files
 
 ### Adding New Controllers
-1. Create a new controller in [auto_follow/controllers/](../auto_follow/controllers)
-2. Implement a corresponding processor in [auto_follow/processors/](../auto_follow/processors)
+1. Create a new controller in [nser_ibvs_drone/controllers/](../nser_ibvs_drone/controllers)
+2. Implement a corresponding processor in [nser_ibvs_drone/processors/](../nser_ibvs_drone/processors)
 3. Add configuration file in [config/simulator/](../config/simulator). Optional for digital-twin simulation
 4. Create entry point script in [runnable/](../runnable)
 
@@ -291,7 +291,7 @@ The framework relies on three git submodules:
 
 ### Student Network
 1. Run several simulations for the new task using the 
-[auto_follow/simulator/simulation_loop_manager.py](../auto_follow/simulator/simulation_loop_manager.py),
+[nser_ibvs_drone/simulator/simulation_loop_manager.py](../nser_ibvs_drone/simulator/simulation_loop_manager.py),
 [scripts/connect_drone_firmware.sh](../scripts/connect_drone_firmware.sh) or run in real-world. The more diversity the better
 2. Use the generated raw `frames` and `.parquet` logs to train the student network with [student_train_pipeline/](../student_train_pipeline)
 3. Test the newly trained network either in real-world or digital-twin. For best results first pre-train the model in the digital-twin if tests are good then fine-tune on real-world and test.

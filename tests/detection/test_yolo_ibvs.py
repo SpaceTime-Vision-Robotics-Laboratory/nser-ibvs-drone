@@ -5,8 +5,8 @@ import cv2
 import numpy as np
 import torch
 
-from auto_follow.detection.targets import TargetIBVS
-from auto_follow.detection.yolo_ibvs import YoloEngineIBVS
+from nser_ibvs_drone.detection.targets import TargetIBVS
+from nser_ibvs_drone.detection.yolo_ibvs import YoloEngineIBVS
 
 
 class TestYoloEngineIBVS(unittest.TestCase):

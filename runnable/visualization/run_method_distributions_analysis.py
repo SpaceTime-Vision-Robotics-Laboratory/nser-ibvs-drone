@@ -1,7 +1,7 @@
 import argparse
 
-from auto_follow.utils.path_manager import Paths
-from auto_follow.visualization.visualize_distributions import run_plot_analysis_on_scenes
+from nser_ibvs_drone.utils.path_manager import Paths
+from nser_ibvs_drone.visualization.visualize_distributions import run_plot_analysis_on_scenes
 
 
 def main():
@@ -9,7 +9,7 @@ def main():
     Generates plots about flight for a given scene experiments.
 
     If the scene experiments come from the Student method it needs Teacher logs generation
-    use auto_follow/evaluation/ibvs_splitter_run_for_logs.py to generate them if needed.
+    use nser_ibvs_drone/evaluation/ibvs_splitter_run_for_logs.py to generate them if needed.
 
     Example of usage:
     python runnable/visualization/run_method_distributions_analysis.py \

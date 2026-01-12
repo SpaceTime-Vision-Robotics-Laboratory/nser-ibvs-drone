@@ -1,5 +1,5 @@
 # Installation Guide
-This guide covers the complete setup process for the Auto-Follow visual servoing framework.
+This guide covers the complete setup process for the `NSER-IBVS-Drone` visual servoing framework.
 
 ## System Requirements
 - **OS:** Ubuntu 22.04 or 24.04 or Debian 11 (required for Parrot Sphinx and Parrot Olympe)
@@ -12,8 +12,8 @@ This guide covers the complete setup process for the Auto-Follow visual servoing
 
 ## Step 1: Clone the Repository
 ```bash
-git clone --recursive https://github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow.git
-cd auto-follow
+git clone --recursive https://github.com/SpaceTime-Vision-Robotics-Laboratory/nser-ibvs-drone.git
+cd nser-ibvs-drone
 ```
 
 If you already cloned without `--recursive`, initialize submodules:

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from auto_follow.simulator.simulation_loop_manager import SimulationLoopManager
+from nser_ibvs_drone.simulator.simulation_loop_manager import SimulationLoopManager
 
 
 class TestSimulationLoopManager(unittest.TestCase):
@@ -29,7 +29,7 @@ class TestSimulationLoopManager(unittest.TestCase):
         result = self.manager._prepare_scene_name(scene)
         self.assertEqual(result, "test_scene-student.yaml")
 
-    @patch("auto_follow.simulator.simulation_loop_manager.main_simulation_runner")
+    @patch("nser_ibvs_drone.simulator.simulation_loop_manager.main_simulation_runner")
     @patch("time.sleep", return_value=None)
     def test_run_single_config_success(self, mock_sleep, mock_runner):
         """Test a successful run where target_runs is met."""
@@ -41,7 +41,7 @@ class TestSimulationLoopManager(unittest.TestCase):
         self.assertEqual(self.manager.successful_runs, 2)
         self.assertEqual(len(self.manager.failures), 0)
 
-    @patch("auto_follow.simulator.simulation_loop_manager.main_simulation_runner")
+    @patch("nser_ibvs_drone.simulator.simulation_loop_manager.main_simulation_runner")
     @patch("time.sleep", return_value=None)
     def test_run_single_config_with_failures(self, mock_sleep, mock_runner):
         """Test tracking failures when the simulation fails once then succeeds."""
@@ -55,7 +55,7 @@ class TestSimulationLoopManager(unittest.TestCase):
         self.assertEqual(len(self.manager.failures), 1)
         self.assertEqual(self.manager.failures[0], 1)  # Failed on the first attempt
 
-    @patch("auto_follow.simulator.simulation_loop_manager.SimulationLoopManager.run_single_config")
+    @patch("nser_ibvs_drone.simulator.simulation_loop_manager.SimulationLoopManager.run_single_config")
     def test_run_suite(self, mock_run_single):
         """Verify that the suite iterates through all provided scenes."""
         scenes = ["s1.yaml", "s2.yaml", "s3.yaml"]

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from auto_follow.pid.pid_controller import PIDController, PIDConfig, FilterConfig
+from nser_ibvs_drone.pid.pid_controller import PIDController, PIDConfig, FilterConfig
 
 
 class TestPIDController(unittest.TestCase):

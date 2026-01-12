@@ -3,13 +3,13 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from auto_follow.detection.mask_splitter_ibvs import MaskSplitterEngineIBVS
+from nser_ibvs_drone.detection.mask_splitter_ibvs import MaskSplitterEngineIBVS
 
 
 class TestMaskSplitterEngineIBVS(unittest.TestCase):
     def setUp(self):
         # Prevent actual model loading
-        with patch('auto_follow.detection.yolo_ibvs.YoloEngineIBVS.__init__', return_value=None), \
+        with patch('nser_ibvs_drone.detection.yolo_ibvs.YoloEngineIBVS.__init__', return_value=None), \
                 patch('mask_splitter.nn.infer.MaskSplitterInference.__init__', return_value=None):
             self.engine = MaskSplitterEngineIBVS()
             self.engine.splitter_model = MagicMock()
@@ -35,7 +35,7 @@ class TestMaskSplitterEngineIBVS(unittest.TestCase):
         self.assertIn(result[0], [(20, 10), (20, 30)])
         self.assertEqual(len(result), 4)
 
-    @patch('auto_follow.detection.yolo_ibvs.YoloEngineIBVS._compute_bbox_oriented')
+    @patch('nser_ibvs_drone.detection.yolo_ibvs.YoloEngineIBVS._compute_bbox_oriented')
     def test_find_best_target_full_flow(self, mock_compute_bbox):
         """Test the logic from initial mask to split masks to target."""
         frame = np.zeros((360, 640, 3), dtype=np.uint8)

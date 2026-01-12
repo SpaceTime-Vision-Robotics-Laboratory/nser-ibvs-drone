@@ -1,6 +1,6 @@
-from auto_follow.controllers.state_follow_controller import StateFollowController
-from auto_follow.processors.state_processor import StateYoloProcessor
-from auto_follow.utils.path_manager import Paths
+from nser_ibvs_drone.controllers.state_follow_controller import StateFollowController
+from nser_ibvs_drone.processors.state_processor import StateYoloProcessor
+from nser_ibvs_drone.utils.path_manager import Paths
 from drone_base.config.drone import DroneIp
 
 

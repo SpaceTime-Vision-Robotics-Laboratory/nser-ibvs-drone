@@ -1,7 +1,7 @@
 import argparse
 
-from auto_follow.utils.path_manager import Paths
-from auto_follow.visualization.metadata_trajectory_analysis import get_carpet_start, trajectory_analysis_single_run
+from nser_ibvs_drone.utils.path_manager import Paths
+from nser_ibvs_drone.visualization.metadata_trajectory_analysis import get_carpet_start, trajectory_analysis_single_run
 
 
 def parse_tuple(value):

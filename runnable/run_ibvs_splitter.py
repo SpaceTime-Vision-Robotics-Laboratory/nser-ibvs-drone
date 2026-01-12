@@ -1,4 +1,4 @@
-from auto_follow.controllers.ibvs_splitter_controller import main_ibvs_splitter_controller
+from nser_ibvs_drone.controllers.ibvs_splitter_controller import main_ibvs_splitter_controller
 
 
 def main():

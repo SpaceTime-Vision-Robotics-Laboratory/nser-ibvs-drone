@@ -2,10 +2,10 @@ import unittest
 from unittest.mock import MagicMock, patch
 import numpy as np
 import torch
-from auto_follow.distiled_network.distil_engine import StudentEngine
+from nser_ibvs_drone.distiled_network.distil_engine import StudentEngine
 
 
-@patch("auto_follow.distiled_network.distil_engine.DroneCommandRegressor")
+@patch("nser_ibvs_drone.distiled_network.distil_engine.DroneCommandRegressor")
 @patch("torch.load")
 class TestStudentEngine(unittest.TestCase):
 
@@ -14,7 +14,7 @@ class TestStudentEngine(unittest.TestCase):
         self.image_size = (224, 224)
 
         with patch("torch.load") as mock_load, \
-                patch("auto_follow.distiled_network.distil_engine.DroneCommandRegressor") as mock_reg:
+                patch("nser_ibvs_drone.distiled_network.distil_engine.DroneCommandRegressor") as mock_reg:
             mock_load.return_value = {"model_state_dict": {}}
             self.mock_model = MagicMock()
             mock_reg.return_value = self.mock_model

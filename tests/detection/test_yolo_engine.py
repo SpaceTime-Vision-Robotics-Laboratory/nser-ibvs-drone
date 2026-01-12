@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import torch
 
-from auto_follow.detection.yolo_engine import YoloEngine
+from nser_ibvs_drone.detection.yolo_engine import YoloEngine
 
 
 class TestYoloEngine(unittest.TestCase):

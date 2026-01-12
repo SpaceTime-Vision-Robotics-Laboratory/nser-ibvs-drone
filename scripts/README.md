@@ -109,6 +109,6 @@ Launches a full `parrot-ue4-carla` CARLA simulation environment by opening three
 
 
 ## Dependencies
-These scripts rely on the environment configuration system located in `../assets/environment/`. 
+These scripts rely on the environment configuration system located in [../assets/environment/](../assets/environment). 
 See [run_environment_car.sh](../assets/environment/run_environment_car.sh) for available 
 configuration options (levels, quality settings, configs).

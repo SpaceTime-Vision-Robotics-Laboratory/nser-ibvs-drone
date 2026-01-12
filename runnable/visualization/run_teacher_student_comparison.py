@@ -1,8 +1,8 @@
 import argparse
 from pathlib import Path
 
-from auto_follow.utils.path_manager import Paths
-from auto_follow.visualization.compare_teacher_student import run_comparison_analysis
+from nser_ibvs_drone.utils.path_manager import Paths
+from nser_ibvs_drone.visualization.compare_teacher_student import run_comparison_analysis
 
 
 def main():

@@ -1,5 +1,5 @@
 # Running Experiments
-This guide explains how to run visual servoing experiments using our framework.
+This guide explains how to run visual servoing experiments using `NSER-IBVS-Drone` framework.
 
 <table align="center">
   <tr>
@@ -244,19 +244,19 @@ python runnable/run_inference_evaluation.py \
 #### Benchmarks Performed
 
 The script runs four evaluation types:
-1. **Multi-Trial Inference Timing** ([eval_inference_multi_trials.py](../auto_follow/evaluation/eval_inference_multi_trials.py))
+1. **Multi-Trial Inference Timing** ([eval_inference_multi_trials.py](../nser_ibvs_drone/evaluation/eval_inference_multi_trials.py))
    - Measures inference time per frame across multiple trials
    - Outputs: `benchmark_results.csv`, `benchmark_table.tex`
 
-2. **Detailed Multi-Trial Benchmark** ([eval_inference_multi_trials_detailed.py](../auto_follow/evaluation/eval_inference_multi_trials_detailed.py))
+2. **Detailed Multi-Trial Benchmark** ([eval_inference_multi_trials_detailed.py](../nser_ibvs_drone/evaluation/eval_inference_multi_trials_detailed.py))
    - Comprehensive timing with per-run breakdowns
    - Outputs: `benchmark_detailed_*.json`, `benchmark_summary_*.csv`, `benchmark_per_run_*.csv`
 
-3. **FLOPs and Parameters** ([evaluate_flops.py](../auto_follow/evaluation/evaluate_flops.py))
+3. **FLOPs and Parameters** ([evaluate_flops.py](../nser_ibvs_drone/evaluation/evaluate_flops.py))
    - Computes computational complexity (GFLOPs, TFLOPs) and model parameters
    - Outputs: `benchmark_timing_raw.csv`, `benchmark_complexity_summary.csv`, `benchmark_complexity_table.tex`
 
-4. **Memory Usage** ([evaluation_memory.py](../auto_follow/evaluation/evaluation_memory.py))
+4. **Memory Usage** ([evaluation_memory.py](../nser_ibvs_drone/evaluation/evaluation_memory.py))
    - Measures RAM and GPU memory consumption
    - Outputs: `benchmark_memory.csv`
 
@@ -265,7 +265,7 @@ The script runs four evaluation types:
 You can also run individual evaluation scripts directly :
 
 ```bash
-python -c "from auto_follow.evaluation.eval_inference_multi_trials import benchmark_infer_multi_evaluators; benchmark_infer_multi_evaluators('/path/to/frames', trials=30, output_dir='./results/inference)"
+python -c "from nser_ibvs_drone.evaluation.eval_inference_multi_trials import benchmark_infer_multi_evaluators; benchmark_infer_multi_evaluators('/path/to/frames', trials=30, output_dir='./results/inference)"
 ```
 
 #### Output Metrics
@@ -318,7 +318,7 @@ python runnable/visualization/run_method_distributions_analysis.py \
 | `time_series_sample_run_*.png`        | Time series plots for random individual runs      |
 
 > **Note:** If analyzing Student experiments, ensure Teacher logs have been generated using
-> [auto_follow/evaluation/ibvs_splitter_run_for_logs.py](../auto_follow/evaluation/ibvs_splitter_run_for_logs.py) 
+> [nser_ibvs_drone/evaluation/ibvs_splitter_run_for_logs.py](../nser_ibvs_drone/evaluation/ibvs_splitter_run_for_logs.py) 
 > for proper comparison data.
 
 ### Teacher-Student Comparison

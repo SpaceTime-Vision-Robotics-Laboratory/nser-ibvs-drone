@@ -3,7 +3,7 @@ import unittest
 
 import torch
 
-from auto_follow.distiled_network.drone_command_regressor import DroneCommandRegressor
+from nser_ibvs_drone.distiled_network.drone_command_regressor import DroneCommandRegressor
 
 
 class TestDroneCommandRegressor(unittest.TestCase):

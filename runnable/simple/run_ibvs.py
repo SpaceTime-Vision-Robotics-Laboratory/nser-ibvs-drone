@@ -1,8 +1,8 @@
 import argparse
 
-from auto_follow.controllers.ibvs_controller import IBVSController
-from auto_follow.processors.ibvs_yolo_processor import IBVSYoloProcessor
-from auto_follow.utils.path_manager import Paths
+from nser_ibvs_drone.controllers.ibvs_controller import IBVSController
+from nser_ibvs_drone.processors.ibvs_yolo_processor import IBVSYoloProcessor
+from nser_ibvs_drone.utils.path_manager import Paths
 from drone_base.config.drone import DroneIp
 
 

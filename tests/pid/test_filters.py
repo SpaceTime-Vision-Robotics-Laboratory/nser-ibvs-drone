@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
-from auto_follow.pid.filters import LowPassFilter, FilterConfig
+from nser_ibvs_drone.pid.filters import LowPassFilter, FilterConfig
 
 
 class TestLowPassFilter(unittest.TestCase):

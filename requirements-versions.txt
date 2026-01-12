@@ -1,7 +1,6 @@
 aenum==3.1.16
 asn1tools==0.167.0
 asttokens==3.0.1
--e git+ssh://git@github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow.git@82bf16a240a510ae93b864aefe4087690c72fe04#egg=auto_follow
 bitstruct==8.21.0
 black==25.12.0
 boltons==25.0.0
@@ -37,6 +36,7 @@ matplotlib-inline==0.2.1
 mpmath==1.3.0
 mypy_extensions==1.1.0
 networkx==3.4.2
+-e git+ssh://git@github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow.git@46d47f290344eee713fa256034a08c8f6053cea0#egg=nser_ibvs_drone
 numpy==2.2.6
 nvidia-cublas-cu12==12.8.4.1
 nvidia-cuda-cupti-cu12==12.8.90

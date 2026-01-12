@@ -1,6 +1,6 @@
 import argparse
 
-from auto_follow.simulator.simulation_loop_manager import SimulationLoopManager
+from nser_ibvs_drone.simulator.simulation_loop_manager import SimulationLoopManager
 
 
 def main():

@@ -2,9 +2,9 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-from auto_follow.detection.frame_visualizer import FrameVisualizer, FrameVisualizerIBVS
+from nser_ibvs_drone.detection.frame_visualizer import FrameVisualizer, FrameVisualizerIBVS
 
-from auto_follow.detection.targets import Target, TargetIBVS
+from nser_ibvs_drone.detection.targets import Target, TargetIBVS
 from drone_base.config.video import VideoConfig
 
 
@@ -43,7 +43,7 @@ class TestFrameVisualizerIBVS(unittest.TestCase):
         self.visualizer = FrameVisualizerIBVS(self.video_config)
         self.frame = np.zeros((360, 640, 3), dtype=np.uint8)
 
-    @patch('auto_follow.detection.frame_visualizer.plot_bbox_keypoints')
+    @patch('nser_ibvs_drone.detection.frame_visualizer.plot_bbox_keypoints')
     def test_display_frame_ibvs(self, mock_plot_keypoints):
         """Test IBVS-specific drawing (oriented bbox and keypoints)."""
         target = TargetIBVS(

@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from auto_follow.ibvs.ibvs_math_fcn import (
+from nser_ibvs_drone.ibvs.ibvs_math_fcn import (
     e2h,
     get_rectangle_sides,
     plot_bbox_keypoints,
