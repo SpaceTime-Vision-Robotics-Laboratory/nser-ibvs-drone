@@ -7,6 +7,9 @@ This guide covers the complete setup process for the `NSER-IBVS-Drone` visual se
 - **GPU:** NVIDIA GPU with CUDA support (recommended for real-time inference, however can run on CPU but might require modifications in `processors` package)
 - **RAM:** 8GB minimum, 32GB recommended
 - **Storage:** ~30GB total (project dependencies ~9GB, bunker custom built environment ~3.5GB, rest for Parrot Sphinx)
+- **Real-World Physical Environment:** A carpet or Lambertian (matte, non-reflective) surface is 
+  required. The bunker environment has a non-Lambertian (reflective) floor which 
+  causes the drone optical flow sensors to fail, resulting in position drift.
 
 > Note: For real-world experiments hardware requirements are far less constraining 
 

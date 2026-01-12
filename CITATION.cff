@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite our paper."
+title: "NSER-IBVS: Efficient Self-Supervised Neuro-Analytic Visual Servoing for Real-time Quadrotor Control"
+authors:
+  - family-names: Mocanu
+    given-names: Sebastian
+  - family-names: Nae
+    given-names: Sebastian-Ion
+  - family-names: Barbu
+    given-names: Mihai-Eugen
+  - family-names: Leordeanu
+    given-names: Marius
+url: "https://github.com/SpaceTime-Vision-Robotics-Laboratory/nser-ibvs-drone"
+preferred-citation:
+  type: conference-paper
+  title: "Efficient Self-Supervised Neuro-Analytic Visual Servoing for Real-time Quadrotor Control"
+  authors:
+    - family-names: Mocanu
+      given-names: Sebastian
+    - family-names: Nae
+      given-names: Sebastian-Ion
+    - family-names: Barbu
+      given-names: Mihai-Eugen
+    - family-names: Leordeanu
+      given-names: Marius
+  collection-title: "Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV) Workshops"
+  year: 2025
+  month: 10
+  start: 1744
+  end: 1753

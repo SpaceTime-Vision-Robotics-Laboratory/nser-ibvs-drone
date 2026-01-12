@@ -50,6 +50,8 @@ corner keypoints across frames.
 - Dropout regularization in deeper layers
 - Custom losses to ensure boundary reconstruction within the existent segmentation
 
+For additional details check the `mask-splitter` [README.md](https://github.com/SpaceTime-Vision-Robotics-Laboratory/mask-splitter).
+
 #### 3. Keypoint Extraction and Ordering:
 From the split masks, we extract an oriented bounding box with consistently ordered keypoints:
 1. Compute bounding box around the full segmentation mask
@@ -85,6 +87,20 @@ current keypoints to reference (goal) keypoints.
 </table>
 </div>
 
+**Mathematical Formulation:**
+
+Classical IBVS control law:
+```
+v = -λL^+_s(s - s*)
+```
+
+Our reduced interaction matrix for fixed-altitude quadrotor control:
+```
+[ u̇ ]   [-f/Z   0    v̄ ] [ vx ]
+[ v̇ ] = [ 0   -f/Z  -ū ] [ vy ]
+                         [ ωz ]
+```
+Where ū = u - u_0, v̄ = v - v_0 are pixel coordinates relative to principal point, f is focal length (pixels), Z is depth.
 
 Our Reduced Formulation eliminates unnecessary degrees of freedom for quadrotor control at fixed altitude.
 This reduction from 6-DOF to 3-DOF (vx, vy, ωz) improves numerical stability and computational efficiency.
@@ -120,6 +136,8 @@ RGB Frame (224x224) -> CNN Feature Extractor -> FC Layers -> (vx, vy, ωz)
 - Tanh activation on output (bounded velocity commands which are between -100 and 100)
 
 **Implementation:** [nser_ibvs_drone/distiled_network/drone_command_regressor.py](../nser_ibvs_drone/distiled_network/drone_command_regressor.py)
+
+Additional details in [student_train_pipeline/README.md](../student_train_pipeline/README.md).
 
 #### Training Process
 The student is trained via knowledge distillation using MSE loss:
@@ -221,6 +239,10 @@ The framework uses Parrot Sphinx with custom Unreal Engine 4 environments for tr
 - **Environment**: [Custom UE4 bunker](https://drive.google.com/file/d/1kHqJtTq7CGoazUUn8tPFnijV3lYY4toO/view?usp=drive_link) with detailed assets made in [Blender](https://www.blender.org/)
 - **Target**: Toy car model (digitized using [Hunyuan3D-2](https://github.com/Tencent-Hunyuan/Hunyuan3D-2))
 - **Test Area**: 10x10x5 bunker-like environment with 5x4 meter carpet
+
+> **Note:** The carpet is necessary because the bunker-like environment has a non-Lambertian floor, 
+> which poses challenges for our UAV to maintain a fixed position. Since this was in issue for the Real-World
+> environment, it was also adopted for the Digital-Twin.
 
 ### Test Scenarios
 Eight starting poses around the target vehicle, covering the full trigonometric circle:
