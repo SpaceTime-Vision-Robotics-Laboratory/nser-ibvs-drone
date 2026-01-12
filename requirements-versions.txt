@@ -17,9 +17,9 @@ decorator==5.2.1
 evdev==1.9.2
 exceptiongroup==1.3.1
 executing==2.2.1
-filelock==3.20.2
+filelock==3.20.3
 fonttools==4.61.1
-fsspec==2025.12.0
+fsspec==2026.1.0
 future==1.0.0
 geographiclib==2.1
 geopy==2.4.1
@@ -36,7 +36,7 @@ matplotlib-inline==0.2.1
 mpmath==1.3.0
 mypy_extensions==1.1.0
 networkx==3.4.2
--e git+ssh://git@github.com/SpaceTime-Vision-Robotics-Laboratory/auto-follow.git@46d47f290344eee713fa256034a08c8f6053cea0#egg=nser_ibvs_drone
+-e git+ssh://git@github.com/SpaceTime-Vision-Robotics-Laboratory/nser-ibvs-drone.git@9166ef7b6e859da7afd78982233275038feb2e58#egg=nser_ibvs_drone
 numpy==2.2.6
 nvidia-cublas-cu12==12.8.4.1
 nvidia-cuda-cupti-cu12==12.8.90
@@ -58,12 +58,12 @@ packaging==25.0
 pandas==2.3.3
 parrot-olympe==7.7.5
 parso==0.8.5
-pathspec==1.0.2
+pathspec==1.0.3
 pexpect==4.9.0
 pillow==12.1.0
 platformdirs==4.5.1
-polars==1.36.1
-polars-runtime-32==1.36.1
+polars==1.37.0
+polars-runtime-32==1.37.0
 prompt_toolkit==3.0.52
 protobuf==3.19.4
 psutil==7.2.1
@@ -81,14 +81,14 @@ pytokens==0.3.0
 pytz==2025.2
 PyYAML==6.0.3
 requests==2.32.5
-ruff==0.14.10
+ruff==0.14.11
 scipy==1.15.3
 seaborn==0.13.2
 six==1.17.0
 stack-data==0.6.3
 sympy==1.14.0
 thop==0.1.1.post2209072238
-tomli==2.3.0
+tomli==2.4.0
 torch==2.9.1
 torchinfo==1.8.0
 torchvision==0.24.1
@@ -98,7 +98,7 @@ triton==3.5.1
 typing_extensions==4.15.0
 tzdata==2025.3
 tzlocal==3.0
-ultralytics==8.3.249
+ultralytics==8.3.252
 ultralytics-thop==2.0.18
 urllib3==2.6.3
 wcwidth==0.2.14
