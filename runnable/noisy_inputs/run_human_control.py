@@ -2,7 +2,7 @@ import argparse
 
 import time
 
-from auto_follow.processors.ibvs_yolo_processor import HumanProcessor
+from nser_ibvs_drone.processors.ibvs_yolo_processor import HumanProcessor
 from drone_base.config.drone import DroneIp
 from drone_base.config.drone import GimbalType
 from drone_base.stream.base_streaming_controller import BaseStreamingController

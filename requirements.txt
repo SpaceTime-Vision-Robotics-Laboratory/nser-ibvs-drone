@@ -1,4 +1,6 @@
 -e external/drone_base
+-e external/mask_splitter
+-e external/drone_sim_runner
 ultralytics
 opencv-python
 parrot-olympe
@@ -11,3 +13,5 @@ torchinfo
 python-dotenv
 pyarrow
 thop
+tqdm
+seaborn

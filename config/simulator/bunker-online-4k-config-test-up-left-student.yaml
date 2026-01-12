@@ -12,5 +12,9 @@ paths:
       pose: "1 1 0.3 0 -0 3.925"
 
   scripts:
-    controller: "auto_follow/controllers/distilled_network_controller.py"
+    controller: "nser_ibvs_drone/controllers/distilled_network_controller.py"
     save_dir_name: "bunker-online-4k-config-test-up-left-student"
+    args:
+      --log_path: "${output_dir}/logs"
+      --results_path: "${output_dir}/results"
+      --parquet_logs_path: "${output_dir}/parquet-logs"

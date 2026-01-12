@@ -1,6 +1,6 @@
 paths:
   sphinx:
-    command: "/home/brittle/Games/MyGames/DroneSimulation/bunker/installed/LinuxNoEditor/UnrealApp.sh"
+    command: "bunker/installed/LinuxNoEditor/UnrealApp.sh"
     level: "main_details"
     quality: "low"
     config_file: "assets/environment/config/add_mc_laren.yaml"
@@ -12,5 +12,5 @@ paths:
       pose: "-1.5375 0 0.3 0 0 0"
 
   scripts:
-    controller: "auto_follow/controllers/ibvs_splitter_controller.py"
+    controller: "nser_ibvs_drone/controllers/ibvs_splitter_controller.py"
 

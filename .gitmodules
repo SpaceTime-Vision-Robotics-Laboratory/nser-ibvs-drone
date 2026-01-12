@@ -5,3 +5,6 @@
 [submodule "external/mask_splitter"]
 	path = external/mask_splitter
 	url = git@github.com:SpaceTime-Vision-Robotics-Laboratory/mask-splitter.git
+[submodule "external/drone_sim_runner"]
+	path = external/drone_sim_runner
+	url = git@github.com:SpaceTime-Vision-Robotics-Laboratory/drone-sim-runner.git
