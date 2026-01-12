@@ -30,10 +30,12 @@ source venv/bin/activate
 
 Install the main package and dependencies:
 ```bash
-pip install --upgrade pip
-pip install -r requirements.txt
-pip install -e .
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip install -e .
 ```
+
+> **Note:** The required packages and dependencies with versions are available in [requirements-versions.txt](../requirements-versions.txt).
 
 ## Step 3: Install Parrot Sphinx Simulator
 Parrot Sphinx is the drone simulation platform used for experiments. 
@@ -108,7 +110,7 @@ sudo systemctl restart firmwared.service
 ### Import Errors for External Packages
 Ensure all submodules are installed in development mode:
 ```bash
-pip install -e external/drone_base
-pip install -e external/drone_sim_runner  
-pip install -e external/mask_splitter
+python -m pip install -e external/drone_base
+python -m pip install -e external/drone_sim_runner  
+python -m pip install -e external/mask_splitter
 ```
