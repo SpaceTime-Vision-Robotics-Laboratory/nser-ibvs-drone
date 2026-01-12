@@ -114,3 +114,8 @@ python -m pip install -e external/drone_base
 python -m pip install -e external/drone_sim_runner  
 python -m pip install -e external/mask_splitter
 ```
+
+### Update Submodules to newest
+```bash
+git submodule update --remote --merge
+```

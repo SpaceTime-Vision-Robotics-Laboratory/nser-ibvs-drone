@@ -101,6 +101,11 @@ python -m pip install -r requirements.txt
 python -m pip install -e .
 ```
 
+### Update submodules
+```bash
+git submodule update --remote --merge
+```
+
 For detailed installation instructions including Parrot Sphinx setup, see the [Installation Guide](./docs/installation-guide.md).
 
 ### Running Experiments
