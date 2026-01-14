@@ -130,6 +130,8 @@ python runnable/run_ibvs_splitter.py --is_real_world --experiment_name="real-ibv
 python runnable/run_student.py --is_real_world --experiment_name="real-student-test"
 ```
 
+For additional details see [running-experiments.md](docs/running-experiments.md).
+
 ## Documentation
 - [Installation Guide](docs/installation-guide.md) - Complete setup instructions
 - [Architecture Overview](docs/architecture.md) - System design and components
@@ -163,6 +165,8 @@ python runnable/run_student.py --is_real_world --experiment_name="real-student-t
 - Indoor environment with Lambertian floor surface (to avoid drone drifting)
 
 ## Results
+To reproduce the results check [runnable/](runnable) directory and
+[running-experiments.md](docs/running-experiments.md) for additional details.
 
 Performance comparison between teacher (NSER-IBVS) and student networks:
 

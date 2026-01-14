@@ -1,15 +1,15 @@
 # Student Distil Training Pipeline
 
-This pipeline trains the lightweight student network (~1.7M parameters) to mimic 
-the NSER-IBVS teacher velocity commands through knowledge distillation.
+This pipeline trains the **lightweight** student network (~1.7M parameters) to mimic 
+the **NSER-IBVS** teacher velocity commands through knowledge distillation.
 
 ![Student Network Architecture](../docs/images/Student-Architecture.png)
 
 
 ## Overview
 The student learns to directly regress drone velocity commands (vx, vy, ωz) from 
-RGB images without explicit visual servoing computation, achieving 11x faster 
-inference than the teacher pipeline.
+RGB images without explicit visual servoing computation, achieving **11x faster 
+inference** than the teacher pipeline.
 
 ## Dataset Preparation
 
