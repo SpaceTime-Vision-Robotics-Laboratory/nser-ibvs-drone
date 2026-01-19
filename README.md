@@ -13,10 +13,11 @@
 [![Paper](https://img.shields.io/badge/Paper-ICCV%202025-blue)](https://openaccess.thecvf.com/content/ICCV2025W/EVW/papers/Mocanu_Efficient_Self-Supervised_Neuro-Analytic_Visual_Servoing_for_Real-time_Quadrotor_Control_ICCVW_2025_paper.pdf)
 [![Website](https://img.shields.io/badge/Project-Website-green)](https://spacetime-vision-robotics-laboratory.github.io/NSER-IBVS/)
 [![arXiv](https://img.shields.io/badge/arXiv-2507.19878-b31b1b)](https://arxiv.org/abs/2507.19878)
-[![Poster](https://img.shields.io/badge/Poster-PDF-orange)](https://spacetime-vision-robotics-laboratory.github.io/NSER-IBVS/assets/poster.pdf)
+[![Poster](https://img.shields.io/badge/Poster-PDF-orange)](https://spacetime-vision-robotics-laboratory.github.io/NSER-IBVS/assets/NSER-IBVS-Poster-ICCV-2025.pdf)
 [![Slides](https://img.shields.io/badge/Slides-ICCV%20Oral-purple)](https://ctipub-my.sharepoint.com/:p:/g/personal/sebastian_mocanu_upb_ro/EXa1_aq5YNJFjFeWjGTOOLMBD5zixvMi5Z_oI_EpdRlV9g)
 [![BibTeX](https://img.shields.io/badge/BibTeX-Citation-teal)](#citation)
 
+[![Hugging Face](https://img.shields.io/badge/🤗%20Hugging%20Face-Models-yellow)](https://huggingface.co/brittleru/nser-ibvs-drone)
 [![Data](https://img.shields.io/badge/Data-Google%20Drive-yellow)](https://drive.google.com/drive/folders/1T2Uq8nPQoy_QNiI87xBUoXlPAk7k-9Cq?usp=sharing)
 [![Sim Env](https://img.shields.io/badge/Bunker%20Sphinx%20UE4-Download-00a5e5?logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1kHqJtTq7CGoazUUn8tPFnijV3lYY4toO/view?usp=drive_link)
 </div> 
