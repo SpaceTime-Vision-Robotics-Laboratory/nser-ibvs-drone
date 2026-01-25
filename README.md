@@ -17,7 +17,7 @@
 [![Slides](https://img.shields.io/badge/Slides-ICCV%20Oral-purple)](https://ctipub-my.sharepoint.com/:p:/g/personal/sebastian_mocanu_upb_ro/EXa1_aq5YNJFjFeWjGTOOLMBD5zixvMi5Z_oI_EpdRlV9g)
 [![BibTeX](https://img.shields.io/badge/BibTeX-Citation-teal)](#citation)
 
-[![Hugging Face](https://img.shields.io/badge/🤗%20Hugging%20Face-Models-yellow)](https://huggingface.co/brittleru/nser-ibvs-drone)
+[![Hugging Face Collection (Paper, Models, Demos, Dataset)](https://img.shields.io/badge/🤗%20Hugging%20Face-Collection-yellow)](https://huggingface.co/collections/brittleru/nser-ibvs-suite)
 [![Data](https://img.shields.io/badge/Data-Google%20Drive-yellow)](https://drive.google.com/drive/folders/1T2Uq8nPQoy_QNiI87xBUoXlPAk7k-9Cq?usp=sharing)
 [![Sim Env](https://img.shields.io/badge/Bunker%20Sphinx%20UE4-Download-00a5e5?logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1kHqJtTq7CGoazUUn8tPFnijV3lYY4toO/view?usp=drive_link)
 </div> 
@@ -32,6 +32,16 @@ positioning without fiducial markers or GPS.
 ![Demo Teacher vs Student Real-World](docs/gifs/Demo.gif)
 
 </div>
+
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Documentation](#documentation)
+- [Pre-trained Models](#pre-trained-models)
+- [Hardware Requirements](#hardware-requirements)
+- [Results](#results)
+- [Citation](#citation)
 
 ## Overview
 This framework introduces a cost-efficient approach to visual servoing where a compact **1.7M parameter 
@@ -142,6 +152,8 @@ For additional details see [running-experiments.md](docs/running-experiments.md)
 
 ## Pre-trained Models
 
+Pre-trained models are available in the [models/](models) directory:
+
 | Model                                                                       | Parameters | Description                                |
 |-----------------------------------------------------------------------------|------------|--------------------------------------------|
 | `29_05_best__yolo11n-seg_sim_car_bunker__all.pt`                            | 2.84M      | YOLOv11 Nano segmentation (simulator)      |
@@ -151,6 +163,7 @@ For additional details see [running-experiments.md](docs/running-experiments.md)
 | `student_model_sim_on_real_world_distribution.pth`                          | 1.7M       | Student network (sim + real normalization) |
 | `student_real_pretrained_augX3_80_runs.pth`                                 | 1.7M       | Student network (real-world fine-tuned)    |
 
+Final trained models are also available on hugging face [brittleru/nser-ibvs-drone](https://huggingface.co/brittleru/nser-ibvs-drone).
 
 ## Hardware Requirements
 
