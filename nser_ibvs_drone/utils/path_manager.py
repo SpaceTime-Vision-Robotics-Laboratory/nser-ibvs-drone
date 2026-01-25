@@ -66,7 +66,7 @@ class Paths:
     GOAL_FRAME_PATH_45: Final[Path] = REFERENCE_IMAGES_DIR / "frame_001030_26999571__45__takeoff.png"
     GOAL_FRAME_POINTS_PATH_45: Final[Path] = REFERENCE_DATA_DIR / "frame_001030_26999571__45__takeoff.json"
     GOAL_FRAME_POINTS_PATH_45_SIM: Final[Path] = REFERENCE_DATA_DIR / "frame_001030_26999571__45__takeoff.json"
-    GOAL_FRAME_POINTS_PATH_45_REAL: Final[Path] = REFERENCE_DATA_DIR / "____frame_001160_9928240_real_45_recording.json"
+    GOAL_FRAME_POINTS_PATH_45_REAL: Final[Path] = REFERENCE_DATA_DIR / "frame_001160_9928240_real_45_recording.json"
 
     CAR_GOAL_PLOT: Final[Path] = REFERENCE_IMAGES_DIR / "real_car_90_90.png"
 

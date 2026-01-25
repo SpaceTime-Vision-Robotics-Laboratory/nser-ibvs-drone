@@ -5,7 +5,6 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pandas as pd
-
 from nser_ibvs_drone.detection.target_tracker import CommandInfo
 from nser_ibvs_drone.distiled_network.distil_engine import StudentEngine
 from nser_ibvs_drone.processors.ibvs_yolo_processor import IBVSYoloProcessor
@@ -21,11 +20,13 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
             student_model_path: str | Path = Paths.SIM_STUDENT_NEW_PATH_REAL_WORLD_DISTRIBUTION,
             logs_parquet_path: str | Path | None = Paths.LOG_PARQUET_DIR,
             error_window_size: int = 5,
+            is_real_world: bool = False,
             **kwargs
     ):
         super().__init__(model_path=model_path, **kwargs)
         self.student_engine = StudentEngine(student_model_path)
         self.int_threshold = 0.5
+        self.is_real_world = is_real_world
 
         print(f"SEG PATH: {model_path}")
         print(f"Student model PATH: {student_model_path}")
@@ -55,6 +56,8 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
         self.recent_commands = np.ones((self.error_window_size, 3))
 
         self.last_command_info = None
+        self.real_rot_threshold = 8
+        self.real_error_threshold = 2
 
     def _process_frame(self, frame: np.ndarray) -> np.ndarray:
         if not self._check_start_drone_state():
@@ -71,9 +74,10 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
             "frame_idx": self._frame_count,
         }
 
-
         if self._frame_count % 2 != 0:
             self._add_cmd_visualization(frame, self.last_command_info)
+            self.check_goal_reached(timestamp)
+            self.check_timout_landing(timestamp)
             return frame
 
         results = self.detector.detect(frame)
@@ -96,7 +100,7 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
             x_cmd=int(command[0]),
             y_cmd=int(command[1]),
             z_cmd=0,
-            rot_cmd=int(command[2]),
+            rot_cmd=int(self._bound_real_world_rotation(command[2])),
             timestamp=time.time(),
             x_offset=0,
             y_offset=0,
@@ -171,7 +175,8 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
         :returns: A tuple of (If goal reached, If reached within a threshold and if all commands are 0)
         """
         # On real we need to put on 2 as a threshold from data with error less than 40
-        # return np.all(self.recent_commands == 0)
+        if self.is_real_world:
+            return np.all(self.recent_commands <= self.real_error_threshold)
         return np.all(np.abs(self.recent_commands) <= 1)
 
     def _save_parquet_logs(self, parquet_row: dict, command_info: CommandInfo, logs: dict) -> None:
@@ -198,3 +203,8 @@ class DistilledNetworkProcessor(IBVSYoloProcessor):
         cv2.putText(
             frame, f"R: {drone_command.rot_cmd:+4d}", (10, 90), self.font, 0.7, (255, 255, 0), 2
         )
+
+    def _bound_real_world_rotation(self, rotation_value: float) -> float:
+        if self.is_real_world:
+            return 0 if abs(rotation_value) < self.real_rot_threshold else rotation_value
+        return rotation_value

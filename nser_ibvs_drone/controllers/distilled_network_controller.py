@@ -17,6 +17,7 @@ class DistilledStudentController(EvaluationStreamingController):
             parquet_log_path: str | Path | None = None,
             seg_model_path: str | Path = Paths.SIM_CAR_IBVS_YOLO_PATH,
             student_model_path: str | Path = Paths.SIM_STUDENT_NEW_PATH_REAL_WORLD_DISTRIBUTION,
+            is_real_world: bool = False,
             **kwargs
     ):
         if parquet_log_path is None:
@@ -27,7 +28,8 @@ class DistilledStudentController(EvaluationStreamingController):
             DistilledNetworkProcessor,
             model_path=seg_model_path,
             student_model_path=student_model_path,
-            logs_parquet_path=self.parquet_log_path
+            logs_parquet_path=self.parquet_log_path,
+            is_real_world=is_real_world,
         )
         super().__init__(ip=ip, processor_class=_processor, **kwargs)
 
@@ -67,6 +69,7 @@ def main_distilled_student_controller():
         parquet_log_path=Path(parquet_log_path),
         seg_model_path=Path(seg_model),
         student_model_path=Path(student_model),
+        is_real_world=args.is_real_world,
         video_config=VideoConfig(width=640, height=360, cam_mode="recording", save_extension="jpg"),
     )
 
