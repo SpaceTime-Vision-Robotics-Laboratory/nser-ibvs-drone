@@ -66,6 +66,8 @@ For experiments using the detailed bunker environment, you need the custom UE4 b
 #### Option A: Use Pre-built Environment
 Contact the authors for access to the pre-built [bunker environment](https://drive.google.com/file/d/1kHqJtTq7CGoazUUn8tPFnijV3lYY4toO/view?usp=drive_link).
 
+Or download it from Hugging Faces dataset [brittleru/bunker-sphinx-ue4](https://huggingface.co/datasets/brittleru/bunker-sphinx-ue4).
+
 #### Option B: Use Empty Environment with Injection
 The `parrot-ue4-empty` environment can be populated dynamically:
 ```bash
