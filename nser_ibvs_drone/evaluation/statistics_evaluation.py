@@ -50,7 +50,7 @@ def compute_error_statistics(parquet_df: pd.DataFrame, duration_df: pd.DataFrame
         if run_last3s.empty:
             continue
 
-        err_uv_norms = run_last3s["err_uv"].apply(lambda v: np.linalg.norm(v))
+        err_uv_norms = run_last3s["err_uv"].apply(np.linalg.norm)
         err_norm_stats.append({
             "run": run_id,
             "direction": direction,
@@ -123,7 +123,7 @@ def compute_error_statistics_for_time_criteria(
         mask = updated_duration_df["run"] == run_id
         updated_duration_df.loc[mask, "flight_duration"] = adjusted_flight_duration
 
-        err_uv_norms = stable_period_data["err_uv"].apply(lambda v: np.linalg.norm(v))
+        err_uv_norms = stable_period_data["err_uv"].apply(np.linalg.norm)
         err_norm_stats.append({
             "run": run_id,
             "direction": direction,
